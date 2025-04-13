@@ -1,0 +1,103 @@
+# Cursor AI Workflow Rules for Gemini Task Manager
+
+This document outlines how to interact with the Gemini Task Manager tool using its command-line interface (`task-manager`). The tool helps manage development tasks stored in a `tasks.json` file.
+
+## Core Concepts
+
+*   **tasks.json:** The central file storing all tasks, subtasks, their details (status, priority, description), and dependencies.
+*   **Task IDs:** Unique numerical identifiers for main tasks (e.g., `1`, `2`).
+*   **Subtask IDs:** Identifiers for subtasks, formatted as `parentTaskId.subtaskIndex` (e.g., `1.1`, `1.2`).
+*   **Statuses:** Common statuses include `todo`, `inprogress`, `done`, `blocked`.
+*   **Priorities:** `high`, `medium`, `low`.
+
+## Available Commands
+
+Always execute these commands from the root of the project where `tasks.json` is located.
+
+### Initialization
+
+*   **Command:** `task-manager init`
+*   **Purpose:** Initializes the project. Creates `tasks.json` if it doesn't exist and the `.cursor/rules` directory.
+*   **When to use:** Only needed once at the very beginning of a project setup.
+
+### Adding Tasks & Subtasks
+
+*   **Command:** `task-manager add --title "<task_title>" [--description "<desc>"] [--priority <prio>] [--depends-on <id1,id2>]`
+*   **Purpose:** Adds a new main task.
+*   **Arguments:**
+    *   `--title` / `-t`: **Required.** The title of the task.
+    *   `--description` / `-d`: *Optional.* A description for the task.
+    *   `--priority` / `-p`: *Optional.* Priority (`high`, `medium`, `low`). Defaults to `medium`.
+    *   `--depends-on`: *Optional.* Comma-separated list of task IDs this task depends on.
+*   **Example:** `task-manager add -t "Implement user login" -d "Setup JWT auth" -p high`
+
+*   **Command:** `task-manager add-subtask <parent_task_id> --title "<subtask_title>"`
+*   **Purpose:** Adds a subtask to an existing main task.
+*   **Arguments:**
+    *   `<parent_task_id>`: **Required.** The ID of the parent task.
+    *   `--title` / `-t`: **Required.** The title of the subtask.
+*   **Example:** `task-manager add-subtask 1 -t "Create login form UI"`
+
+### Viewing Tasks
+
+*   **Command:** `task-manager list [--status <status>]`
+*   **Purpose:** Lists tasks. By default, lists all tasks.
+*   **Arguments:**
+    *   `--status` / `-s`: *Optional.* Filter tasks by status (e.g., `todo`, `inprogress`, `done`).
+*   **Example:** `task-manager list -s todo`
+
+*   **Command:** `task-manager next`
+*   **Purpose:** Determines and displays the next actionable task based on dependencies (must be `done`) and priority (highest first, then lowest ID).
+*   **Example:** `task-manager next`
+
+### Updating Tasks
+
+*   **Command:** `task-manager status <task_or_subtask_id> <new_status>`
+*   **Purpose:** Updates the status of a specific task or subtask.
+*   **Arguments:**
+    *   `<task_or_subtask_id>`: **Required.** The ID (e.g., `2` or `2.1`).
+    *   `<new_status>`: **Required.** The new status (e.g., `inprogress`, `done`).
+*   **Example:** `task-manager status 1.1 done`
+
+*   **Command:** `task-manager update <task_or_subtask_id> [--title "..."] [--description "..."] [--priority <...>]`
+*   **Purpose:** Updates the details (title, description, priority) of a task or subtask. Note: Description and priority currently only apply effectively to main tasks.
+*   **Arguments:**
+    *   `<task_or_subtask_id>`: **Required.** The ID (e.g., `3` or `1.2`).
+    *   `--title` / `-t`: *Optional.* New title.
+    *   `--description` / `-d`: *Optional.* New description (for main tasks).
+    *   `--priority` / `-p`: *Optional.* New priority (for main tasks).
+*   **Example:** `task-manager update 3 -p low --title "Refactor legacy code"`
+
+### Removing Tasks
+
+*   **Command:** `task-manager remove <task_or_subtask_id>` (or `task-manager rm <id>`)
+*   **Purpose:** Deletes a task or subtask. **Use with caution, no confirmation prompt.**
+*   **Arguments:**
+    *   `<task_or_subtask_id>`: **Required.** The ID to remove.
+*   **Example:** `task-manager rm 2.1`
+
+### Generating Files
+
+*   **Command:** `task-manager generate`
+*   **Purpose:** Creates individual Markdown files (`task_XXX.md`) for each task in the `tasks/` directory.
+*   **Example:** `task-manager generate`
+
+### PRD Parsing (Using Gemini API)
+
+*   **Command:** `task-manager parse-prd <path_to_prd_file>`
+*   **Purpose:** Reads a Product Requirements Document (text file), sends it to the Gemini API (requires a `GEMINI_API_KEY` configured in a `.env` file), parses the response, and adds the generated tasks to `tasks.json`.
+*   **Arguments:**
+    *   `<path_to_prd_file>`: **Required.** The path to the PRD file.
+*   **Example:** `task-manager parse-prd ./docs/requirements.txt`
+
+## Workflow Example
+
+1.  User provides a PRD file.
+2.  AI uses `task-manager parse-prd <prd_file>` to generate initial tasks.
+3.  AI uses `task-manager list` or `task-manager next` to identify what to work on.
+4.  User/AI work on implementing a task (e.g., task 3).
+5.  AI uses `task-manager status 3 inprogress`.
+6.  User/AI add subtasks if needed: `task-manager add-subtask 3 -t "Write unit tests"`.
+7.  User/AI complete subtasks: `task-manager status 3.1 done`.
+8.  User/AI complete the main task: `task-manager status 3 done`.
+9.  AI uses `task-manager next` to find the next task.

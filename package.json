@@ -1,0 +1,29 @@
+{
+  "name": "gemini-task-manager",
+  "version": "0.1.0",
+  "description": "CLI and MCP task manager with Gemini-based PRD parsing",
+  "main": "src/core.js",
+  "bin": {
+    "task-manager": "./bin/task-manager",
+    "task-manager-mcp": "./bin/task-manager-mcp"
+  },
+  "scripts": {
+    "start:mcp": "node ./bin/task-manager-mcp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "task",
+    "manager",
+    "cli",
+    "mcp",
+    "cursor",
+    "gemini"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "commander": "^12.1.0",
+    "dotenv": "^16.5.0"
+  }
+}
