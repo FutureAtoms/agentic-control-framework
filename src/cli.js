@@ -106,6 +106,24 @@ program
     await core.parsePrd(filePath);
   });
 
+// expand command
+program
+  .command('expand <task-id>')
+  .description('Use Gemini API to break down a task into subtasks (overwrites existing subtasks)')
+  .action(async (taskId) => {
+    await core.expandTask(taskId);
+  });
+
+// revise command
+program
+  .command('revise')
+  .description('Use Gemini API to revise future tasks based on a prompt/change')
+  .requiredOption('--from <task-id>', 'The task ID from which revision should start')
+  .requiredOption('-p, --prompt <prompt>', 'User prompt describing the change or new requirement')
+  .action(async (options) => {
+    await core.reviseTasks(options);
+  });
+
 // --- Placeholder for MCP server integration ---
 
 // Always parse the arguments

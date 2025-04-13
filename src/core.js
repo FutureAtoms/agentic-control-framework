@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const prdParser = require('./prd_parser'); // Import the PRD parser
+const Table = require('cli-table3'); // Import cli-table3
+const chalk = require('chalk'); // Import chalk (v4)
 
 const TASKS_FILE = 'tasks.json';
 const CURSOR_RULES_DIR = path.join('.cursor', 'rules');
@@ -123,20 +125,55 @@ function listTasks(options) {
     return;
   }
 
-  console.log('\n--- Task List ---');
-  tasksToDisplay.forEach(task => {
-    const depends = task.dependsOn.length > 0 ? ` (depends on: ${task.dependsOn.join(', ')})` : '';
-    const subtaskCount = task.subtasks.length;
-    const subtaskInfo = subtaskCount > 0 ? ` [${subtaskCount} subtask(s)]` : '';
-    console.log(
-      `[${task.id}] ${task.title} [${task.status}] [${task.priority}]${depends}${subtaskInfo}`
-    );
-    // Optionally list subtasks too - can be added later
-    // task.subtasks.forEach(sub => {
-    //   console.log(`  - [${sub.id}] ${sub.title} [${sub.status}]`);
-    // });
+  const table = new Table({
+    head: ['ID', 'Title', 'Status', 'Priority', 'Depends', 'Subtasks'],
+    colWidths: [8, 45, 15, 10, 10, 10] // Adjusted widths slightly
   });
-  console.log('-----------------');
+
+  // Helper function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'done': return chalk.green;
+      case 'inprogress': return chalk.yellow;
+      case 'blocked': return chalk.red;
+      case 'todo':
+      default: return chalk.white; // Or chalk.gray, etc.
+    }
+  };
+
+  tasksToDisplay.forEach(task => {
+    if (!task) {
+        console.error("DEBUG: Skipping undefined task object in listTasks");
+        return;
+    }
+    
+    const colorFunc = getStatusColor(task.status);
+    
+    table.push([
+      colorFunc(task.id),
+      colorFunc(task.title),
+      colorFunc(task.status),
+      colorFunc(task.priority),
+      colorFunc(task.dependsOn.join(', ') || '-'),
+      colorFunc(task.subtasks.length)
+    ]);
+
+    if (task.subtasks && task.subtasks.length > 0) {
+        task.subtasks.forEach(sub => {
+            const subColorFunc = getStatusColor(sub.status);
+            table.push([
+                subColorFunc(`  ${sub.id}`),
+                subColorFunc(`  ${sub.title}`),
+                subColorFunc(sub.status),
+                '', 
+                '', 
+                ''  
+            ]);
+        });
+    }
+  });
+
+  console.log(table.toString());
 }
 
 // Function to add a subtask to a parent task
@@ -258,23 +295,24 @@ function getNextTask() {
 
   const nextTask = readyTasks[0];
 
-  console.log('\n--- Next Task ---');
-  console.log(`ID: ${nextTask.id}`);
-  console.log(`Title: ${nextTask.title}`);
-  console.log(`Status: ${nextTask.status}`);
-  console.log(`Priority: ${nextTask.priority}`);
+  console.log('\n---------- Next Task ----------');
+  console.log(` ID          : ${nextTask.id}`);
+  console.log(` Title       : ${nextTask.title}`);
+  console.log(` Status      : ${nextTask.status}`);
+  console.log(` Priority    : ${nextTask.priority}`);
   if (nextTask.description) {
-    console.log(`Description: ${nextTask.description}`);
+    console.log(` Description : ${nextTask.description}`);
   }
   if (nextTask.dependsOn.length > 0) {
-    console.log(`Dependencies: ${nextTask.dependsOn.join(', ')}`);
+    console.log(` Depends On  : ${nextTask.dependsOn.join(', ')}`);
   }
   if (nextTask.subtasks.length > 0) {
-      console.log(`Subtasks (${nextTask.subtasks.length}):`);
+      console.log(` Subtasks (${nextTask.subtasks.length}) :`);
       nextTask.subtasks.forEach(sub => {
-        console.log(`  - [${sub.id}] ${sub.title} [${sub.status}]`);
+        console.log(`   - [${sub.id}] ${sub.title} [${sub.status}]`);
       });
   }
+  console.log('-----------------------------');
 }
 
 // Function to update fields of a task or subtask
@@ -474,6 +512,131 @@ async function parsePrd(prdFilePath) {
 
 }
 
+// Function to expand a task using Gemini
+async function expandTask(taskId) {
+  const tasksData = readTasks();
+  const taskIdNum = parseInt(taskId);
+  const taskIndex = tasksData.tasks.findIndex(task => task.id === taskIdNum);
+
+  if (taskIndex === -1) {
+    console.error(`Error: Task with ID ${taskIdNum} not found.`);
+    return;
+  }
+
+  const parentTask = tasksData.tasks[taskIndex];
+
+  // Clear existing subtasks before generating new ones
+  if (parentTask.subtasks && parentTask.subtasks.length > 0) {
+      console.log(`Clearing ${parentTask.subtasks.length} existing subtask(s) for task ${taskIdNum}...`);
+      parentTask.subtasks = [];
+  }
+
+  const generatedSubtaskTitles = await prdParser.expandTaskWithGemini(parentTask);
+
+  if (!generatedSubtaskTitles || generatedSubtaskTitles.length === 0) {
+    console.error(`Failed to generate subtasks for task ${taskIdNum}.`);
+    // Write tasksData even if expansion fails, to save the cleared subtasks
+    writeTasks(tasksData);
+    return;
+  }
+
+  let subtasksAddedCount = 0;
+  generatedSubtaskTitles.forEach((title, index) => {
+    const nextSubtaskIndex = index + 1; // Reset index for new subtasks
+    const newSubtaskId = `${parentTask.id}.${nextSubtaskIndex}`;
+    const newSubtask = {
+      id: newSubtaskId,
+      title: title,
+      status: 'todo'
+    };
+    parentTask.subtasks.push(newSubtask);
+    subtasksAddedCount++;
+  });
+
+  parentTask.updatedAt = new Date().toISOString();
+  writeTasks(tasksData);
+
+  console.log(`Successfully generated and added ${subtasksAddedCount} subtask(s) for task ${taskIdNum}.`);
+}
+
+// Function to revise future tasks using Gemini
+async function reviseTasks(options) {
+  const { from, prompt } = options;
+  const fromTaskId = parseInt(from);
+
+  if (isNaN(fromTaskId)) {
+    console.error("Error: Invalid --from task ID provided.");
+    return;
+  }
+  if (!prompt) {
+    console.error("Error: --prompt is required for revision.");
+    return;
+  }
+
+  const tasksData = readTasks();
+
+  // Separate past/current tasks from future tasks
+  const pastOrCurrentTasks = [];
+  const futureTasks = [];
+  let fromTaskFound = false;
+
+  tasksData.tasks.forEach(task => {
+      if (task.id < fromTaskId) {
+          pastOrCurrentTasks.push(task);
+      } else {
+          if(task.id === fromTaskId) fromTaskFound = true;
+          // Include the 'from' task and all subsequent tasks as future tasks
+          futureTasks.push(task);
+      }
+  });
+
+  if (!fromTaskFound) {
+      console.warn(`Warning: Task ID ${fromTaskId} specified in --from not found. Revising all tasks.`);
+      // If from task not found, treat all tasks as future tasks for revision
+      futureTasks.push(...pastOrCurrentTasks);
+      pastOrCurrentTasks.length = 0; // Clear past tasks
+  }
+  
+  if (futureTasks.length === 0) {
+      console.log("No future tasks found to revise.");
+      return;
+  }
+
+  const revisedFutureTasks = await prdParser.reviseTasksWithGemini(prompt, pastOrCurrentTasks, futureTasks);
+
+  if (!revisedFutureTasks) {
+    console.error("Failed to get revised tasks from Gemini. No changes made.");
+    return;
+  }
+
+  // DEBUG: Log the structure received from Gemini
+  console.error('DEBUG: Revised future tasks received from Gemini:', JSON.stringify(revisedFutureTasks, null, 2));
+
+  // Replace the original future tasks with the revised ones
+  const updatedTasks = [...pastOrCurrentTasks, ...revisedFutureTasks];
+
+  // Update lastTaskId if new tasks were potentially added
+  let maxId = 0;
+  updatedTasks.forEach(task => {
+      if (task.id > maxId) maxId = task.id;
+      // Ensure core fields exist, even if Gemini didn't return them
+      task.subtasks = task.subtasks || []; 
+      task.status = task.status || 'todo'; // Default to todo if missing
+      task.priority = task.priority || 'medium'; // Default priority if missing
+      task.dependsOn = task.dependsOn || []; // Default dependencies if missing
+      task.description = task.description || ''; // Default description if missing
+      
+      task.updatedAt = new Date().toISOString(); // Mark as updated
+  });
+  
+  tasksData.tasks = updatedTasks;
+  tasksData.lastTaskId = maxId > tasksData.lastTaskId ? maxId : tasksData.lastTaskId;
+
+  writeTasks(tasksData);
+
+  console.log(`Successfully revised tasks from ID ${fromTaskId} onwards based on the prompt.`);
+}
+
 module.exports = {
   initProject,
   addTask,
@@ -484,5 +647,7 @@ module.exports = {
   updateTask,
   removeTask,
   generateTaskFiles,
-  parsePrd // Export parsePrd
+  parsePrd,
+  expandTask,
+  reviseTasks // Export reviseTasks
 };

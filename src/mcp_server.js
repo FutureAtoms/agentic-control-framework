@@ -16,6 +16,8 @@ const methodMap = {
     'removeTask': core.removeTask, // Expects [id]
     'generateTaskFiles': core.generateTaskFiles,
     'parsePrd': core.parsePrd, // Expects [filePath]
+    'expandTask': core.expandTask, // Expects [taskId]
+    'reviseTasks': core.reviseTasks // Expects [{from, prompt}]
 };
 
 // Create readline interface for stdin/stdout

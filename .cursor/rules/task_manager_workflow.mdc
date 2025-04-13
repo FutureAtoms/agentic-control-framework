@@ -10,6 +10,19 @@ This document outlines how to interact with the Gemini Task Manager tool using i
 *   **Statuses:** Common statuses include `todo`, `inprogress`, `done`, `blocked`.
 *   **Priorities:** `high`, `medium`, `low`.
 
+## AI Interaction Guidelines
+
+Your primary goal when interacting with this task manager is to drive the project forward by completing tasks sequentially based on dependencies and priorities.
+
+1.  **Determine the Next Task:** Always start by checking what needs to be done next using `task-manager next`. This command considers dependencies and priorities.
+2.  **Understand the Task:** Analyze the output of `task-manager next` (or `task-manager list` for broader context) to understand the requirements of the current task.
+3.  **Break Down Complex Tasks:** If a task seems too large or complex, use `task-manager expand <task_id>` to break it down into subtasks *before* starting implementation. Review the generated subtasks.
+4.  **Implement:** Perform the coding or other actions required to complete the current task or subtask.
+5.  **Update Status Regularly:** Mark tasks as `inprogress` when you start working on them (`task-manager status <id> inprogress`). Mark tasks/subtasks as `done` immediately upon completion (`task-manager status <id> done`). If blocked, mark as `blocked` (`task-manager status <id> blocked`).
+6.  **Handle Changes:** If implementation choices require changes to future tasks, use `task-manager revise --from <next_task_id> --prompt "<reason_for_change>"` to update the plan.
+7.  **Repeat:** After completing a task (or subtask), immediately run `task-manager next` again to identify the next piece of work.
+8.  **Communicate:** Inform the user about the task you are working on, when you complete it, and what you plan to do next based on the task manager.
+
 ## Available Commands
 
 Always execute these commands from the root of the project where `tasks.json` is located.
@@ -90,14 +103,56 @@ Always execute these commands from the root of the project where `tasks.json` is
     *   `<path_to_prd_file>`: **Required.** The path to the PRD file.
 *   **Example:** `task-manager parse-prd ./docs/requirements.txt`
 
-## Workflow Example
+### Expanding Tasks (AI)
 
-1.  User provides a PRD file.
-2.  AI uses `task-manager parse-prd <prd_file>` to generate initial tasks.
-3.  AI uses `task-manager list` or `task-manager next` to identify what to work on.
-4.  User/AI work on implementing a task (e.g., task 3).
-5.  AI uses `task-manager status 3 inprogress`.
-6.  User/AI add subtasks if needed: `task-manager add-subtask 3 -t "Write unit tests"`.
-7.  User/AI complete subtasks: `task-manager status 3.1 done`.
-8.  User/AI complete the main task: `task-manager status 3 done`.
-9.  AI uses `task-manager next` to find the next task.
+*   **Command:** `task-manager expand <task_id>`
+*   **Purpose:** Uses the Gemini API to break down the specified task into subtasks. **This will overwrite any existing subtasks for that task.**
+*   **Arguments:**
+    *   `<task_id>`: **Required.** The ID of the main task to expand.
+*   **Example:** `task-manager expand 3`
+
+### Revising Tasks (AI)
+
+*   **Command:** `task-manager revise --from <task_id> --prompt "<change_description>"`
+*   **Purpose:** Uses the Gemini API to revise tasks starting from `<task_id>` based on the provided prompt. It considers tasks before `<task_id>` as context (completed/in-progress) and sends the tasks from `<task_id>` onwards to be revised. The returned list replaces the original future tasks.
+*   **Arguments:**
+    *   `--from <task_id>`: **Required.** The ID of the task from which revisions should begin.
+    *   `--prompt` / `-p`: **Required.** A description of the change, new requirement, or reason for revision.
+*   **Example:** `task-manager revise --from 5 -p "We decided to switch from REST API to GraphQL for data fetching."`
+
+## Enhanced Workflow Example (AI Driven)
+
+This demonstrates how you, the AI, should use the tool:
+
+1.  **User:** "Let's start working on the project. I have the PRD at `docs/prd.txt`."
+2.  **AI:** "Okay, I will initialize the task manager and parse the PRD."
+    *   *Executes:* `task-manager init` (if needed)
+    *   *Executes:* `task-manager parse-prd docs/prd.txt`
+3.  **AI:** "I have parsed the PRD and generated the initial tasks. Let me find the first task to work on."
+    *   *Executes:* `task-manager next`
+4.  **AI:** (Analyzes output of `next`, e.g., Task 1: Create Game Board)
+    "The next task is #1: Create Game Board. I will start working on the HTML structure for the board."
+    *   *Executes:* `task-manager status 1 inprogress`
+5.  **AI:** (Writes HTML code for the 3x3 grid)
+6.  **AI:** "I have created the basic HTML structure for the game board."
+    *   *Executes:* `task-manager status 1 done`
+7.  **AI:** "Now I'll check for the next task."
+    *   *Executes:* `task-manager next`
+8.  **AI:** (Analyzes output, e.g., Task 2: Implement Turn Handling)
+    "The next task is #2: Implement Turn Handling. This seems complex, I recommend expanding it first."
+    *   *Executes:* `task-manager expand 2`
+9.  **AI:** "I have broken down Task 2 into subtasks. Let's review them."
+    *   *Executes:* `task-manager list` (or reads `tasks.json`)
+10. **AI:** "Okay, the first subtask is 2.1: 'Initialize player variable'. I will implement that now."
+    *   *Executes:* `task-manager status 2 inprogress` (Mark parent task)
+    *   *Executes:* `task-manager status 2.1 inprogress`
+11. **AI:** (Writes Javascript code for player variable)
+12. **AI:** "Subtask 2.1 is complete."
+    *   *Executes:* `task-manager status 2.1 done`
+13. **AI:** "I will proceed with the next subtask for Task 2..."
+    *   (Continues cycle: implement subtask, `task-manager status <subtask_id> done`) ...
+14. **AI:** "All subtasks for Task 2 are complete."
+    *   *Executes:* `task-manager status 2 done`
+15. **AI:** "Checking for the next task..."
+    *   *Executes:* `task-manager next`
+    *   (Continues until all tasks are done)
