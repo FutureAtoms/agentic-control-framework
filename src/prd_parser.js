@@ -62,8 +62,8 @@ JSON Output:
     if (response.data && response.data.candidates && response.data.candidates[0].content && response.data.candidates[0].content.parts) {
       let jsonResponse = response.data.candidates[0].content.parts[0].text;
       
-      // Clean the response: Gemini might add ```json ... ``` or other text
-      jsonResponse = jsonResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      // Clean the response: First try to extract JSON from markdown code blocks
+      jsonResponse = jsonResponse.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
 
       try {
         const parsedTasks = JSON.parse(jsonResponse);
@@ -126,7 +126,9 @@ JSON Output:
 
     if (response.data && response.data.candidates && response.data.candidates[0].content && response.data.candidates[0].content.parts) {
       let jsonResponse = response.data.candidates[0].content.parts[0].text;
-      jsonResponse = jsonResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      // Clean the response: First try to extract JSON from markdown code blocks
+      jsonResponse = jsonResponse.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
 
       try {
         const parsedSubtasks = JSON.parse(jsonResponse);
@@ -139,6 +141,16 @@ JSON Output:
       } catch (parseError) {
         console.error("Error parsing JSON response from Gemini for subtask expansion:", parseError);
         console.error("Raw Gemini response text:", jsonResponse);
+        // Fallback to line splitting if JSON parsing fails
+        console.error("Attempting fallback line-by-line parsing...");
+        const lines = jsonResponse.split('\n')
+          .map(line => line.trim())
+          .filter(line => line && !line.includes('```'));
+          
+        if (lines.length > 0) {
+          console.log(`Extracted ${lines.length} potential subtask titles using fallback method.`);
+          return lines;
+        }
         return null;
       }
     } else {
@@ -198,7 +210,9 @@ Revised JSON Output:
 
     if (response.data && response.data.candidates && response.data.candidates[0].content && response.data.candidates[0].content.parts) {
       let jsonResponse = response.data.candidates[0].content.parts[0].text;
-      jsonResponse = jsonResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      // Clean the response: First try to extract JSON from markdown code blocks
+      jsonResponse = jsonResponse.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
 
       try {
         const revisedTasks = JSON.parse(jsonResponse);
