@@ -1,3 +1,17 @@
+<<<<<<< HEAD
 #!/usr/bin/env node
 
 require('../src/mcp_server.js');
+=======
+#!/usr/bin/env bash
+
+# Symlink wrapper for Gemini Task Manager MCP script
+# This script routes to the actual task-manager-mcp in the gemini-task-manager package
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Execute the actual MCP server script with all args passed through
+exec "$REPO_ROOT/gemini-task-manager/bin/task-manager-mcp" "$@" 
+>>>>>>> bd02b5b (Update README and add comprehensive tutorial documentation)

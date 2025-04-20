@@ -1,1 +1,23 @@
- 
+#!/usr/bin/env bash
+
+# Gemini Task Manager MCP Wrapper Script
+# This script helps Cursor communicate with the GTM MCP server
+
+# Find the real path of this script
+SCRIPT_PATH="$(dirname "$(realpath "$0")")"
+PROJECT_ROOT="$(realpath "$SCRIPT_PATH/..")"
+
+# Ensure we're using proper node executable
+NODE_CMD="node"
+if command -v nodejs &> /dev/null; then
+    NODE_CMD="nodejs"
+fi
+
+# Setup environment for the MCP server
+export GTM_WORKSPACE_ROOT="${PWD}"
+echo "GTM MCP wrapper starting..." >&2
+echo "Workspace root: ${GTM_WORKSPACE_ROOT}" >&2
+echo "Project root: ${PROJECT_ROOT}" >&2
+
+# Execute the actual MCP server
+exec "$NODE_CMD" "$PROJECT_ROOT/bin/gtm-mcp-server.js" "$@" 
