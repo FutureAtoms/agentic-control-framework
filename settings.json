@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "gemini-task-manager": {
+      "command": "node",
+      "args": [
+        "/Users/abhilashchadhar/uncloud/cursor/task-master/gemini-task-manager/bin/gtm-mcp-server.js",
+        "--workspaceRoot",
+        "${workspaceFolder}"
+      ],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyBsxFNpIk4QmhY15FzVIHEk6I3a0jqGUfg",
+        "GTM_WORKSPACE_ROOT": "/Users/abhilashchadhar/uncloud/cursor/task-master",
+        "NODE_PATH": "/Users/abhilashchadhar/uncloud/cursor/task-master/node_modules"
+      }
+    }
+  }
+} 

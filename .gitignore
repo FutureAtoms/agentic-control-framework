@@ -1,26 +1,33 @@
-# Dependencies
-/node_modules
-
-# Lock files
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+
+.cursor
 
 # Environment variables
 .env
-.env.*
-!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Build output
-/dist
-/build
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS generated files
+# OS files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Task manager files
+tasks.json
+/tasks/
+
+# Log files
+*.log 
