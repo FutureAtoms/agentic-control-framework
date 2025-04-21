@@ -4,7 +4,7 @@
       "command": "/Users/abhilashchadhar/uncloud/cursor/task-master/bin/task-manager-mcp",
       "args": [],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyBsxFNpIk4QmhY15FzVIHEk6I3a0jqGUfg",
+        "GEMINI_API_KEY": "<YOUR_API_KEY>",
         "DEBUG": "true"
       }
     }
