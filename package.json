@@ -1,37 +1,31 @@
 {
   "name": "gemini-task-manager",
-  "version": "0.2.0",
-  "description": "A command-line and MCP-compatible task manager with Gemini integration",
+  "version": "0.1.1",
+  "description": "CLI and MCP task manager with Gemini-based PRD parsing",
   "main": "src/core.js",
   "bin": {
-    "task-manager": "bin/task-manager",
-    "task-manager-mcp": "bin/task-manager-mcp"
+    "task-manager": "./bin/task-manager",
+    "task-manager-mcp": "./bin/task-manager-mcp"
   },
   "scripts": {
-    "start": "node src/mcp_server.js",
-    "cli": "node src/cli.js",
+    "start:mcp": "node ./bin/task-manager-mcp",
+    "start:gtm-mcp": "node ./bin/gtm-mcp-server.js --workspaceRoot $(pwd)",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/FutureAtoms/Gemini-task-man-mcp.git"
   },
   "keywords": [
     "task",
     "manager",
-    "gemini",
-    "mcp",
     "cli",
-    "cursor"
+    "mcp",
+    "cursor",
+    "gemini"
   ],
   "author": "Abhilash Chadhar",
   "license": "ISC",
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
-    "axios": "^1.6.8",
-    "chalk": "^4.1.2",
-    "cli-table3": "^0.6.4",
-    "commander": "^12.0.0",
-    "dotenv": "^16.4.5"
+    "axios": "^1.8.4",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "dotenv": "^16.5.0"
   }
 }

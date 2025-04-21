@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('../src/cli.js');
+// CLI Entry point
+require('../src/cli.js'); 

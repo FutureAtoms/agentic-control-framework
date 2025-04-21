@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Import the core functionality
-const core = require('./core');
+const core = require('../src/core');
 
 // Create readline interface for JSON-RPC communication
 const rl = readline.createInterface({
