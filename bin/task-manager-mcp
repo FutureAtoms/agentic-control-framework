@@ -1,11 +1,50 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
 
-# Symlink wrapper for Gemini Task Manager MCP script
-# This script routes to the actual task-manager-mcp in the gemini-task-manager package
+// Gemini Task Manager MCP server wrapper script
+// This script ensures the correct workspace root is used when the MCP server starts
+const path = require('path');
+const { spawn } = require('child_process');
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+// Determine the workspace root (where the task manager is being used)
+const workspaceRoot = process.cwd();
 
-# Execute the actual MCP server script with all args passed through
-exec "$REPO_ROOT/gemini-task-manager/bin/task-manager-mcp" "$@" 
+// Determine the project root (where the task manager code is located)
+const projectRoot = path.resolve(__dirname, '..');
+
+// Log debug information
+if (process.env.DEBUG === 'true') {
+  console.error('GTM_WORKSPACE_ROOT: ' + workspaceRoot);
+  console.error('GTM_PROJECT_ROOT: ' + projectRoot);
+}
+
+// Set environment variables to be used by the MCP server
+process.env.GTM_WORKSPACE_ROOT = workspaceRoot;
+process.env.GTM_PROJECT_ROOT = projectRoot;
+
+// Launch the MCP server with proper arguments
+const serverPath = path.join(projectRoot, 'src', 'mcp_server.js');
+const args = ['--workspaceRoot', workspaceRoot, ...process.argv.slice(2)];
+
+if (process.env.DEBUG === 'true') {
+  console.error(`Starting MCP server: ${serverPath}`);
+  console.error(`With args: ${args.join(' ')}`);
+}
+
+// Spawn the server process
+const server = spawn('node', [serverPath, ...args], {
+  stdio: 'inherit',
+  env: process.env
+});
+
+// Handle server process events
+server.on('error', (err) => {
+  console.error(`Failed to start MCP server: ${err.message}`);
+  process.exit(1);
+});
+
+server.on('exit', (code) => {
+  if (code !== 0) {
+    console.error(`MCP server exited with code ${code}`);
+  }
+  process.exit(code);
+}); 
