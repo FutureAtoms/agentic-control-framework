@@ -1,5 +1,6 @@
 const { Command } = require('commander');
 const core = require('./core');
+const logger = require('./logger'); // Import our logger
 const program = new Command();
 const readline = require('readline/promises'); // Import readline promises
 const { stdin: input, stdout: output } = require('process'); // Import streams
@@ -8,13 +9,13 @@ const chalk = require('chalk'); // Add chalk
 
 program
   .version('0.1.0')
-  .description('Gemini Task Manager CLI');
+  .description('Agentic Control Framework CLI');
 
 // init command
 program
   .command('init')
   .description('Initialize the task manager project')
-  .option('--project-name <name>', 'Set the project name non-interactively')
+  .option('--project-name <n>', 'Set the project name non-interactively')
   .option('--project-description <desc>', 'Set the project description non-interactively')
   .action(async (options) => {
     let projectName = options.projectName;
@@ -25,7 +26,7 @@ program
         interactive = true;
         const rl = readline.createInterface({ input, output });
         try {
-            console.log("Initializing Gemini Task Manager...");
+            logger.info("Initializing Agentic Control Framework...");
             if (!projectName) {
                 projectName = await rl.question('Enter Project Name: ');
             }
@@ -33,7 +34,7 @@ program
                 projectDescription = await rl.question('Enter Project Goal/Description: ');
             }
         } catch (error) {
-            console.error("Initialization failed during prompts:", error);
+            logger.error(`Initialization failed during prompts: ${error}`);
             if (rl) rl.close();
             process.exitCode = 1; 
             return;
@@ -41,7 +42,7 @@ program
             if (rl) rl.close();
         }
     } else {
-        console.log("Initializing Gemini Task Manager non-interactively...");
+        logger.info("Initializing Agentic Control Framework non-interactively...");
     }
 
     try {
@@ -49,14 +50,14 @@ program
       const result = core.initProject(process.cwd(), { projectName, projectDescription }); 
       if (result.success) {
           // Log the messages returned by core.initProject
-          console.log(result.message); 
+          logger.output(result.message); 
       } else {
           // Although core.initProject currently doesn't return failure, handle it just in case
-          console.error(`Initialization failed: ${result.message || 'Unknown error from core.initProject'}`);
+          logger.error(`Initialization failed: ${result.message || 'Unknown error from core.initProject'}`);
           process.exitCode = 1;
       }
     } catch (error) {
-      console.error("Initialization failed:", error.message);
+      logger.error(`Initialization failed: ${error.message}`);
       process.exitCode = 1; // Set exit code on error
     }
   });
@@ -74,14 +75,14 @@ program
     try {
         const result = core.addTask(process.cwd(), options);
         if (result.success) {
-            console.log(result.message);
+            logger.output(result.message);
         } else {
              // Log failure message if provided
-            console.error(`Error adding task: ${result.message || 'Unknown error'}`);
+            logger.error(`Error adding task: ${result.message || 'Unknown error'}`);
             process.exitCode = 1;
         }
     } catch (error) {
-        console.error(`Error adding task: ${error.message}`);
+        logger.error(`Error adding task: ${error.message}`);
         process.exitCode = 1;
     }
   });
@@ -98,7 +99,7 @@ program
 
         if (options.json) {
             // Output raw JSON if flag is set
-            console.log(JSON.stringify(result, null, 2));
+            logger.output(result);
             return;
         }
 
@@ -106,7 +107,7 @@ program
             const tasksToDisplay = result.tasks;
 
             if (tasksToDisplay.length === 0) {
-              console.log(options.status ? `No tasks found with status: ${options.status}` : "No tasks found.");
+              logger.output(options.status ? `No tasks found with status: ${options.status}` : "No tasks found.");
               return;
             }
           
@@ -145,12 +146,12 @@ program
               ]);
             });
           
-            console.log(table.toString());
+            logger.outputTable(table);
           } else {
-            console.log("Failed to retrieve tasks.");
+            logger.error("Failed to retrieve tasks.");
           }
     } catch (error) {
-        console.error(`Error listing tasks: ${error.message}`);
+        logger.error(`Error listing tasks: ${error.message}`);
         process.exitCode = 1;
     }
   });
@@ -164,13 +165,13 @@ program
     try {
         const result = core.addSubtask(process.cwd(), parentId, options);
         if (result.success) {
-            console.log(result.message);
+            logger.output(result.message);
         } else {
-            console.error(`Error adding subtask: ${result.message || 'Unknown error'}`);
+            logger.error(`Error adding subtask: ${result.message || 'Unknown error'}`);
             process.exitCode = 1;
         }
     } catch (error) {
-        console.error(`Error adding subtask: ${error.message}`);
+        logger.error(`Error adding subtask: ${error.message}`);
         process.exitCode = 1;
     }
   });
@@ -184,17 +185,17 @@ program
     try {
         const validStatuses = ['todo', 'inprogress', 'done', 'blocked', 'error'];
         if (!validStatuses.includes(newStatus.toLowerCase())) {
-          console.warn(`Warning: "${newStatus}" is not a standard status. Allowed: ${validStatuses.join(', ')}`);
+          logger.warn(`"${newStatus}" is not a standard status. Allowed: ${validStatuses.join(', ')}`);
         }
         const result = core.updateStatus(process.cwd(), id, newStatus.toLowerCase(), options.message);
         if (result.success) {
-            console.log(result.message);
+            logger.output(result.message);
         } else {
-            console.error(`Error updating status: ${result.message || 'Unknown error'}`);
+            logger.error(`Error updating status: ${result.message || 'Unknown error'}`);
             process.exitCode = 1;
         }
     } catch (error) {
-        console.error(`Error updating status: ${error.message}`);
+        logger.error(`Error updating status: ${error.message}`);
         process.exitCode = 1;
     }
   });
@@ -202,25 +203,59 @@ program
 // next command
 program
   .command('next')
-  .description('Show the next actionable task based on status, dependencies, and priority')
+  .description('Get the next actionable task')
   .action(() => {
     try {
         const result = core.getNextTask(process.cwd());
         if (result.success) {
             if (result.task) {
-                // Print the task object as JSON, similar to previous behavior
-                console.log(JSON.stringify(result.task, null, 2)); 
+                // Display the next task in a readable format
+                const task = result.task;
+                // Create a table for better formatting
+                const table = new Table({
+                  head: [chalk.cyan('ID'), chalk.cyan('Title'), chalk.cyan('Status'), chalk.cyan('Priority'), chalk.cyan('Description')],
+                  colWidths: [5, 30, 12, 10, 50],
+                  wordWrap: true
+                });
+                
+                table.push([
+                  task.id,
+                  task.title,
+                  task.status,
+                  task.priority,
+                  task.description || 'No description'
+                ]);
+                
+                logger.output("Next actionable task:");
+                logger.outputTable(table);
+                
+                if (task.subtasks && task.subtasks.length > 0) {
+                  const subtasksTable = new Table({
+                    head: [chalk.cyan('ID'), chalk.cyan('Subtask'), chalk.cyan('Status')],
+                    colWidths: [10, 70, 12],
+                    wordWrap: true
+                  });
+                  
+                  task.subtasks.forEach(subtask => {
+                    subtasksTable.push([
+                      subtask.id,
+                      subtask.title,
+                      subtask.status
+                    ]);
+                  });
+                  
+                  logger.output("Subtasks:");
+                  logger.outputTable(subtasksTable);
+                }
             } else {
-                // Print the message explaining why no task was found
-                console.log(result.message); 
+                logger.output("No actionable tasks found.");
             }
         } else {
-            // Should not happen with current getNextTask logic, but handle just in case
-            console.error(`Error getting next task: ${result.message || 'Unknown error'}`);
+            logger.error(`Error getting next task: ${result.message || 'Unknown error'}`);
             process.exitCode = 1;
         }
     } catch (error) {
-        console.error(`Error getting next task: ${error.message}`);
+        logger.error(`Error getting next task: ${error.message}`);
         process.exitCode = 1;
     }
   });
@@ -228,148 +263,211 @@ program
 // update command
 program
   .command('update <id>')
-  .description('Update details of a task or subtask')
-  .option('-t, --title <title>', 'New title for the task/subtask')
-  .option('-d, --description <description>', 'New description (main tasks only)')
-  .option('-p, --priority <priority>', 'New priority (low, medium, high) (main tasks only)')
-  .option('--related-files <paths>', 'Comma-separated list of relevant file paths (replaces existing, main tasks only)')
+  .description('Update task or subtask details')
+  .option('-t, --title <title>', 'New title')
+  .option('-d, --description <description>', 'New description')
+  .option('-p, --priority <priority>', 'New priority (low, medium, high)')
+  .option('--related-files <paths>', 'Comma-separated list of relevant file paths')
   .option('-m, --message <message>', 'Add a message to the activity log')
   .action((id, options) => {
-      try {
-        const result = core.updateTask(process.cwd(), id, options);
-        if (result.success) {
-            console.log(result.message);
-        } else {
-             console.error(`Error updating task: ${result.message || 'Unknown error'}`);
-             process.exitCode = 1;
+    try {
+        // Build update options object from command-line arguments
+        const updateOptions = {};
+        if (options.title) updateOptions.title = options.title;
+        if (options.description) updateOptions.description = options.description;
+        if (options.priority) updateOptions.priority = options.priority;
+        if (options.relatedFiles) updateOptions.relatedFiles = options.relatedFiles;
+        if (options.message) updateOptions.message = options.message;
+        
+        // Check if any options are provided
+        if (Object.keys(updateOptions).length === 0) {
+            logger.error("No update options provided. Use -t, -d, -p, --related-files, or -m to specify changes.");
+            process.exitCode = 1;
+            return;
         }
-      } catch(error) {
-         console.error(`Error updating task: ${error.message}`);
-         process.exitCode = 1;
-      }
+        
+        const result = core.updateTask(process.cwd(), id, updateOptions);
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error updating task: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
+    } catch (error) {
+        logger.error(`Error updating task: ${error.message}`);
+        process.exitCode = 1;
+    }
   });
 
 // remove command
 program
   .command('remove <id>')
-  .alias('rm')
-  .description('Remove a task or subtask by ID')
-  .action((id) => {
-     try {
-        const result = core.removeTask(process.cwd(), id);
-        if (result.success) {
-            console.log(result.message);
-        } else {
-             console.error(`Error removing task: ${result.message || 'Unknown error'}`);
-             process.exitCode = 1;
-        }
-     } catch (error) {
-         console.error(`Error removing task: ${error.message}`);
-         process.exitCode = 1;
-     }
-  });
-
-// generate command
-program
-  .command('generate')
-  .description('Generate individual Markdown task files in the tasks/ directory')
-  .action(() => {
-     try {
-        const result = core.generateTaskFiles(process.cwd());
-        if (result.success) {
-            console.log(result.message);
-        } else {
-            console.error(`Error generating task files: ${result.message || 'Unknown error'}`);
-            process.exitCode = 1;
-        }
-     } catch (error) {
-        console.error(`Error generating task files: ${error.message}`);
-        process.exitCode = 1;
-     }
-  });
-
-// get-context command
-program
-  .command('get-context <id>')
-  .description('Get detailed context for a specific task or subtask as JSON')
+  .description('Remove a task or subtask')
   .action((id) => {
     try {
-      const contextData = core.getContext(process.cwd(), id); 
-      // Print the returned context object as JSON
-      console.log(JSON.stringify(contextData, null, 2));
+        const result = core.removeTask(process.cwd(), id);
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error removing task: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
     } catch (error) {
-      console.error(`Error getting context: ${error.message}`);
-      process.exitCode = 1;
+        logger.error(`Error removing task: ${error.message}`);
+        process.exitCode = 1;
+    }
+  });
+
+// context command
+program
+  .command('context <id>')
+  .description('Get detailed context for a task or subtask')
+  .action((id) => {
+    try {
+        const result = core.getContext(process.cwd(), id);
+        if (result.success) {
+            if (result.context) {
+                // Format and display the context
+                const context = result.context;
+                logger.output(`Task Context for ${context.id}: ${context.title}`);
+                logger.output(`Status: ${context.status}`);
+                logger.output(`Priority: ${context.priority}`);
+                if (context.description) logger.output(`Description: ${context.description}`);
+                
+                // Show related files if available
+                if (context.relatedFiles && context.relatedFiles.length > 0) {
+                    logger.output(`\nRelated Files:`);
+                    context.relatedFiles.forEach(file => {
+                        logger.output(`- ${file}`);
+                    });
+                }
+                
+                // Show dependencies
+                if (context.dependsOn && context.dependsOn.length > 0) {
+                    logger.output(`\nDepends On: ${context.dependsOn.join(', ')}`);
+                }
+                
+                // Show subtasks
+                if (context.subtasks && context.subtasks.length > 0) {
+                    logger.output(`\nSubtasks:`);
+                    context.subtasks.forEach(subtask => {
+                        logger.output(`- ${subtask.id}: ${subtask.title} [${subtask.status}]`);
+                    });
+                }
+                
+                // Show activity log
+                if (context.activityLog && context.activityLog.length > 0) {
+                    logger.output(`\nActivity Log:`);
+                    context.activityLog.forEach(entry => {
+                        const date = new Date(entry.timestamp).toLocaleString();
+                        logger.output(`[${date}] ${entry.type}: ${entry.message}`);
+                    });
+                }
+            } else {
+                logger.output("No context found for the specified task.");
+            }
+        } else {
+            logger.error(`Error getting task context: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
+    } catch (error) {
+        logger.error(`Error getting task context: ${error.message}`);
+        process.exitCode = 1;
+    }
+  });
+
+// generate-files command
+program
+  .command('generate-files')
+  .description('Generate individual Markdown files for each task in the tasks/ directory')
+  .action(() => {
+    try {
+        const result = core.generateTaskFiles(process.cwd());
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error generating task files: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
+    } catch (error) {
+        logger.error(`Error generating task files: ${error.message}`);
+        process.exitCode = 1;
     }
   });
 
 // parse-prd command
 program
   .command('parse-prd <file-path>')
-  .description('Parse a Product Requirements Document (PRD) using Gemini API to generate tasks')
-  .action(async (filePath) => { // Make action async
+  .description('Parse a PRD document using Gemini and generate tasks')
+  .action(async (filePath) => {
     try {
-      // Call the async core function
-      const result = await core.parsePrd(process.cwd(), filePath);
-      // Print the message from the result
-      if (result.success) {
-          console.log(result.message);
-      } else {
-           console.error(`Error parsing PRD: ${result.message || 'Unknown error'}`);
-           process.exitCode = 1;
-      }
+        logger.info(`Parsing PRD file: ${filePath}`);
+        const result = await core.parsePrd(process.cwd(), filePath);
+        
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error parsing PRD: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
     } catch (error) {
-      console.error(`Error parsing PRD: ${error.message}`);
-      process.exitCode = 1;
+        logger.error(`Error parsing PRD: ${error.message}`);
+        process.exitCode = 1;
     }
   });
 
-// expand command
+// expand-task command
 program
-  .command('expand <task-id>')
-  .description('Use Gemini API to break down a task into subtasks (overwrites existing)')
-  .action(async (taskId) => { // Make action async
+  .command('expand-task <id>')
+  .description('Use Gemini to break down a task into subtasks')
+  .action(async (id) => {
     try {
-      // Call the async core function
-      const result = await core.expandTask(process.cwd(), taskId);
-      // Print the message from the result
-      if (result.success) {
-          console.log(result.message);
-      } else {
-          console.error(`Error expanding task: ${result.message || 'Unknown error'}`);
-          process.exitCode = 1;
-      }
+        logger.info(`Expanding task with ID: ${id}`);
+        const result = await core.expandTask(process.cwd(), id);
+        
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error expanding task: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
     } catch (error) {
-      console.error(`Error expanding task: ${error.message}`);
-      process.exitCode = 1;
+        logger.error(`Error expanding task: ${error.message}`);
+        process.exitCode = 1;
     }
   });
 
-// revise command
+// revise-tasks command
 program
-  .command('revise')
-  .description('Use Gemini API to revise future tasks based on a prompt')
-  .requiredOption('--from <task-id>', 'Task ID from which revision should start')
-  .requiredOption('-p, --prompt <prompt>', 'User prompt describing the change')
-  .action(async (options) => { // Make action async
+  .command('revise-tasks <from-task-id>')
+  .requiredOption('-p, --prompt <prompt>', 'Prompt describing the changes')
+  .description('Use Gemini to revise future tasks based on a prompt (starting from a specific task ID)')
+  .action(async (fromTaskId, options) => {
     try {
-       // Call the async core function with options object
-       // FIXED: Pass fromTaskId correctly using the key expected by core.js
-      const result = await core.reviseTasks(process.cwd(), { fromTaskId: options.from, prompt: options.prompt });
-       // Print the message from the result
-      if (result.success) {
-          console.log(result.message);
-      } else {
-           console.error(`Error revising tasks: ${result.message || 'Unknown error'}`);
-           process.exitCode = 1;
-      }
+        if (!options.prompt) {
+            logger.error("A prompt is required. Use -p or --prompt to specify changes.");
+            process.exitCode = 1;
+            return;
+        }
+        
+        logger.info(`Revising tasks starting from ID ${fromTaskId}`);
+        const result = await core.reviseTasks(process.cwd(), {
+            fromTaskId: fromTaskId,
+            prompt: options.prompt
+        });
+        
+        if (result.success) {
+            logger.output(result.message);
+        } else {
+            logger.error(`Error revising tasks: ${result.message || 'Unknown error'}`);
+            process.exitCode = 1;
+        }
     } catch (error) {
-      console.error(`Error revising tasks: ${error.message}`);
-      process.exitCode = 1;
+        logger.error(`Error revising tasks: ${error.message}`);
+        process.exitCode = 1;
     }
   });
 
-// Catch-all for unknown commands
 program.parse(process.argv);
 
 // If no command is specified, show help

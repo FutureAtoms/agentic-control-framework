@@ -1,13 +1,12 @@
-# Task 15: Create Level 4: The Shadow Self
+# Task 15: Create documentation
 
 **Status:** todo
-**Priority:** low
+**Priority:** medium
 **Description:**
-Develop the fourth level focusing on unconscious motivations and defense mechanisms, with challenges for confronting repressed aspects of the character's personality.
-**Depends On:** 11
+Write comprehensive documentation for the project
 
 **Activity Log:**
-* 2025-04-20T12:46:13.460Z [log] Task created with title: "Create Level 4: The Shadow Self"
+* 2025-04-19T10:40:31.491Z [log] Task created with title: "Create documentation"
 
-*Created:* 2025-04-20T12:46:13.460Z
-*Updated:* 2025-04-20T12:46:13.460Z
+*Created:* 2025-04-19T10:40:31.490Z
+*Updated:* 2025-04-19T10:40:31.491Z

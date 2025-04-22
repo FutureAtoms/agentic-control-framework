@@ -1,13 +1,10 @@
-# Task 12: Create Level 1: Cognitive Awareness
+# Task 12: Handle 2FA failures
 
 **Status:** todo
-**Priority:** medium
+**Priority:** high
 **Description:**
-Develop the first level focusing on basic cognitive biases and perception, with challenges for identifying confirmation bias, anchoring effect, and framing effect.
-**Depends On:** 11
+Implement error handling and user feedback for 2FA failures.
+**Depends On:** 9
 
-**Activity Log:**
-* 2025-04-20T12:46:02.982Z [log] Task created with title: "Create Level 1: Cognitive Awareness"
-
-*Created:* 2025-04-20T12:46:02.982Z
-*Updated:* 2025-04-20T12:46:02.982Z
+*Created:* undefined
+*Updated:* 2025-04-17T15:14:23.885Z

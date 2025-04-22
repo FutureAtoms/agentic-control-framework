@@ -1,10 +1,9 @@
-# Task 8: Apply Tailwind CSS Styling
+# Task 8: Design dashboard layout with 2FA indicator
 
-**Status:** undefined
+**Status:** todo
 **Priority:** high
 **Description:**
-Style the game board and messages using Tailwind CSS to ensure clarity and visual distinction.
-**Depends On:** 1, 6
+Design the UI layout for the user dashboard, including visual indicators for 2FA status (enabled/disabled).
 
 *Created:* undefined
-*Updated:* 2025-04-13T21:06:34.193Z
+*Updated:* 2025-04-17T15:14:23.885Z

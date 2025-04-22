@@ -1,14 +1,15 @@
 require('dotenv').config(); // Load environment variables from .env file
 const axios = require('axios');
 const fs = require('fs');
+const logger = require('./logger'); // Import our logger
 
 const API_KEY = process.env.GEMINI_API_KEY;
 const API_ENDPOINT = process.env.GEMINI_API_ENDPOINT || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 async function parsePrdWithGemini(prdFilePath) {
   if (!API_KEY) {
-    console.error("Error: GEMINI_API_KEY not found in environment variables.");
-    console.error("Please create a .env file based on .env.example and add your key.");
+    logger.error("GEMINI_API_KEY not found in environment variables.");
+    logger.error("Please create a .env file based on .env.example and add your key.");
     return null; // Indicate failure
   }
 
@@ -16,7 +17,7 @@ async function parsePrdWithGemini(prdFilePath) {
   try {
     prdContent = fs.readFileSync(prdFilePath, 'utf-8');
   } catch (error) {
-    console.error(`Error reading PRD file: ${prdFilePath}`, error);
+    logger.error(`Error reading PRD file: ${prdFilePath} - ${error}`);
     return null;
   }
 
@@ -36,7 +37,7 @@ ${prdContent}
 JSON Output:
 `;
 
-  console.log("Sending PRD content to Gemini API...");
+  logger.info("Sending PRD content to Gemini API...");
 
   try {
     const response = await axios.post(
@@ -71,21 +72,21 @@ JSON Output:
           throw new Error("Gemini response is not a JSON array.");
         }
         // Optional: Add validation for task structure here
-        console.log("Successfully parsed tasks from Gemini response.");
+        logger.info("Successfully parsed tasks from Gemini response.");
         return parsedTasks; // Return the array of generated tasks
       } catch (parseError) {
-        console.error("Error parsing JSON response from Gemini:", parseError);
-        console.error("Raw Gemini response text:", jsonResponse);
+        logger.error(`Error parsing JSON response from Gemini: ${parseError}`);
+        logger.debug(`Raw Gemini response text: ${jsonResponse}`);
         return null;
       }
     } else {
-      console.error("Error: Unexpected response structure from Gemini API.");
-      console.error("Raw API Response:", JSON.stringify(response.data, null, 2));
+      logger.error("Unexpected response structure from Gemini API.");
+      logger.debug(`Raw API Response: ${JSON.stringify(response.data, null, 2)}`);
       return null;
     }
 
   } catch (error) {
-    console.error("Error calling Gemini API:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    logger.error(`Error calling Gemini API: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`);
     return null;
   }
 }
@@ -93,7 +94,7 @@ JSON Output:
 // Function to ask Gemini to expand a task into subtasks
 async function expandTaskWithGemini(parentTask) {
   if (!API_KEY) {
-    console.error("Error: GEMINI_API_KEY not found in environment variables.");
+    logger.error("GEMINI_API_KEY not found in environment variables.");
     return null;
   }
 
@@ -112,7 +113,7 @@ Example Output:
 JSON Output:
 `;
 
-  console.log(`Sending task (ID: ${parentTask.id}) to Gemini API for expansion...`);
+  logger.info(`Sending task (ID: ${parentTask.id}) to Gemini API for expansion...`);
 
   try {
     const response = await axios.post(
@@ -135,32 +136,32 @@ JSON Output:
         if (!Array.isArray(parsedSubtasks) || !parsedSubtasks.every(sub => typeof sub === 'object' && sub.title)) {
             throw new Error("Gemini response is not a valid JSON array of {title: string} objects.")
         }
-        console.log("Successfully parsed subtasks from Gemini response.");
+        logger.info("Successfully parsed subtasks from Gemini response.");
         // Return just the array of titles for simplicity in core.js
         return parsedSubtasks.map(sub => sub.title);
       } catch (parseError) {
-        console.error("Error parsing JSON response from Gemini for subtask expansion:", parseError);
-        console.error("Raw Gemini response text:", jsonResponse);
+        logger.error(`Error parsing JSON response from Gemini for subtask expansion: ${parseError}`);
+        logger.debug(`Raw Gemini response text: ${jsonResponse}`);
         // Fallback to line splitting if JSON parsing fails
-        console.error("Attempting fallback line-by-line parsing...");
+        logger.info("Attempting fallback line-by-line parsing...");
         const lines = jsonResponse.split('\n')
           .map(line => line.trim())
           .filter(line => line && !line.includes('```'));
           
         if (lines.length > 0) {
-          console.log(`Extracted ${lines.length} potential subtask titles using fallback method.`);
+          logger.info(`Extracted ${lines.length} potential subtask titles using fallback method.`);
           return lines;
         }
         return null;
       }
     } else {
-      console.error("Error: Unexpected response structure from Gemini API during expansion.");
-      console.error("Raw API Response:", JSON.stringify(response.data, null, 2));
+      logger.error("Unexpected response structure from Gemini API during expansion.");
+      logger.debug(`Raw API Response: ${JSON.stringify(response.data, null, 2)}`);
       return null;
     }
 
   } catch (error) {
-    console.error("Error calling Gemini API for task expansion:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    logger.error(`Error calling Gemini API for task expansion: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`);
     return null;
   }
 }
@@ -168,7 +169,7 @@ JSON Output:
 // Function to ask Gemini to revise future tasks based on a change
 async function reviseTasksWithGemini(userPrompt, pastTasks, futureTasks) {
   if (!API_KEY) {
-    console.error("Error: GEMINI_API_KEY not found in environment variables.");
+    logger.error("GEMINI_API_KEY not found in environment variables.");
     return null;
   }
 
@@ -199,12 +200,15 @@ Output ONLY the revised JSON array of future tasks in the same format as provide
 Revised JSON Output:
 `;
 
-  console.log(`Sending future tasks to Gemini API for revision based on prompt: "${userPrompt}"`);
+  logger.info("Sending tasks revision request to Gemini API...");
 
   try {
     const response = await axios.post(
       `${API_ENDPOINT}?key=${API_KEY}`,
-      { contents: [{ parts: [{ text: prompt }] }] },
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        // generationConfig: { temperature: 0.4 } // Optional: Adjust temperature
+      },
       { headers: { 'Content-Type': 'application/json' } }
     );
 
@@ -215,26 +219,34 @@ Revised JSON Output:
       jsonResponse = jsonResponse.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
 
       try {
-        const revisedTasks = JSON.parse(jsonResponse);
-        if (!Array.isArray(revisedTasks)) {
-          throw new Error("Gemini response is not a valid JSON array for revised tasks.")
+        const parsedTasks = JSON.parse(jsonResponse);
+        if (!Array.isArray(parsedTasks)) {
+          throw new Error("Gemini response is not a JSON array.");
         }
-        // Add more validation if needed (e.g., check for required fields)
-        console.log("Successfully parsed revised tasks from Gemini response.");
-        return revisedTasks;
+        
+        // Validation: Check that we have valid task objects
+        if (!parsedTasks.every(task => 
+            typeof task === 'object' && 
+            task.id !== undefined && 
+            typeof task.title === 'string')) {
+          throw new Error("Some tasks in the response are missing required fields (id, title).");
+        }
+        
+        logger.info("Successfully parsed revised tasks from Gemini response.");
+        return parsedTasks;
       } catch (parseError) {
-        console.error("Error parsing JSON response from Gemini for task revision:", parseError);
-        console.error("Raw Gemini response text:", jsonResponse);
+        logger.error(`Error parsing JSON response from Gemini for task revision: ${parseError}`);
+        logger.debug(`Raw Gemini response text: ${jsonResponse}`);
         return null;
       }
     } else {
-      console.error("Error: Unexpected response structure from Gemini API during revision.");
-      console.error("Raw API Response:", JSON.stringify(response.data, null, 2));
+      logger.error("Unexpected response structure from Gemini API during task revision.");
+      logger.debug(`Raw API Response: ${JSON.stringify(response.data, null, 2)}`);
       return null;
     }
 
   } catch (error) {
-    console.error("Error calling Gemini API for task revision:", error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
+    logger.error(`Error calling Gemini API for task revision: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`);
     return null;
   }
 }

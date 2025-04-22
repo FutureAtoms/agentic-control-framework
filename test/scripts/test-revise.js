@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Import core module
-const core = require('./gemini-task-manager/src/core');
+const core = require('./src/core');
 
 // Define a task ID to start revision from (assuming tasks.json exists with tasks)
 const fromTaskId = 26; // Replace with an actual task ID from your tasks.json

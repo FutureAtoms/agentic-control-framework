@@ -1,0 +1,43 @@
+Okay, here are drafts for a LinkedIn post, a tweet, and a 1-minute video transcript advertising Abhilash Chadhar's Gemini Task Manager, highlighting its benefits, especially its free core functionality compared to alternatives like Claude Task Master.
+1. LinkedIn Post
+Headline Option 1: Supercharge Your Cursor AI Workflow for FREE with the Gemini Task Manager!
+Headline Option 2: Stop Paying for AI Task Management? Try Abhilash Chadhar's Open-Source Gemini Task Manager for Cursor!
+(Body)
+Struggling to keep complex AI-driven coding projects organized in Cursor? Wish there was a powerful task management system like Claude Task Master, but without the mandatory paid API keys?
+Excited to share the Gemini Task Manager with MCP, created by Abhilash Chadhar! 🎉 1
+This open-source tool brings structure and efficiency to your AI development workflow, integrating seamlessly with Cursor via MCP.
+Why is it amazing?
+✅ Free Core Functionality: Unlike alternatives requiring paid Anthropic or Perplexity keys, the core task management (add, list, update, dependencies, subtasks) is completely FREE.
+✅ Seamless Cursor Integration: Use natural language commands directly in the Cursor chat thanks to the built-in MCP server. Guide your AI effectively!
+✅ Structured Workflow: Break down complex PRDs and projects into manageable tasks and subtasks. Keep your AI focused, reduce errors, and maintain context.
+✅ Optional Gemini Power: Leverage the Google Gemini API (requires your own free or paid key) for advanced features like automatic PRD parsing, task expansion, and revision – but only if you need them!
+✅ Developer Focused: Built with features developers need, like CLI access, status tracking, dependency management, and task file generation.
+✅ Open Source: Fork it, contribute, make it your own!
+Stop juggling context windows and expensive API calls for basic task tracking. Give your AI the structured guidance it needs to shine.
+Huge props to Abhilash Chadhar for building and sharing this fantastic tool with the community!
+Check out the repo, try it in your next project, and experience a smoother, more efficient AI coding workflow:
+👉 https://github.com/FutureAtoms/Gemini-task-man-mcp
+\#AIDevelopment \#DevTools \#TaskManager \#CursorIDE \#GeminiAI \#OpenSource \#Programming \#Coding \#FreeTool \#DeveloperWorkflow \#MCP \#SoftwareDevelopment \#FutureOfCoding
+2. Tweet
+Level up your Cursor AI workflow! 🔥 Check out the Gemini Task Manager w/ MCP by Abhilash Chadhar.
+✅ FREE core task management (unlike paid alternatives!)
+✅ Seamless Cursor integration (MCP)
+✅ Structured tasks/subtasks
+✅ Optional Gemini AI power
+Manage complex projects effectively & keep your AI focused, without the mandatory API costs. Open source!
+Get it here: https://github.com/FutureAtoms/Gemini-task-man-mcp
+\#AIDev \#CursorIDE \#GeminiAI \#OpenSource \#FreeDevTool \#TaskManager
+3. 1-Minute Video Transcript
+(0:00-0:05) [Upbeat, techy intro music. Screen shows Cursor IDE interface with code.]
+Narrator: Using AI like Cursor to code is amazing, right? But managing big projects, keeping the AI on track... it can get messy. And costly!
+(0:05-0:15) [Transition to GitHub repo page for Gemini Task Manager. Highlight the name and creator.]
+Narrator: What if you could get structured AI task management, without the mandatory paid API keys? Meet the Gemini Task Manager with MCP, created by Abhilash Chadhar! It's open-source and the core features are FREE.
+(0:15-0:30) [Show quick cuts: CLI commands like task-manager init, task-manager add, task-manager list. Then show Cursor chat with commands like /list tasks, /add subtask ... being used.]
+Narrator: Manage tasks, subtasks, dependencies, and status effortlessly. Use the powerful CLI, OR integrate it directly into Cursor with the MCP server. Just chat naturally like /add task 'Refactor auth module' or /get next task.
+(0:30-0:40) [Visual emphasizing "FREE" and contrasting with icons representing paid APIs (e.g., crossed-out dollar signs on generic API logos).]
+Narrator: This gives your AI the structure it needs, reducing errors and context overload. And unlike many alternatives, the essential task tracking doesn't rely on expensive, paid APIs!
+(0:40-0:50) [Show a quick visual hinting at AI features - maybe PRD text turning into tasks or a task expanding into subtasks.]
+Narrator: Need more power? Optionally connect your own Google Gemini API key to unlock features like parsing PRDs directly into tasks or automatically expanding complex steps into detailed subtasks.
+(0:50-1:00) [End screen showing GitHub link clearly. Music swells slightly.]
+Narrator: Stop fighting complexity and cost. Bring order to your AI coding workflow today. Check out Abhilash Chadhar's Gemini Task Manager on GitHub – it's free, powerful, and ready to integrate with Cursor! [Link: https://github.com/FutureAtoms/Gemini-task-man-mcp]
+(Outro music fades)

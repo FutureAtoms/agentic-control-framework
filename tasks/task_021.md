@@ -1,12 +1,14 @@
-# Task 21: Create dynamic audio design
+# Task 21: Task 2: Core Development
 
 **Status:** todo
-**Priority:** medium
+**Priority:** high
 **Description:**
-Develop a dynamic soundtrack that responds to player mental states, with binaural elements to enhance immersion.
+Implement core features
+**Depends On:** 20
 
 **Activity Log:**
-* 2025-04-20T12:46:32.576Z [log] Task created with title: "Create dynamic audio design"
+* 2025-04-19T11:44:35.430Z [log] Task created with title: "Task 2: Development"
+* 2025-04-19T11:44:51.477Z [log] Updating task details
 
-*Created:* 2025-04-20T12:46:32.576Z
-*Updated:* 2025-04-20T12:46:32.576Z
+*Created:* 2025-04-19T11:44:35.430Z
+*Updated:* 2025-04-19T11:44:51.477Z

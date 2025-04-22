@@ -1,13 +1,16 @@
-# Task 14: Create Level 3: Social Dynamics
+# Task 14: Setup development environment
 
-**Status:** todo
-**Priority:** low
+**Status:** inprogress
+**Priority:** high
 **Description:**
-Develop the third level focusing on group psychology and social influence, with challenges for recognizing peer pressure, conformity, and authority influence.
-**Depends On:** 11
+Install and configure all necessary tools for development
+
+**Subtasks:**
+*   [14.1] Install Node.js dependencies [todo]
 
 **Activity Log:**
-* 2025-04-20T12:46:10.425Z [log] Task created with title: "Create Level 3: Social Dynamics"
+* 2025-04-19T10:28:04.146Z [log] Task created with title: "Setup development environment"
+* 2025-04-19T10:40:49.456Z [status] Started setting up development environment
 
-*Created:* 2025-04-20T12:46:10.425Z
-*Updated:* 2025-04-20T12:46:10.425Z
+*Created:* 2025-04-19T10:28:04.145Z
+*Updated:* 2025-04-19T10:41:07.315Z

@@ -1,12 +1,6 @@
 {
-  "mcpServers": {
-    "gemini-task-manager": {
-      "command": "/Users/abhilashchadhar/uncloud/cursor/task-master/bin/task-manager-mcp",
-      "args": [],
-      "env": {
-        "GEMINI_API_KEY": "<YOUR_API_KEY>",
-        "DEBUG": "true"
-      }
-    }
+  "agentic-control-framework": {
+    "command": "/Users/abhilashchadhar/uncloud/cursor/task-master/bin/task-manager-mcp",
+    "protocol": "MCP"
   }
 } 

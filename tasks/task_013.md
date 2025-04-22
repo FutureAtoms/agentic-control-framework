@@ -1,13 +1,10 @@
-# Task 13: Create Level 2: Emotional Intelligence
+# Task 13: Render data components
 
 **Status:** todo
-**Priority:** medium
+**Priority:** high
 **Description:**
-Develop the second level focusing on emotional recognition and regulation, with challenges for navigating emotionally charged scenarios.
-**Depends On:** 11
+Display the fetched user data on the dashboard using appropriate UI components.
+**Depends On:** 10
 
-**Activity Log:**
-* 2025-04-20T12:46:05.938Z [log] Task created with title: "Create Level 2: Emotional Intelligence"
-
-*Created:* 2025-04-20T12:46:05.938Z
-*Updated:* 2025-04-20T12:46:05.938Z
+*Created:* undefined
+*Updated:* 2025-04-17T15:14:23.885Z

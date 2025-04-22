@@ -1,7 +1,7 @@
 {
   "projectName": "Comprehensive Test",
   "projectDescription": "Testing all commands",
-  "lastTaskId": 43,
+  "lastTaskId": 44,
   "tasks": [
     {
       "id": 1,
@@ -1279,6 +1279,45 @@
           "timestamp": "2025-04-20T08:48:37.880Z",
           "type": "log",
           "message": "Task created with title: \"Marketing and Launch Preparation\""
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "title": "Test Task",
+      "description": "Testing task creation",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-21T10:23:03.411Z",
+      "updatedAt": "2025-04-21T10:24:16.904Z",
+      "subtasks": [
+        {
+          "id": "44.1",
+          "title": "Test Subtask",
+          "status": "inprogress",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-21T10:23:40.226Z",
+              "type": "log",
+              "message": "Subtask created with title: \"Test Subtask\""
+            },
+            {
+              "timestamp": "2025-04-21T10:24:16.905Z",
+              "type": "status",
+              "message": "Working on subtask"
+            }
+          ],
+          "updatedAt": "2025-04-21T10:24:16.905Z"
+        }
+      ],
+      "lastSubtaskIndex": 1,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-21T10:23:03.412Z",
+          "type": "log",
+          "message": "Task created with title: \"Test Task\""
         }
       ]
     }

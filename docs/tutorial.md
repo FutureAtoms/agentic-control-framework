@@ -1,10 +1,10 @@
-# Gemini Task Manager Tutorial
+# Agentic Control Framework Tutorial
 
 ## 📋 Introduction
 
-The Gemini Task Manager (GTM) is a powerful AI-driven task management system that helps you organize, track, and complete project tasks efficiently. It integrates with the Cursor IDE through the Model Control Protocol (MCP) and offers both a command-line interface and natural language interaction for managing your tasks.
+The Agentic Control Framework (ACF) is a powerful AI-driven task management system that helps you organize, track, and complete project tasks efficiently. It integrates with the Cursor IDE through the Model Control Protocol (MCP) and offers both a command-line interface and natural language interaction for managing your tasks.
 
-This tutorial will guide you through setting up and using the Gemini Task Manager, from basic task management to advanced AI-powered features.
+This tutorial will guide you through setting up and using the Agentic Control Framework, from basic task management to advanced AI-powered features.
 
 ## 📑 Table of Contents
 
@@ -35,8 +35,8 @@ This tutorial will guide you through setting up and using the Gemini Task Manage
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/task-master.git
-   cd task-master
+   git clone https://github.com/FutureAtoms/agentic-control-framework.git
+   cd agentic-control-framework
    ```
 
 2. Install dependencies:
@@ -47,16 +47,16 @@ This tutorial will guide you through setting up and using the Gemini Task Manage
 3. (Optional) Set up Gemini API key for AI features:
    ```bash
    # Add to your .bashrc, .zshrc, or equivalent shell config
-   export GEMINI_API_KEY="your-api-key-here"
+   export GEMINI_API_KEY="your_api_key_here"
    ```
 
 ### MCP Server Setup (For Cursor IDE Integration)
 
-To use the Gemini Task Manager with Cursor IDE, you need to set up the MCP server wrapper:
+To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP server wrapper:
 
 1. Make the wrapper scripts executable:
    ```bash
-   chmod +x gemini-task-manager/bin/task-manager-mcp
+   chmod +x bin/task-manager-mcp
    chmod +x bin/task-manager-mcp
    ```
 
@@ -65,7 +65,7 @@ To use the Gemini Task Manager with Cursor IDE, you need to set up the MCP serve
    **Option 1**: Add to your shell config
    ```bash
    # Add this to your .bashrc, .zshrc, or equivalent shell config file
-   export PATH="$PATH:/absolute/path/to/task-master/bin"
+   export PATH="$PATH:/path/to/agentic-control-framework/bin"
    ```
 
    **Option 2**: Create a symlink in a directory already in your PATH
@@ -80,12 +80,12 @@ To use the Gemini Task Manager with Cursor IDE, you need to set up the MCP serve
    b. Go to Settings (⚙️) > Preferences
    c. Search for "MCP" in the settings search
    d. Under MCP Integrations, add a new integration:
-      - Name: `Gemini Task Manager`
+      - Name: `Agentic Control Framework`
       - Command: The path to your `bin/task-manager-mcp` script
       - Protocol: `MCP`
    e. Save the settings
 
-   Now you can access the Gemini Task Manager in Cursor by typing `/` followed by a task management command in the editor.
+   Now you can access the Agentic Control Framework in Cursor by typing `/` followed by a task management command in the editor.
 
 ## 📝 Basic Task Management
 
@@ -95,7 +95,7 @@ Before you can start creating tasks, you need to initialize a project:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager init --projectName "My Project" --projectDescription "Description of my project"
+./bin/task-manager init --projectName "My Project" --projectDescription "Description of my project"
 ```
 
 **Cursor IDE Method:**
@@ -110,7 +110,7 @@ This creates a `tasks.json` file in your project root that will store all your t
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager add -t "Implement login feature" -d "Create user authentication system with email and password" -p high
+./bin/task-manager add -t "Implement login feature" -d "Create user authentication system with email and password" -p high
 ```
 
 **Cursor IDE Method:**
@@ -123,10 +123,10 @@ This creates a `tasks.json` file in your project root that will store all your t
 **CLI Method:**
 ```bash
 # List all tasks
-./gemini-task-manager/bin/task-manager list
+./bin/task-manager list
 
 # List tasks with specific status
-./gemini-task-manager/bin/task-manager list -s todo
+./bin/task-manager list -s todo
 ```
 
 **Cursor IDE Method:**
@@ -150,7 +150,7 @@ The `next` command will suggest the next task to work on based on status, depend
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager next
+./bin/task-manager next
 ```
 
 **Cursor IDE Method:**
@@ -162,7 +162,7 @@ The `next` command will suggest the next task to work on based on status, depend
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager remove 1
+./bin/task-manager remove 1
 ```
 
 **Cursor IDE Method:**
@@ -178,7 +178,7 @@ Subtasks help you break down complex tasks into smaller, manageable pieces.
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager add-subtask 1 -t "Design login form"
+./bin/task-manager add-subtask 1 -t "Design login form"
 ```
 
 **Cursor IDE Method:**
@@ -202,7 +202,7 @@ To see the detailed subtasks, use the `get-context` command:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager get-context 1
+./bin/task-manager get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -214,14 +214,14 @@ To see the detailed subtasks, use the `get-context` command:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager status 1.1 inprogress -m "Working on login form design"
-./gemini-task-manager/bin/task-manager status 1.1 done -m "Completed login form design"
+./bin/task-manager status 1.1 inprogress -m "Starting implementation"
+./bin/task-manager status 1.1 done -m "Completed implementation"
 ```
 
 **Cursor IDE Method:**
 ```
-/update subtask 1.1 status to inprogress with message "Working on login form design"
-/mark subtask 1.1 as done with message "Completed login form design"
+/update subtask 1.1 status to inprogress with message "Starting implementation"
+/mark subtask 1.1 as done with message "Completed implementation"
 ```
 
 ## 🔄 Task Dependencies and Priority
@@ -232,12 +232,12 @@ Dependencies ensure tasks are completed in the proper order. A task will only be
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager add -t "Implement user profile" -d "Create user profile page" -p medium --dependsOn "1"
+./bin/task-manager add -t "Implement registration" -d "Create user registration flow" --depends-on "1"
 ```
 
 **Cursor IDE Method:**
 ```
-/add task "Implement user profile" with description "Create user profile page" and medium priority and depends on task 1
+/add task "Implement registration" with description "Create user registration flow" and depends on task 1
 ```
 
 ### Setting Task Priority
@@ -246,7 +246,7 @@ Tasks can have one of three priority levels: `high`, `medium`, or `low`. The `ne
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager update 2 -p high
+./bin/task-manager add -t "Fix security vulnerability" -p high
 ```
 
 **Cursor IDE Method:**
@@ -267,7 +267,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager status 1 inprogress -m "Starting work on login feature"
+./bin/task-manager status 1 inprogress -m "Starting work on login feature"
 ```
 
 **Cursor IDE Method:**
@@ -279,7 +279,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager status 1 error -m "Login API endpoint returns 500 error"
+./bin/task-manager status 1 error -m "Login API endpoint returns 500 error"
 ```
 
 **Cursor IDE Method:**
@@ -291,7 +291,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager status 2 blocked -m "Blocked by pending API documentation"
+./bin/task-manager status 2 blocked -m "Blocked by pending API documentation"
 ```
 
 **Cursor IDE Method:**
@@ -307,7 +307,7 @@ You can associate specific files in your codebase with tasks to make it easier t
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager add -t "Refactor authentication" --related-files "src/auth/login.js,src/auth/register.js"
+./bin/task-manager add -t "Refactor authentication" --related-files "src/auth/login.js,src/auth/register.js"
 ```
 
 **Cursor IDE Method:**
@@ -319,7 +319,7 @@ You can associate specific files in your codebase with tasks to make it easier t
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager update 3 --related-files "src/auth/login.js,src/auth/register.js,src/auth/reset-password.js"
+./bin/task-manager update 3 --related-files "src/auth/login.js,src/auth/register.js,src/auth/reset-password.js"
 ```
 
 **Cursor IDE Method:**
@@ -335,7 +335,7 @@ Activity logs help you track the history of a task, including status changes and
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager update 1 -m "Discovered a potential security issue in the login form"
+./bin/task-manager update 1 -m "Discovered a potential security issue in the login form"
 ```
 
 **Cursor IDE Method:**
@@ -349,7 +349,7 @@ Activity logs are included when you view task context:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager get-context 1
+./bin/task-manager get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -419,7 +419,7 @@ The `get-context` command provides detailed information about a task, including 
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager get-context 1
+./bin/task-manager get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -435,7 +435,7 @@ To use AI-powered features, you need to set up a Gemini API key:
 
 ```bash
 # Add to your .bashrc, .zshrc, or equivalent shell config
-export GEMINI_API_KEY="your-api-key-here"
+export GEMINI_API_KEY="your_api_key_here"
 ```
 
 ### Parsing PRD Documents
@@ -444,7 +444,7 @@ You can automatically generate tasks from a Product Requirements Document (PRD):
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager parse-prd --filePath "docs/requirements.md"
+./bin/task-manager parse-prd --filePath "docs/requirements.md"
 ```
 
 **Cursor IDE Method:**
@@ -473,7 +473,7 @@ The `expand` command uses AI to automatically break down a complex task into sub
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager expand --taskId 1
+./bin/task-manager expand-task 1
 ```
 
 **Cursor IDE Method:**
@@ -499,7 +499,7 @@ The `revise` command uses AI to update tasks based on changing requirements:
 
 **CLI Method:**
 ```bash
-./gemini-task-manager/bin/task-manager revise --fromTaskId 3 --prompt "Change authentication from OAuth to JWT"
+./bin/task-manager revise-tasks 3 -p "Change authentication from OAuth to JWT"
 ```
 
 **Cursor IDE Method:**
@@ -511,7 +511,7 @@ The `revise` command uses AI to update tasks based on changing requirements:
 
 ### Basic Commands in Cursor
 
-When using Gemini Task Manager with Cursor IDE via MCP, you can interact with it through natural language commands by typing `/` followed by your request:
+When using Agentic Control Framework with Cursor IDE via MCP, you can interact with it through natural language commands by typing `/` followed by your request:
 
 ```
 /init project "Todo App" with description "A simple todo application with authentication and task management"
@@ -549,29 +549,29 @@ The MCP integration supports flexible natural language commands:
 
 ```bash
 # Initialize project
-./gemini-task-manager/bin/task-manager init --projectName "E-Commerce App" --projectDescription "A modern e-commerce application with user authentication, product listings, and checkout"
+./bin/task-manager init --projectName "E-Commerce App" --projectDescription "A modern e-commerce application with user authentication, product listings, and checkout"
 
 # Add main tasks
-./gemini-task-manager/bin/task-manager add -t "User Authentication" -p high
-./gemini-task-manager/bin/task-manager add -t "Product Catalog" -p high --dependsOn "1"
-./gemini-task-manager/bin/task-manager add -t "Shopping Cart" -p medium --dependsOn "2"
-./gemini-task-manager/bin/task-manager add -t "Checkout Process" -p medium --dependsOn "3"
-./gemini-task-manager/bin/task-manager add -t "Admin Dashboard" -p low --dependsOn "1,2,3,4"
+./bin/task-manager add -t "User Authentication" -p high
+./bin/task-manager add -t "Product Catalog" -p high --dependsOn "1"
+./bin/task-manager add -t "Shopping Cart" -p medium --dependsOn "2"
+./bin/task-manager add -t "Checkout Process" -p medium --dependsOn "3"
+./bin/task-manager add -t "Admin Dashboard" -p low --dependsOn "1,2,3,4"
 
 # Expand first task using AI
-./gemini-task-manager/bin/task-manager expand --taskId 1
+./bin/task-manager expand-task 1
 
 # Start working on first subtask
-./gemini-task-manager/bin/task-manager status 1.1 inprogress -m "Setting up authentication routes"
+./bin/task-manager status 1.1 inprogress -m "Setting up authentication routes"
 
 # Add file associations
-./gemini-task-manager/bin/task-manager update 1 --related-files "src/auth/index.js,src/auth/routes.js,src/auth/controllers.js"
+./bin/task-manager update 1 --related-files "src/auth/index.js,src/auth/routes.js,src/auth/controllers.js"
 
 # Mark subtask as done
-./gemini-task-manager/bin/task-manager status 1.1 done -m "Authentication routes complete"
+./bin/task-manager status 1.1 done -m "Authentication routes complete"
 
 # Generate documentation
-./gemini-task-manager/bin/task-manager generate
+./bin/task-manager generate-files
 ```
 
 ### Example 2: Refactoring Project with PRD
@@ -593,17 +593,17 @@ We need to refactor our codebase to improve performance and maintainability.
 EOL
 
 # Initialize project
-./gemini-task-manager/bin/task-manager init --projectName "Code Refactoring" --projectDescription "Refactoring project to improve performance and maintainability"
+./bin/task-manager init --projectName "Code Refactoring" --projectDescription "Refactoring project to improve performance and maintainability"
 
 # Parse PRD to generate tasks
-./gemini-task-manager/bin/task-manager parse-prd --filePath "dummy_prd.md"
+./bin/task-manager parse-prd --filePath "dummy_prd.md"
 
 # Expand the first task
-./gemini-task-manager/bin/task-manager expand --taskId 1
+./bin/task-manager expand-task 1
 
 # Start working and track progress
-./gemini-task-manager/bin/task-manager status 1 inprogress -m "Starting performance analysis"
-./gemini-task-manager/bin/task-manager status 1.1 inprogress -m "Profiling render cycles"
+./bin/task-manager status 1 inprogress -m "Starting performance analysis"
+./bin/task-manager status 1.1 inprogress -m "Profiling render cycles"
 ```
 
 ## 💡 Tips and Best Practices
@@ -622,7 +622,7 @@ EOL
 
 7. **Status Management**: Keep task statuses updated to accurately reflect the current state of your project.
 
-8. **Generate Task Files**: Use the `generate` command to create Markdown files for easy task reference and documentation.
+8. **Generate Task Files**: Use the `generate-files` command to create Markdown files for easy task reference and documentation.
 
 ## 🔧 Troubleshooting
 
@@ -657,6 +657,6 @@ EOL
 
 ## 🎓 Conclusion
 
-The Gemini Task Manager is a powerful tool for managing tasks in your development projects. By integrating with Cursor IDE through the MCP protocol and leveraging AI capabilities through the Gemini API, it offers a seamless and efficient task management experience.
+The Agentic Control Framework is a powerful tool for managing tasks in your development projects. By integrating with Cursor IDE through the MCP protocol and leveraging AI capabilities through the Gemini API, it offers a seamless and efficient task management experience.
 
-Use this tutorial as a reference as you explore the features and capabilities of the Gemini Task Manager. Happy task managing! 
+Use this tutorial as a reference as you explore the features and capabilities of the Agentic Control Framework. Happy task managing! 

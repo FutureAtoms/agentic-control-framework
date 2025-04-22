@@ -86,7 +86,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
   if (dirMsg) messages.push(dirMsg);
 
   if (!fs.existsSync(cursorRulesFile)) {
-    const placeholderContent = `# Cursor AI Workflow Rules for Gemini Task Manager\n\n# (Define rules here to tell Cursor how to use task-manager commands)\n\n# Example:\n# To list tasks, use the command: task-manager list\n# To get the next task: task-manager next\n`;
+    const placeholderContent = `# Cursor AI Workflow Rules for Agentic Control Framework\n\n# (Define rules here to tell Cursor how to use task-manager commands)\n\n# Example:\n# To list tasks, use the command: task-manager list\n# To get the next task: task-manager next\n`;
     try {
       fs.writeFileSync(cursorRulesFile, placeholderContent);
       messages.push(`Created placeholder Cursor rules file: ${cursorRulesFile}`);
@@ -218,7 +218,7 @@ function listTasks(workspaceRoot, options) { // Renamed argument
   const table = new Table({...});
   const getStatusColor = (status) => { ... };
   tasksToDisplay.forEach(task => { ... });
-  console.log(table.toString());
+  console.error(table.toString());
   */
 }
 
@@ -341,17 +341,17 @@ function getNextTask(workspaceRoot) { // Renamed argument
   // return nextTask; // Return object or null
 
   /* --- Original Console Logging (Removed for MCP return) ---
-  console.log('Next Actionable Task:');
-  console.log(`  ID: ${nextTask.id}`);
-  console.log(`  Title: ${nextTask.title}`);
-  console.log(`  Status: ${nextTask.status}`);
-  console.log(`  Priority: ${nextTask.priority}`);
+  console.error('Next Actionable Task:');
+  console.error(`  ID: ${nextTask.id}`);
+  console.error(`  Title: ${nextTask.title}`);
+  console.error(`  Status: ${nextTask.status}`);
+  console.error(`  Priority: ${nextTask.priority}`);
   if (nextTask.description) {
-    console.log(`  Description: ${nextTask.description}`);
+    console.error(`  Description: ${nextTask.description}`);
   }
   if (nextTask.subtasks && nextTask.subtasks.length > 0) {
-    console.log('  Subtasks:');
-    nextTask.subtasks.forEach(sub => console.log(`    - [${sub.status}] ${sub.title} (ID: ${sub.id})`));
+    console.error('  Subtasks:');
+    nextTask.subtasks.forEach(sub => console.error(`    - [${sub.status}] ${sub.title} (ID: ${sub.id})`));
   }
   */
 }
@@ -530,7 +530,7 @@ function generateTaskFiles(workspaceRoot) { // Renamed argument
 
 // Function to parse PRD and add tasks
 async function parsePrd(workspaceRoot, prdFilePath) { // Renamed argument
-  console.log(`Attempting to parse PRD: ${prdFilePath}`); // Keep this log
+  console.error(`Attempting to parse PRD: ${prdFilePath}`); // Keep this log but use stderr
   const generatedTasks = await prdParser.parsePrdWithGemini(prdFilePath);
 
   if (!generatedTasks || !Array.isArray(generatedTasks) || generatedTasks.length === 0) {

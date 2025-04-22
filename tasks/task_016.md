@@ -1,13 +1,15 @@
-# Task 16: Create Level 5: Metacognition
+# Task 16: Set up basic project structure
 
 **Status:** todo
-**Priority:** low
+**Priority:** high
 **Description:**
-Develop the fifth level focusing on thinking about thinking, with puzzles that require awareness of one's own problem-solving strategies.
-**Depends On:** 11
+Create the necessary files and folders for the project
+
+**Subtasks:**
+*   [16.1] Create HTML structure [todo]
 
 **Activity Log:**
-* 2025-04-20T12:46:17.335Z [log] Task created with title: "Create Level 5: Metacognition"
+* 2025-04-19T11:35:59.063Z [log] Task created with title: "Set up basic project structure"
 
-*Created:* 2025-04-20T12:46:17.335Z
-*Updated:* 2025-04-20T12:46:17.335Z
+*Created:* 2025-04-19T11:35:59.062Z
+*Updated:* 2025-04-19T11:36:03.815Z

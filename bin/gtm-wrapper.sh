@@ -1,50 +1,41 @@
 #!/bin/bash
 
-# Gemini Task Manager MCP Wrapper Script
-# This script serves as an entry point for Cursor's MCP integration
-
-# Exit on any error
-set -e
+# Gemini Task Manager wrapper script
+# This script handles properly launching the Task Manager MCP server
+# with the correct workspace root configuration
 
 # Get the directory where this script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Get the repository root directory (parent of bin directory)
+REPO_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
-# Go to the root of the repository (one level up from bin/)
-REPO_ROOT="$( cd "$SCRIPT_DIR/.." &> /dev/null && pwd )"
+# Determine workspace root
+# If provided as argument, use that
+if [ "$1" == "--workspaceRoot" ] && [ -n "$2" ]; then
+  WORKSPACE_ROOT="$2"
+else
+  # Otherwise use the current directory
+  WORKSPACE_ROOT=$(pwd)
+fi
 
-# Function to detect workspace root
-detect_workspace_root() {
-  # If GTM_WORKSPACE_ROOT is explicitly set, use that
-  if [ -n "$GTM_WORKSPACE_ROOT" ]; then
-    echo "$GTM_WORKSPACE_ROOT"
-    return
-  fi
-  
-  # Otherwise use current working directory
-  echo "$PWD"
-}
-
-# Set workspace root
-export GTM_WORKSPACE_ROOT=$(detect_workspace_root)
-
-# Ensure workspace root is a valid directory
-if [ ! -d "$GTM_WORKSPACE_ROOT" ]; then
-  echo "Error: Workspace root '$GTM_WORKSPACE_ROOT' is not a valid directory."
+# Basic validation
+if [ "$WORKSPACE_ROOT" == "/" ]; then
+  echo "[ERROR] Workspace root cannot be the root directory (/)" >&2
   exit 1
 fi
 
-# Prevent using system root as workspace
-if [ "$GTM_WORKSPACE_ROOT" = "/" ]; then
-  echo "Error: Cannot use system root as workspace. Please specify a valid project directory."
+if [ -z "$WORKSPACE_ROOT" ]; then
+  echo "[ERROR] Could not determine workspace directory" >&2
   exit 1
 fi
 
-# Check if GTM_WORKSPACE_ROOT is set appropriately
-echo "Using workspace root: $GTM_WORKSPACE_ROOT" >&2
+# Set environment variable for the MCP server
+export GTM_WORKSPACE_ROOT="$WORKSPACE_ROOT"
 
-# Ensure tasks directory exists in the workspace
-TASKS_DIR="$GTM_WORKSPACE_ROOT/tasks"
-mkdir -p "$TASKS_DIR"
+# Log what we're doing
+echo "[INFO] Starting Gemini Task Manager MCP Server" >&2
+echo "[INFO] Workspace Root: $WORKSPACE_ROOT" >&2
+echo "[INFO] Project Root: $REPO_ROOT" >&2
 
-# Run the MCP server
-exec "$SCRIPT_DIR/task-manager-mcp" "$@" 
+# Execute the MCP wrapper script
+exec node "$REPO_ROOT/bin/task-manager-mcp.js" --workspaceRoot "$WORKSPACE_ROOT" "$@" 

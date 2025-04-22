@@ -1,13 +1,13 @@
-# Task 17: Create Level 6: Integration
+# Task 17: Implement game logic
 
 **Status:** todo
-**Priority:** low
+**Priority:** medium
 **Description:**
-Develop the final level focusing on psychological wholeness and balance, with challenges for synthesizing learnings from previous levels.
-**Depends On:** 12, 13, 14, 15, 16
+Create the core game logic following Conway's rules
+**Depends On:** 16
 
 **Activity Log:**
-* 2025-04-20T12:46:21.053Z [log] Task created with title: "Create Level 6: Integration"
+* 2025-04-19T11:36:01.124Z [log] Task created with title: "Implement game logic"
 
-*Created:* 2025-04-20T12:46:21.053Z
-*Updated:* 2025-04-20T12:46:21.053Z
+*Created:* 2025-04-19T11:36:01.124Z
+*Updated:* 2025-04-19T11:36:01.124Z
