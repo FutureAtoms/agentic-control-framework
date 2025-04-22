@@ -28,6 +28,7 @@ Thumbs.db
 # Task manager files
 tasks.json
 /tasks/
+.task_manager/
 
 # Log files
 *.log 

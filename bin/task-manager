@@ -3,8 +3,8 @@
 // CLI Entry point
 try {
   require("./task-cli.js");
-} catch (error) {
+                } catch (error) {
   console.error(`[FATAL] Failed to start CLI: ${error.message}`);
   console.error(error.stack);
   process.exit(1);
-}
+  }

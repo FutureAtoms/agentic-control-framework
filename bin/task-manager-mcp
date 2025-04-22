@@ -71,6 +71,7 @@ serverProcess.on('error', (err) => {
 // Process server output
 serverProcess.stdout.on('data', (data) => {
   const output = data.toString();
+  // Only write to stdout for JSON-RPC responses, which is the primary communication channel
   process.stdout.write(output);
 });
 
@@ -81,6 +82,7 @@ serverProcess.stdout.on('error', (err) => {
 // Handle errors and logging from stderr
 serverProcess.stderr.on('data', (data) => {
   const output = data.toString();
+  // All stderr from MCP server gets written to stderr
   process.stderr.write(output);
   
   // Check for workspace path changes in stderr

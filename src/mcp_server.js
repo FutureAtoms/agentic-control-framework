@@ -64,7 +64,8 @@ function sendResponse(id, result) {
     id: id || 0,  // Ensure id is never undefined, default to 0
     result: result
   };
-  console.log(JSON.stringify(response));
+  // Use logger.output specifically for JSON-RPC responses to stdout
+  logger.output(JSON.stringify(response));
 }
 
 // Function to send JSON-RPC error
@@ -78,7 +79,8 @@ function sendError(id, code, message, data = {}) {
       data: data
     }
   };
-  console.log(JSON.stringify(response));
+  // Use logger.output specifically for JSON-RPC responses to stdout
+  logger.output(JSON.stringify(response));
 }
 
 // Handle incoming lines from stdin (JSON-RPC requests)
@@ -199,11 +201,7 @@ rl.on('line', async (line) => {
               name: 'getNextTask',
               description: 'Gets the next actionable task based on status, dependencies, and priority.',
               inputSchema: {
-                type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                type: 'object'
               }
             },
             {
@@ -248,11 +246,7 @@ rl.on('line', async (line) => {
               name: 'generateTaskFiles',
               description: 'Generates individual Markdown files for each task in the tasks/ directory.',
               inputSchema: {
-                type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                type: 'object'
               }
             },
             {
@@ -292,259 +286,172 @@ rl.on('line', async (line) => {
           ]
         });
         break;
-        
-      case 'tools/run':
+      
       case 'tools/call':
-        logger.debug(`Handling tools/run or tools/call request with tool: ${params?.name || 'undefined'}`);
-        // Forward to appropriate tool handler
-        if (!params || !params.name) {
-          sendError(id, -32602, 'Invalid params: tool name is required');
-          return;
-        }
+      case 'tools/run':
+        logger.debug(`Processing tool request: ${JSON.stringify(params)}`);
         
-        // Sanitize tool name by removing any prefix (e.g., "gemini-task-manager_")
-        const toolName = params.name.includes('_') ? params.name.split('_').pop() : params.name;
-        const toolArgs = params.arguments || {};
+        // Extract the parameters we need
+        const toolName = method === 'tools/call' ? params.name : params.tool; // Adjust based on MCP version
+        const argsParam = method === 'tools/call' ? params.parameters : params.args;
         
-        logger.debug(`Processing tool ${toolName} with args: ${JSON.stringify(toolArgs)}`);
+        logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(argsParam)}`);
         
         try {
-          // Handle different tools
+          // Handle the specific tool requests
+          let responseData;
+          
           switch (toolName) {
             case 'setWorkspace':
-              if (!toolArgs.workspacePath) {
-                sendError(id, -32602, 'Invalid params: workspacePath is required');
-                return;
+              if (argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
+                workspaceRoot = argsParam.workspacePath;
+                logger.info(`Workspace root set to: ${workspaceRoot}`);
+                responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
+              } else {
+                logger.error(`Invalid workspace path: ${argsParam.workspacePath}`);
+                responseData = { success: false, message: `Invalid or non-existent workspace path: ${argsParam.workspacePath}` };
               }
-              
-              // Validate path exists
-              if (!fs.existsSync(toolArgs.workspacePath)) {
-                sendError(id, -32602, `Invalid params: workspacePath does not exist: ${toolArgs.workspacePath}`);
-                return;
-              }
-              
-              // Set the new workspace root
-              workspaceRoot = toolArgs.workspacePath;
-              logger.info(`Workspace root set to: ${workspaceRoot}`);
-              sendResponse(id, { success: true, message: `Workspace set to: ${workspaceRoot}` });
               break;
-            
+              
             case 'initProject':
-              try {
-                const result = core.initProject(workspaceRoot, toolArgs);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error initializing project: ${error.message}`);
-                sendError(id, -32603, `Error initializing project: ${error.message}`);
-              }
+              responseData = core.initProject(workspaceRoot, {
+                projectName: argsParam.projectName || 'Untitled Project',
+                projectDescription: argsParam.projectDescription || ''
+              });
               break;
               
             case 'addTask':
-              try {
-                if (!toolArgs.title) {
-                  sendError(id, -32602, 'Invalid params: title is required');
-                  return;
-                }
-                
-                const result = core.addTask(workspaceRoot, toolArgs);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error adding task: ${error.message}`);
-                sendError(id, -32603, `Error adding task: ${error.message}`);
-              }
+              responseData = core.addTask(workspaceRoot, {
+                title: argsParam.title,
+                description: argsParam.description || '',
+                priority: argsParam.priority || 'medium',
+                dependsOn: argsParam.dependsOn || '',
+                relatedFiles: argsParam.relatedFiles || ''
+              });
               break;
               
             case 'addSubtask':
-              try {
-                if (!toolArgs.parentId || !toolArgs.title) {
-                  sendError(id, -32602, 'Invalid params: parentId and title are required');
-                  return;
-                }
-                
-                const result = core.addSubtask(workspaceRoot, toolArgs.parentId, {
-                  title: toolArgs.title
-                });
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error adding subtask: ${error.message}`);
-                sendError(id, -32603, `Error adding subtask: ${error.message}`);
-              }
+              responseData = core.addSubtask(workspaceRoot, argsParam.parentId, {
+                title: argsParam.title
+              });
               break;
               
             case 'listTasks':
-              try {
-                const result = core.listTasks(workspaceRoot, toolArgs);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error listing tasks: ${error.message}`);
-                sendError(id, -32603, `Error listing tasks: ${error.message}`);
-              }
+              responseData = core.listTasks(workspaceRoot, {
+                status: argsParam.status
+              });
               break;
               
             case 'updateStatus':
-              try {
-                if (!toolArgs.id || !toolArgs.newStatus) {
-                  sendError(id, -32602, 'Invalid params: id and newStatus are required');
-                  return;
-                }
-                
-                const result = core.updateStatus(workspaceRoot, toolArgs.id, toolArgs.newStatus, toolArgs.message || '');
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error updating status: ${error.message}`);
-                sendError(id, -32603, `Error updating status: ${error.message}`);
-              }
+              responseData = core.updateStatus(workspaceRoot, argsParam.id, argsParam.newStatus, argsParam.message || '');
               break;
               
             case 'getNextTask':
-              try {
-                const result = core.getNextTask(workspaceRoot);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error getting next task: ${error.message}`);
-                sendError(id, -32603, `Error getting next task: ${error.message}`);
-              }
+              responseData = core.getNextTask(workspaceRoot);
               break;
               
             case 'updateTask':
-              try {
-                if (!toolArgs.id) {
-                  sendError(id, -32602, 'Invalid params: id is required');
-                  return;
-                }
-                
-                const result = core.updateTask(workspaceRoot, toolArgs.id, toolArgs);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error updating task: ${error.message}`);
-                sendError(id, -32603, `Error updating task: ${error.message}`);
-              }
+              responseData = core.updateTask(workspaceRoot, argsParam.id, {
+                title: argsParam.title,
+                description: argsParam.description,
+                priority: argsParam.priority,
+                relatedFiles: argsParam.relatedFiles,
+                message: argsParam.message
+              });
               break;
               
             case 'removeTask':
-              try {
-                if (!toolArgs.id) {
-                  sendError(id, -32602, 'Invalid params: id is required');
-                  return;
-                }
-                
-                const result = core.removeTask(workspaceRoot, toolArgs.id);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error removing task: ${error.message}`);
-                sendError(id, -32603, `Error removing task: ${error.message}`);
-              }
+              responseData = core.removeTask(workspaceRoot, argsParam.id);
               break;
               
             case 'getContext':
-              try {
-                if (!toolArgs.id) {
-                  sendError(id, -32602, 'Invalid params: id is required');
-                  return;
-                }
-                
-                const result = core.getContext(workspaceRoot, toolArgs.id);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error getting context: ${error.message}`);
-                sendError(id, -32603, `Error getting context: ${error.message}`);
-              }
+              responseData = core.getContext(workspaceRoot, argsParam.id);
               break;
               
             case 'generateTaskFiles':
-              try {
-                const result = core.generateTaskFiles(workspaceRoot);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error generating task files: ${error.message}`);
-                sendError(id, -32603, `Error generating task files: ${error.message}`);
-              }
+              responseData = core.generateTaskFiles(workspaceRoot);
               break;
               
             case 'parsePrd':
-              try {
-                if (!toolArgs.filePath) {
-                  sendError(id, -32602, 'Invalid params: filePath is required');
-                  return;
-                }
-                
-                // Get absolute path - if provided path is relative, resolve it against workspaceRoot
-                const prdPath = path.isAbsolute(toolArgs.filePath) 
-                  ? toolArgs.filePath 
-                  : path.resolve(workspaceRoot, toolArgs.filePath);
-                
-                // Check if file exists
-                if (!fs.existsSync(prdPath)) {
-                  sendError(id, -32602, `Invalid params: PRD file does not exist: ${prdPath}`);
-                  return;
-                }
-                
-                // parsePrd is async so we need to await it
-                logger.info(`Parsing PRD file: ${prdPath}`);
-                const result = await core.parsePrd(workspaceRoot, prdPath);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error parsing PRD: ${error.message}`);
-                sendError(id, -32603, `Error parsing PRD: ${error.message}`);
-              }
+              responseData = await core.parsePrd(workspaceRoot, argsParam.filePath);
               break;
               
             case 'expandTask':
-              try {
-                if (!toolArgs.taskId) {
-                  sendError(id, -32602, 'Invalid params: taskId is required');
-                  return;
-                }
-                
-                // expandTask is async so we need to await it
-                logger.info(`Expanding task: ${toolArgs.taskId}`);
-                const result = await core.expandTask(workspaceRoot, toolArgs.taskId);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error expanding task: ${error.message}`);
-                sendError(id, -32603, `Error expanding task: ${error.message}`);
-              }
+              responseData = await core.expandTask(workspaceRoot, argsParam.taskId);
               break;
               
             case 'reviseTasks':
-              try {
-                if (!toolArgs.fromTaskId || !toolArgs.prompt) {
-                  sendError(id, -32602, 'Invalid params: fromTaskId and prompt are required');
-                  return;
-                }
-                
-                // reviseTasks is async so we need to await it
-                logger.info(`Revising tasks from ID ${toolArgs.fromTaskId}`);
-                const result = await core.reviseTasks(workspaceRoot, toolArgs);
-                sendResponse(id, result);
-              } catch (error) {
-                logger.error(`Error revising tasks: ${error.message}`);
-                sendError(id, -32603, `Error revising tasks: ${error.message}`);
-              }
+              responseData = await core.reviseTasks(workspaceRoot, {
+                fromTaskId: argsParam.fromTaskId,
+                prompt: argsParam.prompt
+              });
               break;
               
             default:
-              sendError(id, -32601, `Method not found: Unknown tool ${toolName}`);
+              logger.error(`Unknown tool requested: ${toolName}`);
+              sendError(id, -32601, `Method not found: ${toolName}`);
+              return;
           }
-        } catch (err) {
-          logger.error(`General error processing tool ${toolName}: ${err.message}`);
-          logger.debug(err.stack);
-          sendError(id, -32603, `Internal error processing tool ${toolName}: ${err.message}`);
+          
+          logger.debug(`Tool "${toolName}" executed successfully`);
+          
+          // Format the response specifically for MCP
+          // If responseData is already MCP formatted, return it as-is
+          if (method === 'tools/call') {
+            // Handle tools/call response (newer MCP format)
+            if (typeof responseData === 'string') {
+              // Text response
+              sendResponse(id, {
+                content: [
+                  {
+                    type: "text",
+                    text: responseData
+                  }
+                ]
+              });
+            } else {
+              // JSON response
+              sendResponse(id, {
+                content: [
+                  {
+                    type: "text",
+                    text: JSON.stringify(responseData)
+                  }
+                ]
+              });
+            }
+          } else {
+            // Handle tools/run response (older MCP format)
+            sendResponse(id, responseData);
+          }
+          
+        } catch (error) {
+          logger.error(`Error executing tool ${toolName}: ${error.message}`);
+          logger.debug(error.stack);
+          
+          sendError(id, -32000, `Error executing tool ${toolName}: ${error.message}`, { 
+            stack: error.stack
+          });
         }
         break;
         
       default:
-        logger.warn(`Unknown method: ${method}`);
+        logger.error(`Unknown method requested: ${method}`);
         sendError(id, -32601, `Method not found: ${method}`);
     }
-  } catch (err) {
-    logger.error(`Error processing request: ${err.message}`);
-    logger.debug(err.stack);
-    // Send error response if we have a requestId
+  } catch (error) {
+    logger.error(`Error processing request: ${error.message}`);
+    logger.debug(error.stack);
+    
     if (requestId !== null) {
-      sendError(requestId, -32603, `Internal error: ${err.message}`, { stack: err.stack });
+      sendError(requestId, -32603, `Internal error: ${error.message}`, { 
+        stack: error.stack
+      });
     }
   }
 });
 
-logger.info('Server ready and listening for requests'); 
+logger.info('Server ready and listening for requests');
+
+// Prevent the process from exiting
+process.stdin.resume(); 

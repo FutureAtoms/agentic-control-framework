@@ -1,13 +1,15 @@
-# Gemini Task Manager Changes
+# Agentic Control Framework Changes
+
+This document outlines the changes made to the Agentic Control Framework.
 
 ## Cleanup and Fixes Applied
 
 ### 1. Repository Cleanup
 
 - **Removed redundant files**:
-  - Removed duplicate MCP server implementations (`gtm-mcp-fixed.js`, `gtm-mcp-rebuild.js`, `minimal-mcp-server.js`)
+  - Removed duplicate MCP server implementations (`acf-mcp-fixed.js`, `acf-mcp-rebuild.js`, `minimal-mcp-server.js`)
   - Eliminated variant wrapper scripts (`bin/mcp-wrapper.js`, `bin/mcp-safe.js`, `bin/mcp-wrapper-extreme.js`)
-  - Removed duplicate wrapper scripts (`gtm-wrapper.sh`, `gtm-workspace-wrapper.sh`)
+  - Removed duplicate wrapper scripts (`acf-wrapper.sh`, `acf-workspace-wrapper.sh`)
 
 - **Consolidated documentation**:
   - Moved scattered tutorial files to `docs/tutorials/`

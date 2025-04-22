@@ -3,16 +3,17 @@ const path = require('path');
 const prdParser = require('./prd_parser'); // Import the PRD parser
 const Table = require('cli-table3'); // Import cli-table3
 const chalk = require('chalk'); // Import chalk (v4)
+const logger = require('./logger'); // Import our logger module
 
 // --- Path Calculation Helper ---
 // Helper function to get paths based on the script's location
 function getWorkspacePaths(workspaceRoot) { // Added workspaceRoot argument
   if (!workspaceRoot) {
     // Fallback or error if workspaceRoot isn't provided - might need adjustment
-    console.error("ERROR: Workspace root not provided to getWorkspacePaths.");
+    logger.error("Workspace root not provided to getWorkspacePaths.");
     // Use process.cwd() instead as a more reliable fallback
     workspaceRoot = process.cwd();
-    console.error(`CORE WARN: Falling back to current working directory: ${workspaceRoot}`);
+    logger.warn(`Falling back to current working directory: ${workspaceRoot}`);
   }
   
   return {
@@ -104,14 +105,11 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
 // Function to read tasks from the file
 function readTasks(workspaceRoot) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
-  // console.error(`DEBUG [readTasks]: TASKS_FILE = ${tasksFilePath}`); // Removed debug log
+  // logger.debug(`TASKS_FILE = ${tasksFilePath}`); // Use logger.debug instead
   
   if (!fs.existsSync(tasksFilePath)) {
     // Instead of exiting, throw an error that can be caught
     throw new Error(`Tasks file not found: ${tasksFilePath}. Please run init command first.`);
-    // console.error(`Error: Tasks file not found: ${tasksFilePath}`);
-    // console.error('Please run "task-manager init" first.');
-    // process.exit(1); // Avoid exiting
   }
   try {
     const rawData = fs.readFileSync(tasksFilePath, 'utf-8');
@@ -134,8 +132,6 @@ function readTasks(workspaceRoot) { // Renamed argument
   } catch (error) {
     // Throw a more specific error for parsing/reading issues
     throw new Error(`Error reading or parsing tasks file ${tasksFilePath}: ${error.message}`);
-    // console.error(`Error reading or parsing tasks file: ${tasksFilePath}`, error);
-    // process.exit(1); // Avoid exiting
   }
 }
 
@@ -147,8 +143,6 @@ function writeTasks(workspaceRoot, data) { // Renamed argument
   } catch (error) {
     // Throw an error instead of exiting
     throw new Error(`Error writing tasks file ${tasksFilePath}: ${error.message}`);
-    // console.error(`Error writing tasks file: ${tasksFilePath}`, error);
-    // process.exit(1); // Avoid exiting
   }
 }
 
@@ -202,158 +196,209 @@ function addTask(workspaceRoot, options) { // Renamed argument
 // Function to list tasks
 function listTasks(workspaceRoot, options) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
-  const { status } = options;
-
-  let tasksToDisplay = tasksData.tasks;
-
-  if (status) {
-    tasksToDisplay = tasksData.tasks.filter(task => task.status === status);
+  
+  let filteredTasks = [...tasksData.tasks]; // Create a copy
+  
+  // Apply status filter if specified
+  if (options && options.status) {
+    filteredTasks = filteredTasks.filter(task => task.status === options.status);
   }
-
-  // Return format for MCP server
-  return { tasks: tasksToDisplay }; 
-
-  /* --- Original Table Logging (Removed for MCP return) ---
-  if (tasksToDisplay.length === 0) { ... }
-  const table = new Table({...});
-  const getStatusColor = (status) => { ... };
-  tasksToDisplay.forEach(task => { ... });
-  console.error(table.toString());
-  */
+  
+  // If this is being used for CLI display, generate a formatted table
+  if (options && options.format === 'table') {
+    // Create a table with chalk for colored output
+    const table = new Table({
+      head: [
+        chalk.cyan('ID'), 
+        chalk.cyan('Title'), 
+        chalk.cyan('Status'), 
+        chalk.cyan('Priority'),
+        chalk.cyan('Subtasks')
+      ],
+      colWidths: [5, 40, 15, 15, 20]
+    });
+    
+    // Add tasks to the table
+    filteredTasks.forEach(task => {
+      table.push([
+        task.id,
+        task.title,
+        getStatusColor(task.status),
+        task.priority,
+        `${task.subtasks.filter(s => s.status === 'done').length}/${task.subtasks.length}`
+      ]);
+    });
+    
+    // Send table to stderr for display (not stdout)
+    logger.error(table.toString());
+    
+    // Helper for status colors
+    function getStatusColor(status) {
+      switch(status) {
+        case 'done': return chalk.green(status);
+        case 'inprogress': return chalk.yellow(status);
+        case 'blocked': return chalk.red(status);
+        case 'error': return chalk.bold.red(status);
+        default: return status;
+      }
+    }
+  }
+  
+  // Return the list of tasks
+  return { success: true, tasks: filteredTasks };
 }
 
 // Function to add a subtask to a parent task
 function addSubtask(workspaceRoot, parentId, options) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
-  const parentTaskIndex = tasksData.tasks.findIndex(task => task.id === parseInt(parentId));
-
-  if (parentTaskIndex === -1) {
+  
+  // Find the parent task
+  const parentTask = tasksData.tasks.find(task => task.id === parseInt(parentId));
+  if (!parentTask) {
     throw new Error(`Parent task with ID ${parentId} not found.`);
   }
-
-  const parentTask = tasksData.tasks[parentTaskIndex];
-
-  // **Fix: Use and increment lastSubtaskIndex on the parent task**
-  parentTask.lastSubtaskIndex = (parentTask.lastSubtaskIndex || 0) + 1;
-  const nextSubtaskIndex = parentTask.lastSubtaskIndex;
-  const newSubtaskId = `${parentTask.id}.${nextSubtaskIndex}`;
-
-  const newSubtask = {
-    id: newSubtaskId,
-    title: options.title,
-    status: 'todo', // Default status for new subtasks
-    activityLog: [] // Initialize activity log for subtask
-  };
-
-  // Initialize subtasks array if it doesn't exist
-  if (!parentTask.subtasks) {
-    parentTask.subtasks = [];
+  
+  // Initialize lastSubtaskIndex if it doesn't exist
+  if (parentTask.lastSubtaskIndex === undefined) {
+    parentTask.lastSubtaskIndex = 0;
   }
-  // Add initial log entry to subtask
+  
+  // Create new subtask index
+  const subTaskIndex = parentTask.lastSubtaskIndex + 1;
+  const subTaskId = `${parentId}.${subTaskIndex}`;
+  
+  // Create new subtask
+  const newSubtask = {
+    id: subTaskId,
+    title: options.title,
+    status: 'todo',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    activityLog: [] // Initialize activityLog
+  };
+  
+  // Add initial activity log entry
   addActivityLog(newSubtask, `Subtask created with title: "${newSubtask.title}"`);
-
+  
+  // Add to parent's subtasks
   parentTask.subtasks.push(newSubtask);
-  parentTask.updatedAt = new Date().toISOString(); // Update parent task timestamp
-
+  parentTask.lastSubtaskIndex = subTaskIndex;
+  
+  // Update tasks.json
   writeTasks(workspaceRoot, tasksData); // Pass argument
-  // Return data instead of logging
-  return { success: true, message: `Added subtask "${newSubtask.title}" (ID: ${newSubtaskId}) to task ${parentId}.`, subtaskId: newSubtaskId };
+  
+  return { success: true, message: `Added subtask (ID: ${subTaskId}): "${newSubtask.title}" to task "${parentTask.title}"`, subtaskId: subTaskId };
 }
 
 // Function to update the status of a task or subtask
 function updateStatus(workspaceRoot, id, newStatus, message) { // Added message parameter
-  const tasksData = readTasks(workspaceRoot);
-  let item = null; // Store the item being updated
-  const idString = String(id);
-
-  // Find the task or subtask
-  if (idString.includes('.')) {
-    const parts = idString.split('.');
-    const parentId = parseInt(parts[0]);
-    const parentTask = tasksData.tasks.find(task => task.id === parentId);
-    if (parentTask) {
-      if (!parentTask.subtasks) parentTask.subtasks = [];
-      item = parentTask.subtasks.find(sub => sub.id === idString);
-      if (item) {
-        parentTask.updatedAt = new Date().toISOString();
-      }
+  const tasksData = readTasks(workspaceRoot); // Pass argument
+  
+  // Normalize status
+  newStatus = newStatus.toLowerCase();
+  
+  // Check if this is a subtask (ID contains a period)
+  if (id.includes('.')) {
+    const [parentId, subtaskIndex] = id.split('.');
+    const parentTask = tasksData.tasks.find(task => task.id === parseInt(parentId));
+    
+    if (!parentTask) {
+      throw new Error(`Parent task with ID ${parentId} not found.`);
     }
+    
+    const subtask = parentTask.subtasks.find(st => st.id === id);
+    if (!subtask) {
+      throw new Error(`Subtask with ID ${id} not found.`);
+    }
+    
+    // Update status
+    const oldStatus = subtask.status;
+    subtask.status = newStatus;
+    subtask.updatedAt = new Date().toISOString();
+    
+    // Add activity log
+    const logMessage = message || `Status changed from ${oldStatus} to ${newStatus}`;
+    addActivityLog(subtask, logMessage, 'status');
+    
+    writeTasks(workspaceRoot, tasksData); // Pass argument
+    return { success: true, message: `Updated subtask "${subtask.title}" (ID: ${id}) status to ${newStatus}` };
   } else {
-    const taskId = parseInt(idString);
-    item = tasksData.tasks.find(task => task.id === taskId);
-  }
-
-  if (item) {
-    const oldStatus = item.status;
-    item.status = newStatus;
-    item.updatedAt = new Date().toISOString();
-
-    const logMessage = message || `Status changed from "${oldStatus}" to "${newStatus}"`;
-    const logType = newStatus === 'error' ? 'error' : 'status';
-    addActivityLog(item, logMessage, logType);
-
-    writeTasks(workspaceRoot, tasksData);
-    // Return data instead of logging
-    const successMsg = `Updated status of "${item.title}" (ID: ${idString}) to "${newStatus}".${message ? ' Logged: "' + message + '"' : ''}`;
-    return { success: true, message: successMsg };
-  } else {
-    throw new Error(`Task or subtask with ID ${idString} not found.`);
+    // Main task
+    const task = tasksData.tasks.find(task => task.id === parseInt(id));
+    if (!task) {
+      throw new Error(`Task with ID ${id} not found.`);
+    }
+    
+    // Update status
+    const oldStatus = task.status;
+    task.status = newStatus;
+    task.updatedAt = new Date().toISOString();
+    
+    // Add activity log
+    const logMessage = message || `Status changed from ${oldStatus} to ${newStatus}`;
+    addActivityLog(task, logMessage, 'status');
+    
+    writeTasks(workspaceRoot, tasksData); // Pass argument
+    return { success: true, message: `Updated task "${task.title}" (ID: ${id}) status to ${newStatus}` };
   }
 }
 
-// Function to get the next available task
+// Function to get the next actionable task
 function getNextTask(workspaceRoot) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
-  const tasks = tasksData.tasks;
-
-  // Filter for tasks that are strictly 'todo' and not blocked
-  const actionableTasks = tasks.filter(task => 
-    task.status === 'todo' && // Only consider tasks explicitly marked as 'todo'
-    task.dependsOn.every(depId => { // Check if all dependencies are met
-        const depTask = tasks.find(t => t.id === depId);
-        return depTask && depTask.status === 'done';
-    })
-  );
-
-  if (actionableTasks.length === 0) {
-    // Return a structured response instead of logging directly
-    return { success: true, task: null, message: "No actionable 'todo' tasks found (check statuses and dependencies)." }; 
-    // console.log("No actionable tasks found (check statuses and dependencies).");
-    // return null; // Return null if no task found
+  
+  // Filter for todo tasks
+  const todoTasks = tasksData.tasks.filter(task => task.status === 'todo');
+  
+  if (todoTasks.length === 0) {
+    logger.debug("No actionable tasks found (check statuses and dependencies).");
+    return { success: false, message: "No actionable tasks found." };
   }
-
-  // Prioritize based on priority (high > medium > low)
-  const priorityOrder = { 'high': 1, 'medium': 2, 'low': 3 };
-  actionableTasks.sort((a, b) => {
-    const priorityA = priorityOrder[a.priority] || 3;
-    const priorityB = priorityOrder[b.priority] || 3;
-    if (priorityA !== priorityB) {
-      return priorityA - priorityB;
-    }
-    // If priority is the same, prioritize older tasks (smaller ID)
-    return a.id - b.id; 
+  
+  // Sort by priority (high > medium > low)
+  const priorityValues = { 'high': 3, 'medium': 2, 'low': 1 };
+  todoTasks.sort((a, b) => {
+    // Sort first by priority
+    const priorityDiff = (priorityValues[b.priority] || 0) - (priorityValues[a.priority] || 0);
+    if (priorityDiff !== 0) return priorityDiff;
+    
+    // Then by ID (older tasks first)
+    return a.id - b.id;
   });
-
+  
+  // Filter out tasks with dependencies on non-done tasks
+  const actionableTasks = todoTasks.filter(task => {
+    // If no dependencies, it's actionable
+    if (!task.dependsOn || task.dependsOn.length === 0) return true;
+    
+    // Check if all dependencies are done
+    return task.dependsOn.every(depId => {
+      const depTask = tasksData.tasks.find(t => t.id === depId);
+      return depTask && depTask.status === 'done';
+    });
+  });
+  
+  if (actionableTasks.length === 0) {
+    return { success: false, message: "No actionable tasks found (all todo tasks have unmet dependencies)." };
+  }
+  
   const nextTask = actionableTasks[0];
-
-  // Return format for MCP server / CLI
-  return { success: true, task: nextTask, message: `Next task: ${nextTask.id} - ${nextTask.title}` };
-  // return nextTask; // Return object or null
-
-  /* --- Original Console Logging (Removed for MCP return) ---
-  console.error('Next Actionable Task:');
-  console.error(`  ID: ${nextTask.id}`);
-  console.error(`  Title: ${nextTask.title}`);
-  console.error(`  Status: ${nextTask.status}`);
-  console.error(`  Priority: ${nextTask.priority}`);
+  
+  // For CLI, format nicely
+  logger.debug('Next Actionable Task:');
+  logger.debug(`  ID: ${nextTask.id}`);
+  logger.debug(`  Title: ${nextTask.title}`);
+  logger.debug(`  Status: ${nextTask.status}`);
+  logger.debug(`  Priority: ${nextTask.priority}`);
   if (nextTask.description) {
-    console.error(`  Description: ${nextTask.description}`);
+    logger.debug(`  Description: ${nextTask.description}`);
   }
   if (nextTask.subtasks && nextTask.subtasks.length > 0) {
-    console.error('  Subtasks:');
-    nextTask.subtasks.forEach(sub => console.error(`    - [${sub.status}] ${sub.title} (ID: ${sub.id})`));
+    logger.debug('  Subtasks:');
+    nextTask.subtasks.forEach(sub => logger.debug(`    - [${sub.status}] ${sub.title} (ID: ${sub.id})`));
   }
-  */
+  
+  return { success: true, task: nextTask, message: `Next task: "${nextTask.title}" (ID: ${nextTask.id}, Priority: ${nextTask.priority})` };
 }
 
 // Function to update fields of a task or subtask
@@ -471,374 +516,447 @@ function removeTask(workspaceRoot, id) { // Renamed argument
   }
 }
 
-// Function to generate individual task files
+// Function to generate individual Markdown files for each task
 function generateTaskFiles(workspaceRoot) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
   const { taskFilesDir } = getWorkspacePaths(workspaceRoot); // Pass argument
-  ensureDirExists(taskFilesDir); // Ensure the output directory exists
-
-  let filesGenerated = 0;
-  tasksData.tasks.forEach(task => {
-    // Format the task details into a string (e.g., Markdown)
-    let fileContent = `# Task ${task.id}: ${task.title}\n\n`;
-    fileContent += `**Status:** ${task.status}\n`;
-    fileContent += `**Priority:** ${task.priority}\n`;
-    if (task.description) {
-      fileContent += `**Description:**\n${task.description}\n`;
-    }
-    if (task.dependsOn && task.dependsOn.length > 0) {
-      fileContent += `**Depends On:** ${task.dependsOn.join(', ')}\n`;
-    }
-    // Add related files
-    if (task.relatedFiles && task.relatedFiles.length > 0) {
-        fileContent += `**Related Files:**\n`;
+  
+  // Create tasks directory if it doesn't exist
+  try {
+    const dirMsg = ensureDirExists(taskFilesDir);
+    if (dirMsg) logger.info(dirMsg);
+  } catch (error) {
+    throw new Error(`Failed to create tasks directory: ${error.message}`);
+  }
+  
+  // Generate one file per task
+  let filesCreated = 0;
+  
+  try {
+    tasksData.tasks.forEach(task => {
+      const taskFileName = `task-${task.id}-${task.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
+      const filePath = path.join(taskFilesDir, taskFileName);
+      
+      // Generate Markdown content
+      let content = `# Task ${task.id}: ${task.title}\n\n`;
+      content += `**Status:** ${task.status}\n`;
+      content += `**Priority:** ${task.priority}\n`;
+      
+      if (task.description) {
+        content += `\n## Description\n\n${task.description}\n`;
+      }
+      
+      if (task.dependsOn && task.dependsOn.length > 0) {
+        content += `\n## Dependencies\n\n`;
+        task.dependsOn.forEach(depId => {
+          const depTask = tasksData.tasks.find(t => t.id === depId);
+          content += `- Task ${depId}: ${depTask ? depTask.title : 'Unknown Task'}\n`;
+        });
+      }
+      
+      if (task.relatedFiles && task.relatedFiles.length > 0) {
+        content += `\n## Related Files\n\n`;
         task.relatedFiles.forEach(file => {
-            fileContent += `* ${file}\n`;
+          content += `- \`${file}\`\n`;
         });
-    }
-    if (task.subtasks && task.subtasks.length > 0) {
-      fileContent += `\n**Subtasks:**\n`;
-      task.subtasks.forEach(sub => {
-        fileContent += `*   [${sub.id}] ${sub.title} [${sub.status}]\n`;
-      });
-    }
-    // Add activity log
-    if (task.activityLog && task.activityLog.length > 0) {
-        fileContent += `\n**Activity Log:**\n`;
-        task.activityLog.forEach(log => {
-            fileContent += `* ${log.timestamp} [${log.type}] ${log.message}\n`;
+      }
+      
+      if (task.subtasks && task.subtasks.length > 0) {
+        content += `\n## Subtasks\n\n`;
+        task.subtasks.forEach(subtask => {
+          content += `- [${subtask.status === 'done' ? 'x' : ' '}] **${subtask.id}:** ${subtask.title}\n`;
         });
-    }
-    fileContent += `\n*Created:* ${task.createdAt}\n`;
-    fileContent += `*Updated:* ${task.updatedAt}\n`;
-
-    const filename = `task_${String(task.id).padStart(3, '0')}.md`;
-    const filePath = path.join(taskFilesDir, filename);
-
-    try {
-      fs.writeFileSync(filePath, fileContent);
-      filesGenerated++;
-    } catch (error) {
-      console.error(`Error writing task file: ${filePath}`, error);
-      // Don't stop generation for one file error, just log it
-    }
-  });
-  // Return data instead of logging
-  const successMsg = `Generated ${filesGenerated} task files in the '${taskFilesDir}' directory.`;
-  return { success: true, message: successMsg, filesGenerated: filesGenerated };
+      }
+      
+      if (task.activityLog && task.activityLog.length > 0) {
+        content += `\n## Activity Log\n\n`;
+        task.activityLog.forEach(entry => {
+          // Format timestamp for display
+          const date = new Date(entry.timestamp);
+          const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+          content += `- **${formattedDate}** [${entry.type}]: ${entry.message}\n`;
+        });
+      }
+      
+      fs.writeFileSync(filePath, content);
+      filesCreated++;
+    });
+    
+    return { success: true, message: `Generated ${filesCreated} task files in the '${taskFilesDir}' directory.` };
+  } catch (error) {
+    logger.error(`Error writing task file: ${error.message}`);
+    throw new Error(`Failed to generate task files: ${error.message}`);
+  }
 }
 
-// Function to parse PRD and add tasks
+// Function to parse a PRD file using the Gemini API
 async function parsePrd(workspaceRoot, prdFilePath) { // Renamed argument
-  console.error(`Attempting to parse PRD: ${prdFilePath}`); // Keep this log but use stderr
-  const generatedTasks = await prdParser.parsePrdWithGemini(prdFilePath);
-
-  if (!generatedTasks || !Array.isArray(generatedTasks) || generatedTasks.length === 0) {
-    console.error("Failed to generate tasks from PRD."); // Keep error log
-    return { success: false, message: "Failed to generate tasks from PRD.", tasksAdded: 0 };
-  }
-
-  const tasksData = readTasks(workspaceRoot);
-  let currentMaxId = tasksData.lastTaskId;
-  let tasksAddedCount = 0;
-
-  generatedTasks.forEach(genTask => {
-    // Basic validation
-    if (!genTask.title) {
-        console.warn('Skipping task from Gemini response due to missing title:', genTask);
-        return;
+  logger.debug(`Attempting to parse PRD: ${prdFilePath}`);
+  
+  try {
+    const tasks = await prdParser.parsePrdWithGemini(prdFilePath);
+    if (!tasks || tasks.length === 0) {
+      logger.error("Failed to generate tasks from PRD.");
+      return { success: false, message: "Failed to generate tasks from PRD." };
     }
-
-    currentMaxId++;
-    const newTask = {
-        id: currentMaxId,
-        title: genTask.title,
-        description: genTask.description || '',
-        status: 'todo', // Default status
-        priority: genTask.priority || 'medium', // Default priority
-        dependsOn: [], // We'll resolve dependencies later
+    
+    // Add generated tasks to tasks.json
+    const tasksData = readTasks(workspaceRoot);
+    let nextId = tasksData.lastTaskId + 1;
+    
+    const addedTasks = [];
+    
+    // Process each task
+    tasks.forEach(taskInfo => {
+      // Create the main task
+      const newTask = {
+        id: nextId,
+        title: taskInfo.title,
+        description: taskInfo.description || '',
+        status: 'todo',
+        priority: taskInfo.priority || 'medium',
+        dependsOn: taskInfo.dependsOn || [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         subtasks: [],
         lastSubtaskIndex: 0,
-        relatedFiles: [],
+        relatedFiles: taskInfo.relatedFiles || [],
         activityLog: []
       };
+      
+      // Add initial log entry
+      addActivityLog(newTask, `Task created from PRD: "${newTask.title}"`);
+      
+      // Add subtasks if they exist
+      if (taskInfo.subtasks && taskInfo.subtasks.length > 0) {
+        taskInfo.subtasks.forEach((subtaskTitle, index) => {
+          const subtaskId = `${nextId}.${index + 1}`;
+          const subtask = {
+            id: subtaskId,
+            title: subtaskTitle,
+            status: 'todo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            activityLog: []
+          };
+          
+          // Add initial log entry
+          addActivityLog(subtask, `Subtask created from PRD: "${subtask.title}"`);
+          
+          newTask.subtasks.push(subtask);
+          newTask.lastSubtaskIndex = index + 1;
+        });
+      }
+      
+      // Add to tasks list
       tasksData.tasks.push(newTask);
-      tasksAddedCount++;
-  });
-
-  tasksData.lastTaskId = currentMaxId;
-  writeTasks(workspaceRoot, tasksData);
-  const successMsg = `Successfully added ${tasksAddedCount} tasks from PRD: ${prdFilePath}`;
-  return { success: true, message: successMsg, tasksAdded: tasksAddedCount };
+      addedTasks.push(newTask);
+      nextId++;
+    });
+    
+    // Update lastTaskId
+    tasksData.lastTaskId = nextId - 1;
+    
+    // Save changes
+    writeTasks(workspaceRoot, tasksData);
+    
+    return { 
+      success: true, 
+      message: `Created ${addedTasks.length} tasks from PRD document.`, 
+      tasks: addedTasks
+    };
+  } catch (error) {
+    throw new Error(`Error parsing PRD: ${error.message}`);
+  }
 }
 
-// Helper function to make Gemini API calls (replace with your actual implementation)
+// Common function to call the Gemini API, used by expandTask and reviseTasks
 async function callGeminiApi(prompt, type = 'generation') {
-    // console.log("DEBUG: Calling Gemini API with prompt:", prompt.substring(0, 100) + "..."); 
-    console.error(`DEBUG: Calling Gemini API (type: ${type})`); // Log to stderr
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error("GEMINI_API_KEY environment variable not set.");
-    }
-
-    // Example using Google Generative AI SDK (ensure it's installed: npm install @google/generative-ai)
-    const { GoogleGenerativeAI } = require("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"}); // Or your preferred model
-
-    try {
-        // Explicitly tell the model to return JSON format
-        const enhancedPrompt = `${prompt.trim()}\n\nIMPORTANT: Return ONLY raw JSON without any markdown formatting, code blocks, or extra text.`;
-        
-        const result = await model.generateContent(enhancedPrompt);
-        const response = await result.response;
-        const text = response.text();
-        console.error(`DEBUG: Received response from Gemini API.`); // Log to stderr
-        return text;
-    } catch (error) {
-        console.error(`Error calling Gemini API: ${error}`); // Log error details to stderr
-        throw new Error(`Gemini API call failed: ${error.message}`);
-    }
+  logger.debug(`Calling Gemini API (type: ${type})`);
+  
+  try {
+    // We'll leverage the PRD parser's access to the Gemini API
+    const result = await prdParser.callGeminiApi(prompt);
+    
+    logger.debug(`Received response from Gemini API.`);
+    return result;
+  } catch (error) {
+    logger.error(`Error calling Gemini API: ${error.message}`);
+    throw error;
+  }
 }
-
-// --- End Gemini Helper ---
 
 // Function to expand a task into subtasks using Gemini API
 async function expandTask(workspaceRoot, taskId) { 
-  const tasksData = readTasks(workspaceRoot);
-  const taskIndex = tasksData.tasks.findIndex(task => task.id === parseInt(taskId));
-
-  if (taskIndex === -1) {
-    // Throw an error instead of logging and exiting
-    throw new Error(`Task with ID ${taskId} not found for expansion.`);
-    // console.error(`Error: Task with ID ${taskId} not found.`);
-    // process.exit(1);
-  }
-
-  const task = tasksData.tasks[taskIndex];
-  const prompt = `Given the following main task, break it down into a list of actionable subtasks. Return ONLY a JSON array of strings, where each string is a subtask title. Do not include preamble or explanations.
-
-Main Task Title: ${task.title}
-Main Task Description: ${task.description || '(No description provided)'}
-`;
-
-  // console.log(`Sending task (ID: ${taskId}) to Gemini API for expansion...`); // Changed to console.error
-  console.error(`DEBUG: Sending task (ID: ${taskId}) to Gemini API for expansion...`);
-
   try {
-    const responseText = await callGeminiApi(prompt);
-    // console.log("Successfully parsed subtasks from Gemini response."); // Changed to console.error
-    console.error("DEBUG: Successfully received response from Gemini API for expansion.");
-
-    let subtaskTitles = [];
-    try {
-        // First strip any markdown code blocks
-        const cleanedResponse = responseText.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
-        console.error(`DEBUG: Cleaned response for JSON parsing`);
-        
-        // Attempt to parse the response as JSON
-        subtaskTitles = JSON.parse(cleanedResponse);
-        if (!Array.isArray(subtaskTitles) || !subtaskTitles.every(t => typeof t === 'string')) {
-            throw new Error("Parsed response is not an array of strings.");
-        }
-         console.error(`DEBUG: Parsed ${subtaskTitles.length} subtask titles from Gemini response.`); // Log count to stderr
-    } catch (parseError) {
-        // Fallback: Treat each line as a subtask if JSON parsing fails
-        console.error(`WARN: Failed to parse Gemini response as JSON array: ${parseError.message}. Falling back to line splitting.`);
-        subtaskTitles = responseText.split('\n').map(line => line.trim()).filter(Boolean);
-        console.error(`DEBUG: Using fallback, extracted ${subtaskTitles.length} subtask titles.`); // Log count to stderr
+    // Read tasks data
+    const tasksData = readTasks(workspaceRoot);
+    
+    // Find the task
+    const task = tasksData.tasks.find(t => t.id === parseInt(taskId));
+    if (!task) {
+      throw new Error(`Task with ID ${taskId} not found.`);
     }
     
-    // Clear existing subtasks and reset index
+    // Prepare prompt for Gemini
+    const prompt = `
+    Please break down the following task into a list of specific subtasks. 
+    Return ONLY the subtask titles, one per line, with no numbering or bullets. 
+    Each subtask should be clear, actionable, and represent a distinct step or component.
+    
+    Task: ${task.title}
+    ${task.description ? `Description: ${task.description}` : ''}
+    `;
+    
+    // Call Gemini API
+    logger.debug(`Sending task (ID: ${taskId}) to Gemini API for expansion...`);
+    const response = await callGeminiApi(prompt, 'expansion');
+    logger.debug("Successfully received response from Gemini API for expansion.");
+    
+    // Parse the response
+    let subtaskTitles = [];
+    
+    // Clean the response text to prepare for parsing
+    const cleanedResponse = response.replace(/^\s*[-*•#]\s*/gm, '').trim();
+    logger.debug(`Cleaned response for JSON parsing`);
+    
+    // First, try to parse as JSON array (if Gemini returns it in that format)
+    try {
+      subtaskTitles = JSON.parse(cleanedResponse);
+      logger.debug(`Parsed ${subtaskTitles.length} subtask titles from Gemini response.`);
+    } catch (parseError) {
+      logger.warn(`Failed to parse Gemini response as JSON array: ${parseError.message}. Falling back to line splitting.`);
+      // If not JSON, split by lines and filter out empty lines
+      subtaskTitles = cleanedResponse.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      logger.debug(`Using fallback, extracted ${subtaskTitles.length} subtask titles.`);
+    }
+    
+    if (!subtaskTitles || subtaskTitles.length === 0) {
+      return { success: false, message: "No subtasks could be generated from the Gemini response." };
+    }
+    
+    // Clear existing subtasks if any
+    const originalSubtaskCount = task.subtasks.length;
     task.subtasks = [];
-    task.lastSubtaskIndex = 0; 
+    task.lastSubtaskIndex = 0;
     
     // Add new subtasks
-    let addedCount = 0;
-    subtaskTitles.forEach(title => {
-        if (title) { // Ensure title is not empty
-            task.lastSubtaskIndex = (task.lastSubtaskIndex || 0) + 1;
-            const nextSubtaskIndex = task.lastSubtaskIndex;
-            const newSubtaskId = `${task.id}.${nextSubtaskIndex}`;
-            
-            const newSubtask = {
-                id: newSubtaskId,
-                title: title,
-                status: 'todo',
-                activityLog: []
-            };
-            addActivityLog(newSubtask, `Subtask created by Gemini expansion`);
-            task.subtasks.push(newSubtask);
-            addedCount++;
-        }
+    subtaskTitles.forEach((title, index) => {
+      const subtaskId = `${taskId}.${index + 1}`;
+      const subtask = {
+        id: subtaskId,
+        title: title,
+        status: 'todo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        activityLog: []
+      };
+      
+      // Add initial log entry
+      addActivityLog(subtask, `Subtask created via AI expansion: "${subtask.title}"`);
+      
+      task.subtasks.push(subtask);
+      task.lastSubtaskIndex = index + 1;
     });
-
-    addActivityLog(task, `Task expanded into ${addedCount} subtasks using Gemini API.`);
-    task.updatedAt = new Date().toISOString();
+    
+    // Add log to main task
+    addActivityLog(task, `Task expanded using AI. ${originalSubtaskCount > 0 ? `Replaced ${originalSubtaskCount} existing subtasks with` : 'Added'} ${subtaskTitles.length} new subtasks.`);
+    
+    // Save changes
     writeTasks(workspaceRoot, tasksData);
     
-    // Return success status and message for MCP
-    const message = `Successfully generated and added ${addedCount} subtask(s) for task ${taskId}.`;
-    return { success: true, message: message, generatedCount: addedCount };
-    // console.log(`Successfully generated and added ${subtaskTitles.length} subtask(s) for task ${taskId}.`); // Removed final log
-
+    return { 
+      success: true, 
+      message: `Successfully generated ${subtaskTitles.length} subtasks for task ${taskId}.`,
+      task: task
+    };
   } catch (error) {
-    // Throw error for MCP handler
-     throw new Error(`Error expanding task ${taskId}: ${error.message}`);
-    // console.error(`Error expanding task ${taskId}: ${error.message}`);
-    // process.exit(1);
+    throw new Error(`Error expanding task ${taskId}: ${error.message}`);
   }
 }
 
-// Function to revise future tasks based on a prompt using Gemini API
+// Function to revise future tasks based on a prompt
 async function reviseTasks(workspaceRoot, options) { 
-  const { fromTaskId, prompt } = options;
-  const tasksData = readTasks(workspaceRoot);
-
-  // **FIXED: Correctly find the index of the task to start revision from**
-  const startIndex = tasksData.tasks.findIndex(task => String(task.id) === String(fromTaskId));
-
-  if (startIndex === -1) {
-    // Throw an error instead of logging and exiting
-    throw new Error(`Invalid --from task ID provided for revision: ${fromTaskId}`);
-    // console.error(`Error: Invalid --from task ID provided for revision.`);
-    // process.exit(1);
-  }
-
-  const futureTasks = tasksData.tasks.slice(startIndex);
-
-  // Prepare the data for the Gemini prompt
-  const futureTasksJson = JSON.stringify(futureTasks.map(task => ({
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    status: task.status,
-    priority: task.priority,
-    dependsOn: task.dependsOn,
-    subtasks: task.subtasks.map(st => ({ id: st.id, title: st.title, status: st.status })) // Include subtasks
-  })), null, 2);
-
-  const apiPrompt = `Given the following list of future tasks (starting from ID ${fromTaskId}) in JSON format and a required change described in the prompt, please revise the tasks. Return ONLY the revised list of tasks in the exact same JSON format (an array of task objects). Ensure IDs are preserved where possible but adjust titles, descriptions, dependencies, status, priority, and subtasks as necessary based on the prompt. Add new tasks or remove tasks if logically required by the change. Do not include any preamble or explanations in your response.
-
-Prompt describing the change: ${prompt}
-
-Current Future Tasks JSON:
-${futureTasksJson}
-`;
-
-  // console.log(`Sending future tasks to Gemini API for revision based on prompt: "${prompt}"`); // Changed to console.error
-  console.error(`DEBUG: Sending future tasks (from ID ${fromTaskId}) to Gemini API for revision...`);
-
   try {
-    const responseText = await callGeminiApi(apiPrompt, 'revision');
-    // console.log("Successfully parsed revised tasks from Gemini response."); // Changed to console.error
-    console.error("DEBUG: Successfully received response from Gemini API for revision.");
-
-    let revisedTasks;
-    try {
-        // First strip any markdown code blocks
-        const cleanedResponse = responseText.replace(/```(?:json)?\n([\s\S]*?)\n```/g, '$1').trim();
-        console.error(`DEBUG: Cleaned response for JSON parsing`);
-        
-        // Attempt to parse the response as JSON
-        revisedTasks = JSON.parse(cleanedResponse);
-        if (!Array.isArray(revisedTasks)) { // Basic validation
-            throw new Error("Parsed response is not an array.");
-        }
-        console.error(`DEBUG: Parsed ${revisedTasks.length} revised tasks from Gemini response.`); // Log count to stderr
-    } catch (parseError) {
-        // If parsing fails, throw an error as we need structured data here
-        throw new Error(`Failed to parse revised tasks JSON from Gemini response: ${parseError.message}. Response Text: ${responseText.substring(0, 200)}...`);
+    const { fromTaskId, prompt } = options;
+    
+    // Read tasks data
+    const tasksData = readTasks(workspaceRoot);
+    
+    // Validate fromTaskId
+    const startTaskIndex = tasksData.tasks.findIndex(task => task.id === parseInt(fromTaskId));
+    if (startTaskIndex === -1) {
+      throw new Error(`Task with ID ${fromTaskId} not found.`);
     }
     
-    // console.error(`DEBUG: Revised future tasks received from Gemini: ${JSON.stringify(revisedTasks)}`); // Log to stderr
-
-    // Replace the original future tasks with the revised ones
-    tasksData.tasks.splice(startIndex, tasksData.tasks.length - startIndex, ...revisedTasks);
-
-    // Add a log entry to the *first affected* task (if it still exists)
-    const firstRevisedTask = tasksData.tasks.find(task => String(task.id) === String(fromTaskId));
-    if (firstRevisedTask) {
-      addActivityLog(firstRevisedTask, `Tasks from this point revised via Gemini based on prompt: "${prompt}"`);
-      firstRevisedTask.updatedAt = new Date().toISOString(); 
-    } else {
-        // Maybe add a project-level log if the starting task was removed?
-        console.error(`WARN: Task ${fromTaskId} seems to have been removed during revision. Log not added to specific task.`);
+    // Get future tasks (the specified task and all tasks with higher IDs)
+    const futureTasks = tasksData.tasks.slice(startTaskIndex);
+    
+    // Create a prompt that includes the task information for Gemini
+    const tasksPrompt = `
+    Given the following list of tasks and the requested change: "${prompt}", 
+    please revise the tasks as needed. Return a JSON array of tasks with updated title, description, status, priority, and subtasks fields.
+    Keep the task IDs the same, but feel free to completely rewrite titles and descriptions, and update the status and priority.
+    
+    Current Tasks:
+    ${futureTasks.map(task => `
+    Task ${task.id}: ${task.title}
+    Description: ${task.description || '(None)'}
+    Status: ${task.status}
+    Priority: ${task.priority}
+    Subtasks: ${task.subtasks.map(sub => `\n  - ${sub.title}`).join('')}
+    `).join('\n')}
+    `;
+    
+    // Call Gemini API
+    logger.debug(`Sending future tasks (from ID ${fromTaskId}) to Gemini API for revision...`);
+    const response = await callGeminiApi(tasksPrompt, 'revision');
+    logger.debug("Successfully received response from Gemini API for revision.");
+    
+    // Parse the response
+    let revisedTasks = [];
+    
+    // Clean response and try to extract JSON
+    const cleanedResponse = response.trim();
+    logger.debug(`Cleaned response for JSON parsing`);
+    
+    try {
+      // Try to extract JSON from the response (in case Gemini adds explanatory text)
+      const jsonMatch = cleanedResponse.match(/\[[\s\S]*\]/);
+      const jsonString = jsonMatch ? jsonMatch[0] : cleanedResponse;
+      
+      revisedTasks = JSON.parse(jsonString);
+      logger.debug(`Parsed ${revisedTasks.length} revised tasks from Gemini response.`);
+    } catch (error) {
+      throw new Error(`Failed to parse Gemini response as JSON: ${error.message}`);
     }
-
+    
+    // Verify we received revised tasks
+    if (!revisedTasks || revisedTasks.length === 0) {
+      return { success: false, message: "No revised tasks could be generated from the Gemini response." };
+    }
+    
+    // Apply revisions to tasks
+    let updatedCount = 0;
+    
+    // Add a log entry to mark the revision point
+    let changeLog = `Revision applied based on: "${prompt}"`;
+    const targetTask = tasksData.tasks.find(task => task.id === parseInt(fromTaskId));
+    
+    if (targetTask) {
+      addActivityLog(targetTask, changeLog, 'revision');
+    } else {
+      logger.warn(`Task ${fromTaskId} seems to have been removed during revision. Log not added to specific task.`);
+    }
+    
+    // Update tasks with revised versions
+    revisedTasks.forEach(revisedTask => {
+      const taskToUpdate = tasksData.tasks.find(task => task.id === revisedTask.id);
+      if (taskToUpdate) {
+        // Update basic properties
+        taskToUpdate.title = revisedTask.title || taskToUpdate.title;
+        taskToUpdate.description = revisedTask.description || taskToUpdate.description;
+        taskToUpdate.status = revisedTask.status || taskToUpdate.status;
+        taskToUpdate.priority = revisedTask.priority || taskToUpdate.priority;
+        taskToUpdate.updatedAt = new Date().toISOString();
+        
+        // Add log of the revision
+        addActivityLog(taskToUpdate, `Task revised by AI based on prompt: "${prompt}"`, 'revision');
+        
+        // Handle subtasks - if new subtasks were provided
+        if (revisedTask.subtasks && Array.isArray(revisedTask.subtasks) && revisedTask.subtasks.length > 0) {
+          const oldSubtaskCount = taskToUpdate.subtasks.length;
+          
+          // Replace subtasks
+          taskToUpdate.subtasks = [];
+          taskToUpdate.lastSubtaskIndex = 0;
+          
+          // Add new subtasks
+          revisedTask.subtasks.forEach((subtaskTitle, index) => {
+            const subtaskId = `${taskToUpdate.id}.${index + 1}`;
+            const subtask = {
+              id: subtaskId,
+              title: subtaskTitle,
+              status: 'todo',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              activityLog: []
+            };
+            
+            // Add initial log entry
+            addActivityLog(subtask, `Subtask created during revision: "${subtask.title}"`);
+            
+            taskToUpdate.subtasks.push(subtask);
+            taskToUpdate.lastSubtaskIndex = index + 1;
+          });
+          
+          // Add log about subtask changes
+          addActivityLog(taskToUpdate, `Replaced ${oldSubtaskCount} existing subtasks with ${taskToUpdate.subtasks.length} new subtasks during revision.`);
+        }
+        
+        updatedCount++;
+      }
+    });
+    
+    // Save changes
     writeTasks(workspaceRoot, tasksData);
     
-    // Return success status and message for MCP
-    const message = `Successfully revised tasks from ID ${fromTaskId} onwards based on the prompt.`;
-    return { success: true, message: message, revisedCount: revisedTasks.length };
-    // console.log(`Successfully revised tasks from ID ${fromTaskId} onwards based on the prompt.`); // Removed final log
-
+    return { 
+      success: true, 
+      message: `Successfully revised ${updatedCount} tasks based on prompt: "${prompt}"`,
+      revisedTasks: revisedTasks
+    };
   } catch (error) {
-      // Throw error for MCP handler
-      throw new Error(`Error revising tasks: ${error.message}`);
-    // console.error(`Error revising tasks: ${error.message}`);
-    // process.exit(1);
+    throw new Error(`Error revising tasks: ${error.message}`);
   }
 }
 
-// Function to retrieve detailed context for a task
+// Function to get detailed context for a specific task
 function getContext(workspaceRoot, id) {
-    const tasksData = readTasks(workspaceRoot);
-    const idString = String(id);
-    let item = null;
-
-    if (idString.includes('.')) {
-        const parts = idString.split('.');
-        const parentId = parseInt(parts[0]);
-        const parentTask = tasksData.tasks.find(task => task.id === parentId);
-        if (parentTask) {
-             if (!parentTask.subtasks) parentTask.subtasks = [];
-            item = parentTask.subtasks.find(sub => sub.id === idString);
-        }
-    } else {
-        const taskId = parseInt(idString);
-        item = tasksData.tasks.find(task => task.id === taskId);
+  const tasksData = readTasks(workspaceRoot);
+  
+  // Check if task ID includes a period (subtask)
+  if (id.includes('.')) {
+    const [parentId, subtaskIndex] = id.split('.');
+    const parentTask = tasksData.tasks.find(task => task.id === parseInt(parentId));
+    
+    if (!parentTask) {
+      throw new Error(`Parent task with ID ${parentId} not found.`);
     }
-
-    if (item) {
-        let contextData;
-        if (idString.includes('.')) {
-            // Subtask context
-            contextData = {
-                id: item.id,
-                title: item.title,
-                status: item.status,
-                activityLog: item.activityLog || []
-            };
-        } else {
-            // Main task context
-            contextData = {
-                id: item.id,
-                title: item.title,
-                description: item.description,
-                status: item.status,
-                priority: item.priority,
-                dependsOn: item.dependsOn,
-                createdAt: item.createdAt,
-                updatedAt: item.updatedAt,
-                subtasks: item.subtasks || [],
-                relatedFiles: item.relatedFiles || [],
-                activityLog: item.activityLog || []
-            };
-            // Add file existence check
-            contextData.filesStatus = contextData.relatedFiles.map(filePath => ({
-                path: filePath,
-                exists: fs.existsSync(path.resolve(workspaceRoot, filePath)) // Check existence relative to workspace
-            }));
-        }
-        return contextData; // Return the context object directly
-    } else {
-        throw new Error(`Task or subtask with ID ${idString} not found.`);
+    
+    const subtask = parentTask.subtasks.find(st => st.id === id);
+    if (!subtask) {
+      throw new Error(`Subtask with ID ${id} not found.`);
     }
+    
+    return {
+      success: true,
+      context: {
+        ...subtask,
+        parentTask: {
+          id: parentTask.id,
+          title: parentTask.title,
+          status: parentTask.status,
+          description: parentTask.description,
+          relatedFiles: parentTask.relatedFiles
+        }
+      }
+    };
+  } else {
+    // Main task
+    const task = tasksData.tasks.find(task => task.id === parseInt(id));
+    if (!task) {
+      throw new Error(`Task with ID ${id} not found.`);
+    }
+    
+    return {
+      success: true,
+      context: task
+    };
+  }
 }
 
+// Export all the functions
 module.exports = {
   initProject,
   addTask,
@@ -849,8 +967,8 @@ module.exports = {
   updateTask,
   removeTask,
   generateTaskFiles,
+  getContext,
   parsePrd,
   expandTask,
-  reviseTasks, // Export reviseTasks
-  getContext // Export getContext
+  reviseTasks
 };

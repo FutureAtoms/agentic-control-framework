@@ -93,6 +93,15 @@ import * as readline from "node:readline";
 
 dotenv.config();
 
+// Simple logger module for consistent logging
+const logger = {
+  info: (message) => { console.error(`[INFO] ${message}`); },
+  debug: (message) => { console.error(`[DEBUG] ${message}`); },
+  warn: (message) => { console.error(`[WARN] ${message}`); },
+  error: (message) => { console.error(`[ERROR] ${message}`); },
+  output: (message) => { console.log(message); }, // Only this goes to stdout
+};
+
 interface MCPClientConfig {
   name?: string;
   version?: string;
@@ -149,9 +158,9 @@ Next, implement the method to connect to an MCP server:
       ListToolsResultSchema
     );
 
-    console.log(
-      "\nConnected to server with tools:",
-      response.tools.map((tool: any) => tool.name)
+    logger.info(
+      "\nConnected to server with tools: " + 
+      response.tools.map((tool: any) => tool.name).join(", ")
     );
   }
 ```
@@ -273,8 +282,8 @@ Add the chat loop and cleanup functionality:
 
 ```typescript
   async chatLoop(): Promise<void> {
-    console.log("\nMCP Client Started!");
-    console.log("Type your queries or 'quit' to exit.");
+    logger.info("MCP Client Started!");
+    logger.output("Type your queries or 'quit' to exit.");
 
     // Using Node's readline for console input
     const rl = readline.createInterface({
@@ -292,10 +301,10 @@ Add the chat loop and cleanup functionality:
           }
 
           const response = await this.processQuery(query);
-          console.log("\n" + response);
+          logger.output("\n" + response);
           askQuestion();
         } catch (error) {
-          console.error("\nError:", error);
+          logger.error("\nError: " + error);
           askQuestion();
         }
       });
@@ -319,7 +328,7 @@ Finally, add the main execution logic outside the class:
 // Main execution
 async function main() {
   if (process.argv.length < 3) {
-    console.log("Usage: ts-node client.ts <path_to_server_script>");
+    logger.error("Usage: ts-node client.ts <path_to_server_script>");
     process.exit(1);
   }
 
@@ -328,7 +337,7 @@ async function main() {
     await client.connectToServer(process.argv[2]);
     await client.chatLoop();
   } catch (error) {
-    console.error("Error:", error);
+    logger.error("Error: " + error);
     await client.cleanup();
     process.exit(1);
   }

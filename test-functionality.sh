@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Comprehensive Test Script for Gemini Task Manager
+# Comprehensive Test Script for Agentic Control Framework
 # This script tests both CLI and MCP functionality after cleanup
 
 echo "======================================================"
-echo "  Gemini Task Manager Functionality Test"
+echo "  Agentic Control Framework Functionality Test"
 echo "======================================================"
 
 # Function to check if a command exists
@@ -30,7 +30,7 @@ run_test() {
 }
 
 # Create a temporary test directory
-TEST_DIR="gtm_test_$(date +%s)"
+TEST_DIR="acf_test_$(date +%s)"
 mkdir -p "$TEST_DIR"
 cd "$TEST_DIR" || { echo "Failed to create test directory"; exit 1; }
 echo "Created test directory: $PWD"
@@ -65,7 +65,7 @@ fi
 echo -e "\n2. Testing CLI functionality..."
 
 # Test CLI initialization
-run_test "project initialization" "../bin/task-manager init --project-name 'Test Project' --project-description 'Testing GTM functionality'"
+run_test "project initialization" "../bin/task-manager init --project-name 'Test Project' --project-description 'Testing ACF functionality'"
 
 # Verify tasks.json was created
 if [ -f "tasks.json" ]; then
@@ -112,6 +112,7 @@ echo -e "\n3. Testing MCP functionality (basic)..."
 # Create a simple MCP client test file
 cat > mcp_test_client.js << 'EOF'
 const net = require('net');
+const logger = require('../src/logger'); // Import logger module
 
 // Create client request
 const request = {
@@ -139,8 +140,8 @@ mcp.stdout.on('data', (data) => {
   
   try {
     const response = JSON.parse(responseData);
-    console.log('MCP initialize test successful!');
-    console.log(JSON.stringify(response, null, 2));
+    logger.info('MCP initialize test successful!');
+    logger.output(JSON.stringify(response, null, 2));
     
     // Request tools list
     const toolsRequest = {
@@ -152,7 +153,7 @@ mcp.stdout.on('data', (data) => {
     
     // After 1 second, terminate the process
     setTimeout(() => {
-      console.log('Test completed, terminating MCP server');
+      logger.info('Test completed, terminating MCP server');
       mcp.kill();
       process.exit(0);
     }, 1000);
@@ -167,7 +168,7 @@ mcp.stdout.on('data', (data) => {
 // Handle process exit
 mcp.on('exit', (code) => {
   if (code !== 0 && code !== null) {
-    console.error(`MCP server exited with code ${code}`);
+    logger.error(`MCP server exited with code ${code}`);
     process.exit(1);
   }
 });
@@ -187,6 +188,7 @@ echo -e "\n4. Testing full task creation through MCP..."
 # Create more complete MCP client test that creates a task
 cat > mcp_create_task.js << 'EOF'
 const { spawn } = require('child_process');
+const logger = require('../src/logger'); // Import logger module
 
 // Start the MCP server
 const mcp = spawn('../bin/task-manager-mcp', [], {
@@ -222,17 +224,17 @@ function sendRequest(request) {
 async function runTests() {
   try {
     // Step 1: Initialize
-    console.log('Initializing MCP server...');
+    logger.info('Initializing MCP server...');
     const initResult = await sendRequest({
       jsonrpc: '2.0',
       id: 1,
       method: 'initialize',
       params: { protocolVersion: '2.0.0' }
     });
-    console.log('Initialization successful');
+    logger.info('Initialization successful');
     
     // Step 2: Add a task using tools/call
-    console.log('Creating a new task...');
+    logger.info('Creating a new task...');
     const addTaskResult = await sendRequest({
       jsonrpc: '2.0',
       id: 2,
@@ -246,10 +248,10 @@ async function runTests() {
         }
       }
     });
-    console.log('Task creation result:', JSON.parse(addTaskResult.result.content[0].text));
+    logger.debug('Task creation result:', JSON.parse(addTaskResult.result.content[0].text));
     
     // Step 3: List tasks
-    console.log('Listing tasks...');
+    logger.info('Listing tasks...');
     const listTasksResult = await sendRequest({
       jsonrpc: '2.0',
       id: 3,
@@ -262,10 +264,10 @@ async function runTests() {
     
     // Parse and display task list
     const tasks = JSON.parse(JSON.parse(listTasksResult.result.content[0].text).tasks);
-    console.log(`Found ${tasks.length} tasks`);
+    logger.info(`Found ${tasks.length} tasks`);
     
     // Step 4: Add a subtask
-    console.log('Adding a subtask...');
+    logger.info('Adding a subtask...');
     const addSubtaskResult = await sendRequest({
       jsonrpc: '2.0',
       id: 4,
@@ -278,11 +280,11 @@ async function runTests() {
         }
       }
     });
-    console.log('Subtask creation result:', JSON.parse(addSubtaskResult.result.content[0].text));
+    logger.debug('Subtask creation result:', JSON.parse(addSubtaskResult.result.content[0].text));
     
-    console.log('All MCP tests completed successfully!');
+    logger.output('All MCP tests completed successfully!');
   } catch (error) {
-    console.error('Error during MCP testing:', error);
+    logger.error('Error during MCP testing:', error);
   } finally {
     // Clean up
     mcp.kill();
@@ -313,7 +315,7 @@ else
 fi
 
 echo -e "\n======================================================"
-echo "  All tests passed! Gemini Task Manager is working properly."
+echo "  All tests passed! Agentic Control Framework is working properly."
 echo "======================================================"
 
 # Cleanup

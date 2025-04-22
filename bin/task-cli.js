@@ -2,6 +2,7 @@
 
 // Simple CLI wrapper for task manager functions
 const core = require('../src/core');
+const logger = require('../src/logger'); // Import the logger module
 const workspaceRoot = process.cwd();
 
 // Parse command line arguments
@@ -98,20 +99,20 @@ async function main() {
         
         // Print tasks in a more readable format
         if (result && result.tasks) {
-          console.log(`Total tasks: ${result.tasks.length}`);
+          logger.output(`Total tasks: ${result.tasks.length}`);
           result.tasks.forEach(task => {
-            console.log(`\nID: ${task.id} - ${task.title} [${task.status}] [${task.priority}]`);
-            if (task.description) console.log(`Description: ${task.description}`);
+            logger.output(`\nID: ${task.id} - ${task.title} [${task.status}] [${task.priority}]`);
+            if (task.description) logger.output(`Description: ${task.description}`);
             
             if (task.subtasks && task.subtasks.length > 0) {
-              console.log('Subtasks:');
+              logger.output('Subtasks:');
               task.subtasks.forEach(subtask => {
-                console.log(`  - ${subtask.id}: ${subtask.title} [${subtask.status}]`);
+                logger.output(`  - ${subtask.id}: ${subtask.title} [${subtask.status}]`);
               });
             }
             
             if (task.dependsOn && task.dependsOn.length > 0) {
-              console.log(`Depends on: ${task.dependsOn.join(', ')}`);
+              logger.output(`Depends on: ${task.dependsOn.join(', ')}`);
             }
           });
           return; // Skip JSON output
@@ -201,7 +202,7 @@ async function main() {
         result = core.removeTask(workspaceRoot, removeId);
         break;
         
-      case 'context':
+      case 'get-context':
         const contextOptions = parseArgs(args);
         const contextId = contextOptions.id || contextOptions._args?.[0];
         
@@ -215,23 +216,18 @@ async function main() {
         
       case 'parse-prd':
         const prdOptions = parseArgs(args);
-        const filePath = prdOptions.filePath || prdOptions.file || prdOptions._args?.[0];
+        const filePath = prdOptions.file || prdOptions._args?.[0];
         
         if (!filePath) {
           console.error('[ERROR] PRD file path is required for parsing');
           process.exit(1);
         }
         
-        // parsePrd returns a Promise, so we need to await it
         console.error('[INFO] Parsing PRD file...');
         result = await core.parsePrd(workspaceRoot, filePath);
         break;
         
-      case 'generate-files':
-        result = core.generateTaskFiles(workspaceRoot);
-        break;
-        
-      case 'expand-task':
+      case 'expand':
         const expandOptions = parseArgs(args);
         const expandTaskId = expandOptions.id || expandOptions._args?.[0];
         
@@ -244,67 +240,67 @@ async function main() {
         result = await core.expandTask(workspaceRoot, expandTaskId);
         break;
         
-      case 'revise-tasks':
+      case 'revise':
         const reviseOptions = parseArgs(args);
-        const fromTaskId = reviseOptions.from || reviseOptions['from-task-id'] || reviseOptions._args?.[0];
-        const prompt = reviseOptions.prompt || reviseOptions.p || reviseOptions._args?.[1];
+        const reviseTaskId = reviseOptions['from-task-id'] || reviseOptions.fromTaskId || reviseOptions._args?.[0];
+        const prompt = reviseOptions.prompt || reviseOptions._args?.[1];
         
-        if (!fromTaskId || !prompt) {
+        if (!reviseTaskId || !prompt) {
           console.error('[ERROR] Both task ID and prompt are required for revising tasks');
           process.exit(1);
         }
         
         console.error('[INFO] Revising tasks...');
         result = await core.reviseTasks(workspaceRoot, {
-          fromTaskId,
-          prompt
+          fromTaskId: reviseTaskId,
+          prompt: prompt
         });
         break;
         
-      case 'help':
+      case 'generate':
+        result = core.generateTaskFiles(workspaceRoot);
+        break;
+        
       default:
-        console.log(`
-Task Manager CLI
-
-Usage:
-  node task-cli.js <command> [options]
+        logger.output(`
+Usage: task-manager <command> [options]
 
 Commands:
-  init [name=ProjectName] [description=Description]   Initialize project
-  add -t "Title" [-d "Description"] [-p high]         Add a new task
-  list [-s todo|inprogress|done|blocked|error]        List tasks
-  add-subtask <parentId> -t "Subtask Title"          Add a subtask
-  status <taskId> <newStatus> [-m "Message"]          Update task status
-  next                                                Get next task
-  update <id> [-t "New Title"] [-d "New Desc"]        Update task details
-  remove <taskId>                                     Remove a task
-  context <taskId>                                    Get task context
-  parse-prd <filePath>                               Parse PRD document
-  generate-files                                      Generate Markdown files
-  expand-task <taskId>                               Expand task into subtasks
-  revise-tasks <fromTaskId> -p "Prompt"              Revise future tasks
-  help                                                Show this help text
+  init                        Initialize the task manager project
+  add -t <title> [options]    Add a new task
+  list [-s <status>]          List all tasks
+  add-subtask <id> -t <title> Add a subtask to a parent task
+  status <id> <status> [-m]   Update the status of a task
+  next                        Get the next actionable task
+  update <id> [options]       Update details of a task
+  remove <id>                 Remove a task
+  get-context <id>            Get detailed context for a task
+  generate                    Generate task files
+  parse-prd <file>            Parse a PRD file to generate tasks
+  expand <id>                 Expand a task into subtasks
+  revise --from-task-id <id>  Revise tasks based on a prompt
 `);
-        process.exit(0);
+        return; // No result to output
     }
     
-    // If we get here, we have a result to print
+    // Output the result
     if (result) {
       if (typeof result === 'object') {
-        console.log(JSON.stringify(result, null, 2));
+        logger.output(JSON.stringify(result, null, 2));
       } else {
-        console.log(result);
+        logger.output(result);
       }
     }
-    
   } catch (error) {
     console.error(`[ERROR] ${error.message}`);
     process.exit(1);
   }
 }
 
-// Run the main function
-main().catch(err => {
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
   console.error(`[FATAL] Uncaught exception: ${err.message}`);
   process.exit(1);
-}); 
+});
+
+main(); 

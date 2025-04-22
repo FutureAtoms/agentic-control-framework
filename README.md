@@ -2,7 +2,7 @@
 
 A powerful CLI and MCP-based task management system for agentic workflows.
 
-![Agentic Control Framework](https://i.imgur.com/LhUbxWD.png)
+![Agentic Control Framework](agentic-control-framework.png)
 
 ## Overview
 

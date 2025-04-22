@@ -3,6 +3,7 @@
 // Simple test client for MCP server
 const { spawn } = require('child_process');
 const readline = require('readline');
+const logger = require('./src/logger'); // Import logger module
 
 // Start the MCP server as a child process
 const server = spawn('node', ['./bin/task-manager-mcp.js', '--workspaceRoot', process.cwd()], {
@@ -67,20 +68,20 @@ const testRequests = [
 rl.on('line', (line) => {
   try {
     const response = JSON.parse(line);
-    console.log('\n===== SERVER RESPONSE =====');
-    console.log(`Response ID: ${response.id}`);
+    logger.info('\n===== SERVER RESPONSE =====');
+    logger.info(`Response ID: ${response.id}`);
     
     if (response.error) {
-      console.log('ERROR:', response.error);
+      logger.error('ERROR:', response.error);
     } else {
-      console.log('SUCCESS');
+      logger.info('SUCCESS');
       // Truncate large responses for readability
       const resultStr = JSON.stringify(response.result, null, 2);
-      console.log('Result:', resultStr.length > 500 ? resultStr.substring(0, 500) + '...' : resultStr);
+      logger.output('Result:', resultStr.length > 500 ? resultStr.substring(0, 500) + '...' : resultStr);
     }
   } catch (error) {
-    console.error('Failed to parse response:', error.message);
-    console.log('Raw response:', line);
+    logger.error('Failed to parse response:', error.message);
+    logger.debug('Raw response:', line);
   }
 });
 
@@ -89,15 +90,15 @@ let requestIndex = 0;
 const sendNextRequest = () => {
   if (requestIndex < testRequests.length) {
     const request = testRequests[requestIndex];
-    console.log(`\n===== SENDING REQUEST ${requestIndex + 1} =====`);
-    console.log(JSON.stringify(request, null, 2));
+    logger.info(`\n===== SENDING REQUEST ${requestIndex + 1} =====`);
+    logger.debug(JSON.stringify(request, null, 2));
     
     server.stdin.write(JSON.stringify(request) + '\n');
     requestIndex++;
     
     setTimeout(sendNextRequest, 1000);
   } else {
-    console.log('\n===== ALL TESTS COMPLETE =====');
+    logger.info('\n===== ALL TESTS COMPLETE =====');
     // Give time for final response before exiting
     setTimeout(() => {
       server.kill();
@@ -111,12 +112,12 @@ setTimeout(sendNextRequest, 2000);
 
 // Handle server exit
 server.on('close', (code) => {
-  console.log(`Server process exited with code ${code}`);
+  logger.info(`Server process exited with code ${code}`);
 });
 
 // Handle errors
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err);
+  logger.error('Uncaught exception:', err);
   server.kill();
   process.exit(1);
 }); 
