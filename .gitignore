@@ -29,6 +29,7 @@ Thumbs.db
 tasks.json
 /tasks/
 .task_manager/
+.tmp/
 
 # Log files
 *.log 
