@@ -1,0 +1,125 @@
+#!/usr/bin/env node
+
+/**
+ * Wrapper script for the Agentic Control Framework MCP server
+ * This script handles launching the server and maintaining workspace paths between restarts
+ */
+
+const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
+
+// Get project root (where the package.json lives)
+const projectRoot = path.resolve(__dirname, '..');
+
+// Set up a place to store last used workspace
+const tmpDir = path.resolve(__dirname, '../.tmp');
+const workspacePathFile = path.join(tmpDir, 'last-workspace.txt');
+
+// Create tmp directory if it doesn't exist
+try {
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+} catch (err) {
+  console.error('[ERROR] Error creating tmp directory:', err);
+}
+
+// Read last workspace path if available
+let initialWorkspaceRoot = process.cwd(); // Default to current directory
+try {
+  if (fs.existsSync(workspacePathFile)) {
+    const savedPath = fs.readFileSync(workspacePathFile, 'utf8').trim();
+    if (savedPath && fs.existsSync(savedPath)) {
+      initialWorkspaceRoot = savedPath;
+    }
+  }
+} catch (err) {
+  console.error('[ERROR] Error reading saved workspace path:', err);
+}
+
+// Debug info
+if (process.env.DEBUG === 'true') {
+  console.error('[DEBUG] Project root:', projectRoot);
+  console.error('[DEBUG] Initial workspace root:', initialWorkspaceRoot);
+  console.error('[DEBUG] Tmp dir:', tmpDir);
+  console.error('[DEBUG] Workspace path file:', workspacePathFile);
+}
+
+// MCP server path
+const mcpServerPath = path.join(projectRoot, 'src', 'mcp_server.js');
+
+// Launch the server with the initial workspace root
+const serverProcess = spawn('node', [
+  mcpServerPath,
+  '--workspaceRoot',
+  initialWorkspaceRoot
+], {
+  stdio: ['inherit', 'pipe', 'pipe'],
+  env: {
+    ...process.env,
+    WORKSPACE_ROOT: initialWorkspaceRoot
+  }
+});
+
+// Handle process errors
+serverProcess.on('error', (err) => {
+  console.error(`[ERROR] Failed to start MCP server process: ${err.message}`);
+  process.exit(1);
+});
+
+// Process server output
+serverProcess.stdout.on('data', (data) => {
+  const output = data.toString();
+  // Only write to stdout for JSON-RPC responses, which is the primary communication channel
+  process.stdout.write(output);
+});
+
+serverProcess.stdout.on('error', (err) => {
+  console.error(`[ERROR] Error in stdout stream: ${err.message}`);
+});
+
+// Handle errors and logging from stderr
+serverProcess.stderr.on('data', (data) => {
+  const output = data.toString();
+  // All stderr from MCP server gets written to stderr
+  process.stderr.write(output);
+  
+  // Check for workspace path changes in stderr
+  const workspaceMatch = output.match(/\[INFO\] Workspace root set to: (.+)/);
+  if (workspaceMatch && workspaceMatch[1]) {
+    const newWorkspacePath = workspaceMatch[1].trim();
+    // Save the new workspace path for future sessions
+    try {
+      fs.writeFileSync(workspacePathFile, newWorkspacePath);
+      console.error(`[INFO] Saved workspace path: ${newWorkspacePath}`);
+    } catch (err) {
+      console.error('[ERROR] Error saving workspace path:', err);
+    }
+  }
+});
+
+serverProcess.stderr.on('error', (err) => {
+  console.error(`[ERROR] Error in stderr stream: ${err.message}`);
+});
+
+// Handle server exit
+serverProcess.on('exit', (code) => {
+  if (code !== 0) {
+    console.error(`[ERROR] MCP server exited with code ${code}`);
+  } else {
+    console.error('[INFO] MCP server exited normally');
+  }
+  process.exit(code);
+});
+
+// Handle process termination
+process.on('SIGINT', () => {
+  console.error('[INFO] Received SIGINT, shutting down...');
+  serverProcess.kill('SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  console.error('[INFO] Received SIGTERM, shutting down...');
+  serverProcess.kill('SIGTERM');
+}); 

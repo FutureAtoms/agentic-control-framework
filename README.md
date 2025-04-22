@@ -63,7 +63,8 @@ The Agentic Control Framework has a clean and organized project structure:
 agentic-control-framework/
 ├── bin/
 │   ├── task-manager      # CLI entry point
-│   ├── task-manager-mcp  # MCP server wrapper for Cursor IDE
+│   ├── task-manager-mcp  # Legacy MCP server wrapper for Cursor IDE
+│   ├── agentic-control-framework-mcp  # New MCP server wrapper for Cursor IDE
 ├── src/
 │   ├── cli.js            # CLI command definitions
 │   ├── core.js           # Core functionality
@@ -81,12 +82,13 @@ To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP
 1. Make the MCP server wrapper executable:
    ```
    chmod +x bin/task-manager-mcp
+   chmod +x bin/agentic-control-framework-mcp
    ```
 
 2. Link the script for system-wide use (optional):
    ```
    # Install globally (may require sudo)
-   sudo ln -s "$(pwd)/bin/task-manager-mcp" /usr/local/bin/task-manager-mcp
+   sudo ln -s "$(pwd)/bin/agentic-control-framework-mcp" /usr/local/bin/agentic-control-framework-mcp
    
    # Or add to your PATH in .bashrc or .zshrc
    export PATH="$PATH:/path/to/agentic-control-framework/bin"
@@ -97,7 +99,7 @@ To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP
    - Go to Extensions > MCP > Add connection
    - Add a new connection with these details:
      - Name: `Agentic Control Framework`
-     - Command: Path to your `bin/task-manager-mcp` script
+     - Command: Path to your `bin/agentic-control-framework-mcp` script
      - Extension ID: Any unique identifier you prefer
 
 4. Now you can use ACF within Cursor by triggering the MCP extension
@@ -113,6 +115,12 @@ The Agentic Control Framework provides a command-line interface for managing tas
 ### MCP Server
 
 Launch the MCP server for integration with Cursor:
+
+```
+./bin/agentic-control-framework-mcp
+```
+
+Or use the legacy name:
 
 ```
 ./bin/task-manager-mcp

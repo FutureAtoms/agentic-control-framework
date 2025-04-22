@@ -5,12 +5,14 @@
   "main": "src/core.js",
   "bin": {
     "acf": "./bin/task-manager",
-    "acf-mcp": "./bin/task-manager-mcp",
+    "acf-mcp": "./bin/agentic-control-framework-mcp",
     "task-manager": "./bin/task-manager",
-    "task-manager-mcp": "./bin/task-manager-mcp"
+    "task-manager-mcp": "./bin/task-manager-mcp",
+    "agentic-control-framework-mcp": "./bin/agentic-control-framework-mcp"
   },
   "scripts": {
-    "start:mcp": "node ./bin/task-manager-mcp",
+    "start:mcp": "node ./bin/agentic-control-framework-mcp",
+    "start:legacy-mcp": "node ./bin/task-manager-mcp",
     "start": "node ./src/mcp_server.js --workspaceRoot $(pwd)",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

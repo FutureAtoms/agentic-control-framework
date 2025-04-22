@@ -32,4 +32,10 @@ tasks.json
 .tmp/
 
 # Log files
-*.log 
+*.log # Ignore test directories and files
+acf_test_*
+test_acf/
+test_results.txt
+mcp_test.js
+.tmp/
+.task_manager/

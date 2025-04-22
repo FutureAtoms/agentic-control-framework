@@ -280,25 +280,53 @@ This tutorial explains how an agent (or user via an AI assistant like Cursor) in
 
 1. **Make sure your MCP server script is executable:**
    ```bash
+   chmod +x bin/agentic-control-framework-mcp
+   # Legacy script is also supported
    chmod +x bin/task-manager-mcp
    ```
 
 2. **Add the wrapper to your PATH:**
    ```bash
-   # Option 1: Add to shell config
-   export PATH="$PATH:/absolute/path/to/agentic-control-framework/bin"
+   # Option A: Create a symlink for the new MCP script
+   ln -s "$(pwd)/bin/agentic-control-framework-mcp" /usr/local/bin/agentic-control-framework-mcp
    
-   # Option 2: Create a symlink
-   ln -s "$(pwd)/bin/task-manager-mcp" /usr/local/bin/task-manager-mcp
+   # Option B: Add to shell config
+   export PATH="$PATH:/absolute/path/to/agentic-control-framework/bin"
    ```
 
 3. **Configure Cursor IDE:**
-   - Open Settings (⚙️) > Preferences
-   - Search for "MCP"
-   - Add a new MCP integration:
+   - Open Settings (⚙️) > Extensions > MCP > Add Connection
+   - Add a new MCP connection with these details:
      - Name: `Agentic Control Framework`
-     - Command: Path to your `bin/task-manager-mcp` script
-     - Protocol: `MCP`
+     - Command: Path to your `bin/agentic-control-framework-mcp` script
+     - Extension ID: Any unique identifier (e.g., "acf")
+
+   The configuration in `~/.cursor/mcp.json` should look like:
+   ```json
+   {
+     "mcpServers": {
+       "agentic-control-framework": {
+         "command": "/path/to/your/agentic-control-framework/bin/agentic-control-framework-mcp",
+         "args": [],
+         "env": {
+           "GEMINI_API_KEY": "your-api-key-here",
+           "DEBUG": "true"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Testing your MCP setup:**
+   - Run the MCP server manually to verify it works:
+     ```bash
+     ./bin/agentic-control-framework-mcp
+     ```
+   - The server should start and wait for input
+   - Test with a simple command (in another terminal):
+     ```bash
+     echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2.0.0"}}' | ./bin/agentic-control-framework-mcp
+     ```
 
 ### MCP Tools
 
@@ -459,7 +487,43 @@ This might generate subtasks like:
 
 - **Task file not found**: Ensure `tasks.json` exists in your workspace root or initialize a new project.
 - **API key errors**: Check that your `GEMINI_API_KEY` is set correctly for AI-powered features.
-- **File permission issues**: Ensure scripts are executable with `chmod +x bin/task-manager bin/task-manager-mcp`.
+- **File permission issues**: Ensure scripts are executable with `chmod +x bin/task-manager bin/agentic-control-framework-mcp`.
+- **Status command error**: If you encounter "Cannot access 'taskOptions' before initialization" error with the status command, use the update command instead:
+  ```bash
+  # Instead of:
+  ./bin/task-manager status 1 inprogress -m "Starting work"
+  
+  # Use:
+  ./bin/task-manager update 1 --status inprogress -m "Starting work"
+  ```
+- **MCP connection issues**: Make sure your MCP server is properly configured in Cursor and the path to the script is correct.
+
+### Cursor MCP Integration Issues
+
+If you're having trouble with the MCP server in Cursor:
+
+1. Try running the MCP server manually to check for any errors:
+   ```bash
+   ./bin/agentic-control-framework-mcp
+   ```
+
+2. Verify your `~/.cursor/mcp.json` configuration:
+   ```json
+   {
+     "mcpServers": {
+       "agentic-control-framework": {
+         "command": "/absolute/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
+         "args": [],
+         "env": {
+           "GEMINI_API_KEY": "your-api-key-here",
+           "DEBUG": "true"
+         }
+       }
+     }
+   }
+   ```
+
+3. Check that the extension is enabled in Cursor by going to Settings > Extensions > MCP
 
 ### Getting Help
 
@@ -467,5 +531,4 @@ Run any command with `--help` to see usage information:
 
 ```bash
 ./bin/task-manager --help
-./bin/task-manager add --help
 ``` 

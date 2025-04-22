@@ -156,7 +156,7 @@ async function main() {
         }
         
         // Allow flag-style arguments to override
-        taskId = statusOptions.id || taskOptions.taskId || taskId;
+        taskId = statusOptions.id || statusOptions.taskId || taskId;
         newStatus = statusOptions.status || statusOptions.newStatus || newStatus;
         message = statusOptions.message || statusOptions.m || message || '';
         
