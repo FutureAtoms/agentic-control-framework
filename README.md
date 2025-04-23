@@ -241,19 +241,66 @@ Revise future tasks based on a prompt:
 ./bin/task-manager revise-tasks 3 -p "Change authentication from OAuth to JWT"
 ```
 
+## Creating a PRD
+
+A Product Requirements Document (PRD) is the starting point for your project in Agentic Control Framework. The system can parse this document to automatically generate tasks based on your project requirements.
+
+### Sample PRD Format
+
+Here's a simple example of how to structure your PRD:
+
+```markdown
+# E-Commerce Application PRD
+
+## User Authentication
+- Implement user registration with email verification
+- Create secure login system with password recovery
+- Add social media login options (Google, Facebook)
+
+## Product Management
+- Create product catalog with categories and search
+- Implement product details page with images and specifications
+- Add inventory management system
+
+## Shopping Cart
+- Design cart UI with product thumbnails and quantities
+- Implement add-to-cart and remove functionality
+- Create cart summary with pricing details
+
+## Checkout
+- Build multi-step checkout process
+- Implement address management
+- Add payment method integration
+```
+
+### PRD Best Practices
+
+1. **Use clear headings**: Each major feature should have its own heading (##)
+2. **List specific requirements**: Use bullet points (-) to list individual requirements
+3. **Be specific**: The more detailed your requirements, the better the generated tasks
+4. **Logical organization**: Group related requirements together under appropriate headings
+5. **Include dependencies**: If possible, mention when one feature depends on another
+
+When the PRD is parsed, each major heading typically becomes a task, and bullet points become subtasks or descriptions.
+
 ## Example Workflow
 
 Here's a complete workflow with the Agentic Control Framework:
 
 ```bash
-# Initialize the project
+# Step 1: Create a PRD (Product Requirements Document)
+# First, create a PRD file that describes your project requirements
+# Example: Create a file named "project_prd.md" with your project requirements
+
+# Step 2: Initialize the project
 ./bin/task-manager init --project-name "E-Commerce App" --project-description "A modern e-commerce application with user authentication, product listings, and checkout"
 
-# Add main tasks
-./bin/task-manager add -t "User Authentication" -p high
-./bin/task-manager add -t "Product Catalog" -p high --dependsOn "1"
-./bin/task-manager add -t "Shopping Cart" -p medium --dependsOn "2"
-./bin/task-manager add -t "Checkout Process" -p medium --dependsOn "3"
+# Step 3: Parse the PRD to automatically generate tasks
+./bin/task-manager parse-prd path/to/project_prd.md
+
+# Step 4: Use other functions to manage and update tasks
+# List all generated tasks
+./bin/task-manager list
 
 # Expand a task into subtasks
 ./bin/task-manager expand-task 1
@@ -267,9 +314,17 @@ Here's a complete workflow with the Agentic Control Framework:
 # Mark task as done
 ./bin/task-manager status 1.1 done -m "Completed login form design"
 
+# Add a new task manually if needed
+./bin/task-manager add -t "New Requirement: Payment Gateway" -p high
+
+# Revise tasks based on changing requirements
+./bin/task-manager revise-tasks 3 -p "Change authentication from OAuth to JWT"
+
 # Generate documentation
 ./bin/task-manager generate-files
 ```
+
+> **Important Note**: Following the correct workflow order is essential. Starting with a PRD and parsing it allows the system to generate a comprehensive task structure based on project requirements. This initial structure can then be further refined and managed with other commands.
 
 ## Troubleshooting
 
@@ -280,12 +335,15 @@ Here's a complete workflow with the Agentic Control Framework:
 
 ## Best Practices
 
+- Start with a well-defined PRD (Product Requirements Document) that outlines all project requirements
+- Follow the recommended workflow order: 1) Create PRD, 2) Initialize project, 3) Parse PRD, 4) Use other commands
 - Always run `task-manager init` in a new project directory before using other commands
 - Use meaningful task titles and descriptions
 - Set appropriate dependencies between tasks
 - Update task status regularly to keep your project dashboard accurate
 - Use the `next` command to maintain focus on the most important tasks
 - Leverage AI expansion for complex tasks
+- Use task revision when project requirements change instead of manually updating each task
 
 ## License
 
