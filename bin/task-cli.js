@@ -4,6 +4,7 @@
 const core = require('../src/core');
 const logger = require('../src/logger'); // Import the logger module
 const workspaceRoot = process.cwd();
+const chalk = require('chalk');
 
 // Parse command line arguments
 const command = process.argv[2];
@@ -241,20 +242,29 @@ async function main() {
         break;
         
       case 'revise':
-        const reviseOptions = parseArgs(args);
-        const reviseTaskId = reviseOptions['from-task-id'] || reviseOptions.fromTaskId || reviseOptions._args?.[0];
-        const prompt = reviseOptions.prompt || reviseOptions._args?.[1];
-        
-        if (!reviseTaskId || !prompt) {
-          console.error('[ERROR] Both task ID and prompt are required for revising tasks');
+        if (args._.length < 3) {
+          console.error('Error: Missing task ID or prompt for revision.');
+          console.error('Usage: task revise <taskId> <prompt>');
           process.exit(1);
         }
         
-        console.error('[INFO] Revising tasks...');
-        result = await core.reviseTasks(workspaceRoot, {
-          fromTaskId: reviseTaskId,
-          prompt: prompt
-        });
+        const fromTaskId = args._[1];
+        const prompt = args._.slice(2).join(' ');
+        
+        if (!fromTaskId || !prompt) {
+          console.error('Error: Both task ID and prompt are required for revision.');
+          process.exit(1);
+        }
+        
+        console.log(chalk.cyan(`Revising tasks starting from ID ${fromTaskId}...`));
+        result = await core.reviseTasks(workspaceRoot, fromTaskId, prompt);
+        
+        if (result && result.success) {
+          console.log(chalk.green(result.message));
+        } else {
+          console.error(chalk.red(result ? result.message : 'Failed to revise tasks.'));
+          process.exit(1);
+        }
         break;
         
       case 'generate':

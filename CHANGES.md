@@ -53,6 +53,16 @@ This document outlines the changes made to the Agentic Control Framework.
   - Tests task creation through MCP
   - Verifies all functionality works correctly
 
+## Version 0.2.0
+
+### Fixed
+
+- Fixed parameter extraction bug in the `reviseTasks` MCP function
+- Improved file path resolution by adding a `resolvePath` utility function
+- Updated all file operations to use consistent path resolution
+- Fixed relative file paths handling for the `parsePrd` function
+- Enhanced parameter handling consistency between CLI and MCP server
+
 ## Benefits of Changes
 
 1. **More robust functionality**: The system no longer fails when run in different environments

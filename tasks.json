@@ -1,27 +1,188 @@
 {
   "projectName": "Comprehensive Test",
   "projectDescription": "Testing all commands",
-  "lastTaskId": 44,
+  "lastTaskId": 69,
   "tasks": [
     {
       "id": 1,
-      "title": "Project Setup: Comprehensive Test",
+      "title": "Updated Task",
       "description": "Testing all commands",
       "status": "done",
       "priority": "high",
       "dependsOn": [],
       "createdAt": "2025-04-17T14:55:19.005Z",
-      "updatedAt": "2025-04-17T15:14:23.885Z",
-      "subtasks": [],
+      "updatedAt": "2025-04-23T09:46:59.908Z",
+      "subtasks": [
+        {
+          "id": "1.2",
+          "title": "Create a test plan outlining test cases for each command",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Create a test plan outlining test cases for each command\""
+            }
+          ]
+        },
+        {
+          "id": "1.3",
+          "title": "Set up a testing environment",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Set up a testing environment\""
+            }
+          ]
+        },
+        {
+          "id": "1.4",
+          "title": "Develop test scripts or procedures for each command",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Develop test scripts or procedures for each command\""
+            }
+          ]
+        },
+        {
+          "id": "1.5",
+          "title": "Execute test scripts or procedures for each command",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Execute test scripts or procedures for each command\""
+            }
+          ]
+        },
+        {
+          "id": "1.6",
+          "title": "Document test results for each command",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Document test results for each command\""
+            }
+          ]
+        },
+        {
+          "id": "1.7",
+          "title": "Analyze test results and identify any failures",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Analyze test results and identify any failures\""
+            }
+          ]
+        },
+        {
+          "id": "1.8",
+          "title": "Debug and fix any identified failures",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Debug and fix any identified failures\""
+            }
+          ]
+        },
+        {
+          "id": "1.9",
+          "title": "Retest commands with fixes implemented",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Retest commands with fixes implemented\""
+            }
+          ]
+        },
+        {
+          "id": "1.10",
+          "title": "Generate a comprehensive test report summarizing findings",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:01:19.581Z",
+          "updatedAt": "2025-04-23T08:01:19.581Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:01:19.581Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Generate a comprehensive test report summarizing findings\""
+            }
+          ]
+        },
+        {
+          "id": "1.11",
+          "title": "Subtask 1",
+          "status": "todo",
+          "createdAt": "2025-04-23T09:46:56.105Z",
+          "updatedAt": "2025-04-23T09:46:56.106Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T09:46:56.106Z",
+              "type": "log",
+              "message": "Subtask created with title: \"Subtask 1\""
+            }
+          ]
+        }
+      ],
       "relatedFiles": [],
       "activityLog": [
         {
           "timestamp": "2025-04-17T15:03:02.700Z",
           "type": "status",
           "message": "Status changed from \"todo\" to \"done\""
+        },
+        {
+          "timestamp": "2025-04-23T08:01:16.171Z",
+          "type": "log",
+          "message": "Task expanded using AI. Added 10 new subtasks."
+        },
+        {
+          "timestamp": "2025-04-23T08:01:17.377Z",
+          "type": "log",
+          "message": "Task expanded using AI. Replaced 10 existing subtasks with 11 new subtasks."
+        },
+        {
+          "timestamp": "2025-04-23T08:01:18.425Z",
+          "type": "log",
+          "message": "Task expanded using AI. Replaced 11 existing subtasks with 11 new subtasks."
+        },
+        {
+          "timestamp": "2025-04-23T08:01:19.581Z",
+          "type": "log",
+          "message": "Task expanded using AI. Replaced 11 existing subtasks with 10 new subtasks."
         }
       ],
-      "lastSubtaskIndex": 0
+      "lastSubtaskIndex": 11
     },
     {
       "id": 2,
@@ -1318,6 +1479,814 @@
           "timestamp": "2025-04-21T10:23:03.412Z",
           "type": "log",
           "message": "Task created with title: \"Test Task\""
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "title": "Implement User Authentication",
+      "description": "Create user registration, login functionality, password reset, and account management",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T08:54:10.933Z",
+      "updatedAt": "2025-04-23T08:54:20.738Z",
+      "subtasks": [
+        {
+          "id": "45.1",
+          "title": "Design User Registration Form",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Design User Registration Form\""
+            }
+          ]
+        },
+        {
+          "id": "45.2",
+          "title": "Implement User Registration Backend",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement User Registration Backend\""
+            }
+          ]
+        },
+        {
+          "id": "45.3",
+          "title": "Design User Login Form",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Design User Login Form\""
+            }
+          ]
+        },
+        {
+          "id": "45.4",
+          "title": "Implement User Login Backend",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement User Login Backend\""
+            }
+          ]
+        },
+        {
+          "id": "45.5",
+          "title": "Implement Password Reset Functionality",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement Password Reset Functionality\""
+            }
+          ]
+        },
+        {
+          "id": "45.6",
+          "title": "Design Password Reset Email Template",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Design Password Reset Email Template\""
+            }
+          ]
+        },
+        {
+          "id": "45.7",
+          "title": "Implement Password Reset Email Sending",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.737Z",
+          "updatedAt": "2025-04-23T08:54:20.737Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.737Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement Password Reset Email Sending\""
+            }
+          ]
+        },
+        {
+          "id": "45.8",
+          "title": "Implement Account Management Features",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement Account Management Features\""
+            }
+          ]
+        },
+        {
+          "id": "45.9",
+          "title": "Design Account Management Interface",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Design Account Management Interface\""
+            }
+          ]
+        },
+        {
+          "id": "45.10",
+          "title": "Implement User Profile Update",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement User Profile Update\""
+            }
+          ]
+        },
+        {
+          "id": "45.11",
+          "title": "Implement User Profile Deletion",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement User Profile Deletion\""
+            }
+          ]
+        },
+        {
+          "id": "45.12",
+          "title": "Implement Security Measures (Input Validation, Encryption)",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Implement Security Measures (Input Validation, Encryption)\""
+            }
+          ]
+        },
+        {
+          "id": "45.13",
+          "title": "Write Unit Tests for Authentication Components",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Write Unit Tests for Authentication Components\""
+            }
+          ]
+        },
+        {
+          "id": "45.14",
+          "title": "Integrate Authentication with Frontend",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Integrate Authentication with Frontend\""
+            }
+          ]
+        },
+        {
+          "id": "45.15",
+          "title": "Test User Registration Flow",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Test User Registration Flow\""
+            }
+          ]
+        },
+        {
+          "id": "45.16",
+          "title": "Test User Login Flow",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Test User Login Flow\""
+            }
+          ]
+        },
+        {
+          "id": "45.17",
+          "title": "Test Password Reset Flow",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Test Password Reset Flow\""
+            }
+          ]
+        },
+        {
+          "id": "45.18",
+          "title": "Test Account Management Flow",
+          "status": "todo",
+          "createdAt": "2025-04-23T08:54:20.738Z",
+          "updatedAt": "2025-04-23T08:54:20.738Z",
+          "activityLog": [
+            {
+              "timestamp": "2025-04-23T08:54:20.738Z",
+              "type": "log",
+              "message": "Subtask created via AI expansion: \"Test Account Management Flow\""
+            }
+          ]
+        }
+      ],
+      "lastSubtaskIndex": 18,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T08:54:10.935Z",
+          "type": "log",
+          "message": "Task created with title: \"Implement User Authentication\""
+        },
+        {
+          "timestamp": "2025-04-23T08:54:20.738Z",
+          "type": "log",
+          "message": "Task expanded using AI. Added 18 new subtasks."
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "title": "Build Task Management Core Features",
+      "description": "Implement creating, editing, completing, and deleting tasks along with filtering and sorting capabilities",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        45
+      ],
+      "createdAt": "2025-04-23T08:54:14.362Z",
+      "updatedAt": "2025-04-23T08:54:14.362Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T08:54:14.362Z",
+          "type": "log",
+          "message": "Task created with title: \"Build Task Management Core Features\""
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "title": "Design Database Schema",
+      "description": "Design the PostgreSQL database schema for users, tasks, categories, tags, and task assignments.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Design Database Schema\""
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "title": "Develop RESTful API Backend",
+      "description": "Develop the RESTful API using a suitable framework, implementing endpoints for all features.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        1
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop RESTful API Backend\""
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "title": "Implement User Authentication (JWT)",
+      "description": "Implement user registration, login, password reset, and account management using JWT for authentication.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        2
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Implement User Authentication (JWT)\""
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "title": "Develop Task Management API Endpoints",
+      "description": "Create API endpoints for creating, editing, deleting, marking complete, filtering, and sorting tasks.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        2
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Task Management API Endpoints\""
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "title": "Develop Categories & Tags API Endpoints",
+      "description": "Create API endpoints for managing categories and tags and filtering tasks based on them.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        2
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Categories & Tags API Endpoints\""
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "title": "Develop Collaboration Features",
+      "description": "Implement task sharing, assignment, commenting, and activity history.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        2,
+        4
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Collaboration Features\""
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "title": "Implement Notification System",
+      "description": "Develop email and in-app notifications for deadlines and task assignments.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        2,
+        4
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Implement Notification System\""
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "title": "Develop Reporting Module",
+      "description": "Create reporting functionality to generate task completion rates and productivity metrics.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        4
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Reporting Module\""
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "title": "Develop React Frontend",
+      "description": "Build the user interface using React, integrating with the RESTful API.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop React Frontend\""
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "title": "Implement Real-time Updates (WebSockets)",
+      "description": "Integrate WebSockets for real-time updates on task changes and notifications.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        2,
+        9
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Implement Real-time Updates (WebSockets)\""
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "title": "Implement Mobile Responsiveness",
+      "description": "Ensure the web application is responsive for mobile devices.",
+      "status": "todo",
+      "priority": "medium",
+      "dependsOn": [
+        9
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Implement Mobile Responsiveness\""
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "title": "Develop iOS Mobile App",
+      "description": "Develop a native iOS mobile app.",
+      "status": "todo",
+      "priority": "low",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop iOS Mobile App\""
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "title": "Develop Android Mobile App",
+      "description": "Develop a native Android mobile app.",
+      "status": "todo",
+      "priority": "low",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Android Mobile App\""
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "title": "Ensure WCAG 2.1 Compliance",
+      "description": "Test and ensure the application meets WCAG 2.1 accessibility guidelines.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        9
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Ensure WCAG 2.1 Compliance\""
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "title": "Testing and QA",
+      "description": "Conduct thorough testing of all features across different platforms.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Testing and QA\""
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "title": "Deployment",
+      "description": "Deploy the application to production.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        15
+      ],
+      "createdAt": "2025-04-23T09:06:29.154Z",
+      "updatedAt": "2025-04-23T09:06:29.154Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:06:29.154Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Deployment\""
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "title": "First Task",
+      "description": "This is the first task",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:46:55.962Z",
+      "updatedAt": "2025-04-23T09:46:55.963Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:55.963Z",
+          "type": "log",
+          "message": "Task created with title: \"First Task\""
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "title": "Design Feature 1",
+      "description": "Design the user interface and user experience for Feature 1, addressing Requirements 1 and 2.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:46:59.665Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Design Feature 1\""
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "title": "Develop Feature 1",
+      "description": "Develop the code for Feature 1 based on the approved design.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        1
+      ],
+      "createdAt": "2025-04-23T09:46:59.666Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Feature 1\""
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "title": "Test Feature 1",
+      "description": "Thoroughly test Feature 1 to ensure it meets all requirements and functions correctly.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        2
+      ],
+      "createdAt": "2025-04-23T09:46:59.666Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Test Feature 1\""
+        }
+      ]
+    },
+    {
+      "id": 67,
+      "title": "Design Feature 2",
+      "description": "Design the user interface and user experience for Feature 2, addressing Requirement 3.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [],
+      "createdAt": "2025-04-23T09:46:59.666Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Design Feature 2\""
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "title": "Develop Feature 2",
+      "description": "Develop the code for Feature 2 based on the approved design.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        4
+      ],
+      "createdAt": "2025-04-23T09:46:59.666Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Develop Feature 2\""
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "title": "Test Feature 2",
+      "description": "Thoroughly test Feature 2 to ensure it meets all requirements and functions correctly.",
+      "status": "todo",
+      "priority": "high",
+      "dependsOn": [
+        5
+      ],
+      "createdAt": "2025-04-23T09:46:59.666Z",
+      "updatedAt": "2025-04-23T09:46:59.666Z",
+      "subtasks": [],
+      "lastSubtaskIndex": 0,
+      "relatedFiles": [],
+      "activityLog": [
+        {
+          "timestamp": "2025-04-23T09:46:59.666Z",
+          "type": "log",
+          "message": "Task created from PRD: \"Test Feature 2\""
         }
       ]
     }

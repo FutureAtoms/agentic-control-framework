@@ -4,6 +4,7 @@ const prdParser = require('./prd_parser'); // Import the PRD parser
 const Table = require('cli-table3'); // Import cli-table3
 const chalk = require('chalk'); // Import chalk (v4)
 const logger = require('./logger'); // Import our logger module
+const os = require('os'); // Import os module
 
 // --- Path Calculation Helper ---
 // Helper function to get paths based on the script's location
@@ -16,11 +17,13 @@ function getWorkspacePaths(workspaceRoot) { // Added workspaceRoot argument
     logger.warn(`Falling back to current working directory: ${workspaceRoot}`);
   }
   
+  // Here we can't use resolvePath to avoid circular dependency,
+  // but we ensure all paths are absolute by using path.resolve
   return {
-    tasksFilePath: path.join(workspaceRoot, 'tasks.json'),
-    cursorRulesDir: path.join(workspaceRoot, '.cursor', 'rules'),
-    cursorRulesFile: path.join(workspaceRoot, '.cursor', 'rules', 'task_manager_workflow.mdc'),
-    taskFilesDir: path.join(workspaceRoot, 'tasks')
+    tasksFilePath: path.resolve(workspaceRoot, 'tasks.json'),
+    cursorRulesDir: path.resolve(workspaceRoot, '.cursor', 'rules'),
+    cursorRulesFile: path.resolve(workspaceRoot, '.cursor', 'rules', 'task_manager_workflow.mdc'),
+    taskFilesDir: path.resolve(workspaceRoot, 'tasks')
   };
 }
 // --- End Path Helper ---
@@ -105,14 +108,16 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
 // Function to read tasks from the file
 function readTasks(workspaceRoot) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
-  // logger.debug(`TASKS_FILE = ${tasksFilePath}`); // Use logger.debug instead
+  // Resolve the path to ensure it works with both relative and absolute paths
+  const resolvedTasksFilePath = resolvePath(workspaceRoot, tasksFilePath);
+  // logger.debug(`TASKS_FILE = ${resolvedTasksFilePath}`); // Use logger.debug instead
   
-  if (!fs.existsSync(tasksFilePath)) {
+  if (!fs.existsSync(resolvedTasksFilePath)) {
     // Instead of exiting, throw an error that can be caught
-    throw new Error(`Tasks file not found: ${tasksFilePath}. Please run init command first.`);
+    throw new Error(`Tasks file not found: ${resolvedTasksFilePath}. Please run init command first.`);
   }
   try {
-    const rawData = fs.readFileSync(tasksFilePath, 'utf-8');
+    const rawData = fs.readFileSync(resolvedTasksFilePath, 'utf-8');
     // Ensure all main tasks have the new fields if loading older data
     const tasksData = JSON.parse(rawData);
     if (tasksData && Array.isArray(tasksData.tasks)) {
@@ -131,18 +136,20 @@ function readTasks(workspaceRoot) { // Renamed argument
     return tasksData;
   } catch (error) {
     // Throw a more specific error for parsing/reading issues
-    throw new Error(`Error reading or parsing tasks file ${tasksFilePath}: ${error.message}`);
+    throw new Error(`Error reading or parsing tasks file ${resolvedTasksFilePath}: ${error.message}`);
   }
 }
 
 // Function to write tasks to the file
 function writeTasks(workspaceRoot, data) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
+  // Resolve the path to ensure it works with both relative and absolute paths
+  const resolvedTasksFilePath = resolvePath(workspaceRoot, tasksFilePath);
   try {
-    fs.writeFileSync(tasksFilePath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(resolvedTasksFilePath, JSON.stringify(data, null, 2));
   } catch (error) {
     // Throw an error instead of exiting
-    throw new Error(`Error writing tasks file ${tasksFilePath}: ${error.message}`);
+    throw new Error(`Error writing tasks file ${resolvedTasksFilePath}: ${error.message}`);
   }
 }
 
@@ -535,7 +542,8 @@ function generateTaskFiles(workspaceRoot) { // Renamed argument
   try {
     tasksData.tasks.forEach(task => {
       const taskFileName = `task-${task.id}-${task.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
-      const filePath = path.join(taskFilesDir, taskFileName);
+      // Use resolvePath to ensure the path is resolved correctly against the workspace root
+      const filePath = resolvePath(workspaceRoot, path.join(taskFilesDir, taskFileName));
       
       // Generate Markdown content
       let content = `# Task ${task.id}: ${task.title}\n\n`;
@@ -589,12 +597,31 @@ function generateTaskFiles(workspaceRoot) { // Renamed argument
   }
 }
 
+// Utility function to resolve paths against the workspace root
+function resolvePath(workspaceRoot, filePath) {
+  if (!filePath) return null;
+  
+  // If it's already an absolute path, return it as is
+  if (path.isAbsolute(filePath)) {
+    return filePath;
+  }
+  
+  // Otherwise, resolve it against the workspace root
+  return path.resolve(workspaceRoot, filePath);
+}
+
 // Function to parse a PRD file using the Gemini API
 async function parsePrd(workspaceRoot, prdFilePath) { // Renamed argument
   logger.debug(`Attempting to parse PRD: ${prdFilePath}`);
   
   try {
-    const tasks = await prdParser.parsePrdWithGemini(prdFilePath);
+    // Resolve relative paths against the workspace root
+    let resolvedPath = resolvePath(workspaceRoot, prdFilePath);
+    logger.debug(`Resolved path: ${resolvedPath}`);
+    
+    // Directly use prdParser to parse the PRD
+    const tasks = await prdParser.parsePrdWithGemini(resolvedPath);
+    
     if (!tasks || tasks.length === 0) {
       logger.error("Failed to generate tasks from PRD.");
       return { success: false, message: "Failed to generate tasks from PRD." };
@@ -675,8 +702,25 @@ async function callGeminiApi(prompt, type = 'generation') {
   logger.debug(`Calling Gemini API (type: ${type})`);
   
   try {
-    // We'll leverage the PRD parser's access to the Gemini API
-    const result = await prdParser.callGeminiApi(prompt);
+    // We use different functions from prdParser depending on the type of operation
+    let result;
+    
+    if (type === 'expansion') {
+      // For expanding tasks, we'll create a mock parent task with the prompt
+      const mockTask = { id: 'temp', title: prompt, description: '' };
+      result = await prdParser.expandTaskWithGemini(mockTask);
+    } else if (type === 'revision') {
+      // For revising tasks, we'll call reviseTasksWithGemini with empty past tasks
+      // and the prompt as the change request
+      result = await prdParser.reviseTasksWithGemini(prompt, [], [{ id: 'temp', title: 'temp', description: prompt }]);
+    } else {
+      // For other types, we'll use parsePrdWithGemini with a temporary file
+      const tempFile = path.join(os.tmpdir(), 'temp_prompt.txt');
+      fs.writeFileSync(tempFile, prompt);
+      result = await prdParser.parsePrdWithGemini(tempFile);
+      // Clean up the temporary file
+      try { fs.unlinkSync(tempFile); } catch (e) { /* ignore cleanup errors */ }
+    }
     
     logger.debug(`Received response from Gemini API.`);
     return result;
@@ -716,23 +760,79 @@ async function expandTask(workspaceRoot, taskId) {
     // Parse the response
     let subtaskTitles = [];
     
-    // Clean the response text to prepare for parsing
-    const cleanedResponse = response.replace(/^\s*[-*•#]\s*/gm, '').trim();
-    logger.debug(`Cleaned response for JSON parsing`);
-    
-    // First, try to parse as JSON array (if Gemini returns it in that format)
-    try {
-      subtaskTitles = JSON.parse(cleanedResponse);
-      logger.debug(`Parsed ${subtaskTitles.length} subtask titles from Gemini response.`);
-    } catch (parseError) {
-      logger.warn(`Failed to parse Gemini response as JSON array: ${parseError.message}. Falling back to line splitting.`);
-      // If not JSON, split by lines and filter out empty lines
-      subtaskTitles = cleanedResponse.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-      logger.debug(`Using fallback, extracted ${subtaskTitles.length} subtask titles.`);
+    // Check if response is already an array of strings 
+    if (Array.isArray(response)) {
+      subtaskTitles = response.map(item => item.toString().trim()).filter(item => item.length > 0);
+      logger.debug(`Received ${subtaskTitles.length} subtask titles from Gemini response array.`);
+    } else if (typeof response === 'string') {
+      // String response handling
+      const cleanedResponse = response.trim();
+      logger.debug(`Processing string response of length ${cleanedResponse.length}`);
+      
+      // First try to parse as JSON
+      try {
+        const jsonResult = JSON.parse(cleanedResponse);
+        if (Array.isArray(jsonResult)) {
+          subtaskTitles = jsonResult.map(item => item.toString().trim()).filter(item => item.length > 0);
+          logger.debug(`Parsed JSON array with ${subtaskTitles.length} subtask titles`);
+        } else {
+          logger.warn("JSON response is not an array, falling back to line splitting");
+          // If JSON but not array, treat as text
+          subtaskTitles = cleanedResponse
+            .replace(/^\s*[-*•#]\s*/gm, '') // Remove bullets
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        }
+      } catch (jsonError) {
+        // Not valid JSON, process as plain text
+        logger.debug(`Not valid JSON: ${jsonError.message}, processing as plain text`);
+        subtaskTitles = cleanedResponse
+          .replace(/^\s*[-*•#]\s*/gm, '') // Remove bullets
+          .split('\n')
+          .map(line => line.trim())
+          .filter(line => line.length > 0);
+        
+        logger.debug(`Extracted ${subtaskTitles.length} subtask titles from text`);
+      }
+    } else if (response === null) {
+      return { 
+        success: false, 
+        message: "Failed to get a response from Gemini API. Check your API key and network connection." 
+      };
+    } else {
+      // Handle other types of responses by converting to string if possible
+      logger.warn(`Unexpected response type from Gemini API: ${typeof response}, attempting to convert`);
+      try {
+        if (response && response.toString) {
+          const stringResponse = response.toString().trim();
+          subtaskTitles = stringResponse
+            .replace(/^\s*[-*•#]\s*/gm, '') // Remove bullets
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+          
+          logger.debug(`Converted response to string and extracted ${subtaskTitles.length} subtask titles`);
+        } else {
+          return { 
+            success: false, 
+            message: "Failed to generate subtasks: unexpected response format." 
+          };
+        }
+      } catch (conversionError) {
+        logger.error(`Failed to convert response: ${conversionError.message}`);
+        return { 
+          success: false, 
+          message: `Failed to process response: ${conversionError.message}` 
+        };
+      }
     }
     
     if (!subtaskTitles || subtaskTitles.length === 0) {
-      return { success: false, message: "No subtasks could be generated from the Gemini response." };
+      return { 
+        success: false, 
+        message: "No subtasks could be generated from the Gemini response." 
+      };
     }
     
     // Clear existing subtasks if any
@@ -771,130 +871,147 @@ async function expandTask(workspaceRoot, taskId) {
       task: task
     };
   } catch (error) {
-    throw new Error(`Error expanding task ${taskId}: ${error.message}`);
+    logger.error(`Error in expandTask: ${error.message}`);
+    return { 
+      success: false, 
+      message: `Error expanding task ${taskId}: ${error.message}` 
+    };
   }
 }
 
 // Function to revise future tasks based on a prompt
-async function reviseTasks(workspaceRoot, options) { 
+async function reviseTasks(workspaceRoot, fromTaskId, prompt) {
   try {
-    const { fromTaskId, prompt } = options;
-    
     // Read tasks data
     const tasksData = readTasks(workspaceRoot);
     
-    // Validate fromTaskId
-    const startTaskIndex = tasksData.tasks.findIndex(task => task.id === parseInt(fromTaskId));
-    if (startTaskIndex === -1) {
+    // Find the task index
+    const taskIndex = tasksData.tasks.findIndex(t => t.id === parseInt(fromTaskId));
+    if (taskIndex === -1) {
       throw new Error(`Task with ID ${fromTaskId} not found.`);
     }
     
-    // Get future tasks (the specified task and all tasks with higher IDs)
-    const futureTasks = tasksData.tasks.slice(startTaskIndex);
+    // Get the future tasks (the specified task and all tasks after it)
+    const futureTasks = tasksData.tasks.slice(taskIndex);
     
-    // Create a prompt that includes the task information for Gemini
-    const tasksPrompt = `
-    Given the following list of tasks and the requested change: "${prompt}", 
-    please revise the tasks as needed. Return a JSON array of tasks with updated title, description, status, priority, and subtasks fields.
-    Keep the task IDs the same, but feel free to completely rewrite titles and descriptions, and update the status and priority.
+    // Prepare existing tasks data for the prompt
+    const existingTasksData = futureTasks.map(task => {
+      return {
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        hasSubtasks: task.subtasks && task.subtasks.length > 0,
+        subtaskCount: task.subtasks ? task.subtasks.length : 0
+      };
+    });
     
-    Current Tasks:
-    ${futureTasks.map(task => `
-    Task ${task.id}: ${task.title}
-    Description: ${task.description || '(None)'}
-    Status: ${task.status}
-    Priority: ${task.priority}
-    Subtasks: ${task.subtasks.map(sub => `\n  - ${sub.title}`).join('')}
-    `).join('\n')}
+    // Prepare prompt for Gemini
+    const apiPrompt = `
+    I have a list of tasks in my project, and I need to revise them based on the following change:
+    "${prompt}"
+    
+    Here are the current tasks:
+    ${JSON.stringify(existingTasksData, null, 2)}
+    
+    Please revise these tasks considering the change. For each task, provide:
+    1. The task ID (keep the original IDs)
+    2. A revised title that better reflects the new direction
+    3. A revised description if needed
+    4. Should this task still have subtasks? (true/false)
+    
+    Important: Return a valid JSON array where each element has the fields: id, title, description, keepSubtasks.
     `;
     
     // Call Gemini API
-    logger.debug(`Sending future tasks (from ID ${fromTaskId}) to Gemini API for revision...`);
-    const response = await callGeminiApi(tasksPrompt, 'revision');
+    logger.debug(`Sending ${futureTasks.length} tasks starting from ID ${fromTaskId} to Gemini API for revision...`);
+    const response = await callGeminiApi(apiPrompt, 'revision');
     logger.debug("Successfully received response from Gemini API for revision.");
     
-    // Parse the response
-    let revisedTasks = [];
+    let revisedTasksData = [];
     
-    // Clean response and try to extract JSON
-    const cleanedResponse = response.trim();
-    logger.debug(`Cleaned response for JSON parsing`);
-    
-    try {
-      // Try to extract JSON from the response (in case Gemini adds explanatory text)
-      const jsonMatch = cleanedResponse.match(/\[[\s\S]*\]/);
-      const jsonString = jsonMatch ? jsonMatch[0] : cleanedResponse;
-      
-      revisedTasks = JSON.parse(jsonString);
-      logger.debug(`Parsed ${revisedTasks.length} revised tasks from Gemini response.`);
-    } catch (error) {
-      throw new Error(`Failed to parse Gemini response as JSON: ${error.message}`);
-    }
-    
-    // Verify we received revised tasks
-    if (!revisedTasks || revisedTasks.length === 0) {
-      return { success: false, message: "No revised tasks could be generated from the Gemini response." };
-    }
-    
-    // Apply revisions to tasks
-    let updatedCount = 0;
-    
-    // Add a log entry to mark the revision point
-    let changeLog = `Revision applied based on: "${prompt}"`;
-    const targetTask = tasksData.tasks.find(task => task.id === parseInt(fromTaskId));
-    
-    if (targetTask) {
-      addActivityLog(targetTask, changeLog, 'revision');
-    } else {
-      logger.warn(`Task ${fromTaskId} seems to have been removed during revision. Log not added to specific task.`);
-    }
-    
-    // Update tasks with revised versions
-    revisedTasks.forEach(revisedTask => {
-      const taskToUpdate = tasksData.tasks.find(task => task.id === revisedTask.id);
-      if (taskToUpdate) {
-        // Update basic properties
-        taskToUpdate.title = revisedTask.title || taskToUpdate.title;
-        taskToUpdate.description = revisedTask.description || taskToUpdate.description;
-        taskToUpdate.status = revisedTask.status || taskToUpdate.status;
-        taskToUpdate.priority = revisedTask.priority || taskToUpdate.priority;
-        taskToUpdate.updatedAt = new Date().toISOString();
+    // Check if response is already an array of task objects
+    if (Array.isArray(response)) {
+      revisedTasksData = response;
+      logger.debug(`Received ${revisedTasksData.length} revised tasks from Gemini response.`);
+    } else if (typeof response === 'string') {
+      // Parse string response for backward compatibility
+      try {
+        // Try to parse the response as JSON
+        const cleanedResponse = response.trim();
+        revisedTasksData = JSON.parse(cleanedResponse);
         
-        // Add log of the revision
-        addActivityLog(taskToUpdate, `Task revised by AI based on prompt: "${prompt}"`, 'revision');
-        
-        // Handle subtasks - if new subtasks were provided
-        if (revisedTask.subtasks && Array.isArray(revisedTask.subtasks) && revisedTask.subtasks.length > 0) {
-          const oldSubtaskCount = taskToUpdate.subtasks.length;
-          
-          // Replace subtasks
-          taskToUpdate.subtasks = [];
-          taskToUpdate.lastSubtaskIndex = 0;
-          
-          // Add new subtasks
-          revisedTask.subtasks.forEach((subtaskTitle, index) => {
-            const subtaskId = `${taskToUpdate.id}.${index + 1}`;
-            const subtask = {
-              id: subtaskId,
-              title: subtaskTitle,
-              status: 'todo',
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              activityLog: []
-            };
-            
-            // Add initial log entry
-            addActivityLog(subtask, `Subtask created during revision: "${subtask.title}"`);
-            
-            taskToUpdate.subtasks.push(subtask);
-            taskToUpdate.lastSubtaskIndex = index + 1;
-          });
-          
-          // Add log about subtask changes
-          addActivityLog(taskToUpdate, `Replaced ${oldSubtaskCount} existing subtasks with ${taskToUpdate.subtasks.length} new subtasks during revision.`);
+        // Ensure we have an array
+        if (!Array.isArray(revisedTasksData)) {
+          throw new Error("Response is not a valid JSON array");
         }
         
-        updatedCount++;
+        logger.debug(`Parsed ${revisedTasksData.length} revised tasks from Gemini response.`);
+      } catch (parseError) {
+        logger.error(`Failed to parse Gemini response as JSON array: ${parseError.message}`);
+        return { 
+          success: false, 
+          message: `Failed to parse API response: ${parseError.message}` 
+        };
+      }
+    } else if (response === null) {
+      return { 
+        success: false, 
+        message: "Failed to get a response from Gemini API. Check your API key and network connection." 
+      };
+    } else {
+      logger.error(`Unexpected response type from Gemini API: ${typeof response}`);
+      return { 
+        success: false, 
+        message: "Failed to revise tasks: unexpected response format." 
+      };
+    }
+    
+    if (!revisedTasksData || revisedTasksData.length === 0) {
+      return { 
+        success: false, 
+        message: "No task revisions were generated from the Gemini response." 
+      };
+    }
+    
+    // Apply revisions to the tasks
+    let changedTaskCount = 0;
+    revisedTasksData.forEach(revisedTask => {
+      const taskId = parseInt(revisedTask.id);
+      const originalTask = tasksData.tasks.find(t => t.id === taskId);
+      
+      if (originalTask) {
+        let isChanged = false;
+        
+        // Check if title changed
+        if (revisedTask.title && revisedTask.title !== originalTask.title) {
+          const oldTitle = originalTask.title;
+          originalTask.title = revisedTask.title;
+          addActivityLog(originalTask, `Title changed from "${oldTitle}" to "${revisedTask.title}" during revision.`);
+          isChanged = true;
+        }
+        
+        // Check if description changed
+        if (revisedTask.description && revisedTask.description !== originalTask.description) {
+          const oldDesc = originalTask.description || '(none)';
+          originalTask.description = revisedTask.description;
+          addActivityLog(originalTask, `Description changed from "${oldDesc}" to "${revisedTask.description}" during revision.`);
+          isChanged = true;
+        }
+        
+        // Handle subtasks (optionally clear them)
+        if (revisedTask.keepSubtasks === false && originalTask.subtasks && originalTask.subtasks.length > 0) {
+          const subtaskCount = originalTask.subtasks.length;
+          originalTask.subtasks = [];
+          originalTask.lastSubtaskIndex = 0;
+          addActivityLog(originalTask, `Removed ${subtaskCount} subtasks during revision as they no longer apply.`);
+          isChanged = true;
+        }
+        
+        // Update the updatedAt timestamp if changes were made
+        if (isChanged) {
+          originalTask.updatedAt = new Date().toISOString();
+          changedTaskCount++;
+        }
       }
     });
     
@@ -903,8 +1020,8 @@ async function reviseTasks(workspaceRoot, options) {
     
     return { 
       success: true, 
-      message: `Successfully revised ${updatedCount} tasks based on prompt: "${prompt}"`,
-      revisedTasks: revisedTasks
+      message: `Successfully revised ${changedTaskCount} tasks based on the prompt: "${prompt}".`,
+      changedTaskCount: changedTaskCount
     };
   } catch (error) {
     throw new Error(`Error revising tasks: ${error.message}`);
@@ -970,5 +1087,11 @@ module.exports = {
   getContext,
   parsePrd,
   expandTask,
-  reviseTasks
+  reviseTasks,
+  callGeminiApi, // Adding this for testing purposes
+  
+  // Utility exports for testing
+  readTasks,
+  writeTasks,
+  resolvePath
 };

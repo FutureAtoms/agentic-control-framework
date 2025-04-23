@@ -451,10 +451,7 @@ program
         }
         
         logger.info(`Revising tasks starting from ID ${fromTaskId}`);
-        const result = await core.reviseTasks(process.cwd(), {
-            fromTaskId: fromTaskId,
-            prompt: options.prompt
-        });
+        const result = await core.reviseTasks(process.cwd(), fromTaskId, options.prompt);
         
         if (result.success) {
             logger.output(result.message);

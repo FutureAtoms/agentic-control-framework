@@ -39,3 +39,4 @@ test_results.txt
 mcp_test.js
 .tmp/
 .task_manager/
+tasks.json

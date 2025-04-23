@@ -14,11 +14,11 @@ const prompt = "Focus more on testing and quality assurance.";
 const workspaceRoot = process.cwd();
 
 // Call the reviseTasks function and handle the result
-core.reviseTasks(workspaceRoot, { fromTaskId, prompt })
+core.reviseTasks(workspaceRoot, fromTaskId, prompt)
   .then(result => {
-    logger.info('Test result:', result);
-    logger.output('Success! Tasks revised based on prompt.');
+    console.log('Result:');
+    console.log(JSON.stringify(result, null, 2));
   })
   .catch(error => {
-    logger.error('Test failed with error:', error.message);
+    console.error(`Error: ${error.message}`);
   }); 

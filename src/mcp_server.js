@@ -293,7 +293,9 @@ rl.on('line', async (line) => {
         
         // Extract the parameters we need
         const toolName = method === 'tools/call' ? params.name : params.tool; // Adjust based on MCP version
-        const argsParam = method === 'tools/call' ? params.parameters : params.args;
+        const argsParam = method === 'tools/call' 
+          ? (params.arguments || params.parameters || {}) // Try both argument formats with fallback
+          : (params.args || {});
         
         logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(argsParam)}`);
         
@@ -303,24 +305,32 @@ rl.on('line', async (line) => {
           
           switch (toolName) {
             case 'setWorkspace':
-              if (argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
+              if (argsParam && argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
                 workspaceRoot = argsParam.workspacePath;
                 logger.info(`Workspace root set to: ${workspaceRoot}`);
                 responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
               } else {
-                logger.error(`Invalid workspace path: ${argsParam.workspacePath}`);
-                responseData = { success: false, message: `Invalid or non-existent workspace path: ${argsParam.workspacePath}` };
+                const path = argsParam && argsParam.workspacePath ? argsParam.workspacePath : 'undefined';
+                logger.error(`Invalid workspace path: ${path}`);
+                responseData = { success: false, message: `Invalid or non-existent workspace path: ${path}` };
               }
               break;
               
             case 'initProject':
               responseData = core.initProject(workspaceRoot, {
-                projectName: argsParam.projectName || 'Untitled Project',
-                projectDescription: argsParam.projectDescription || ''
+                projectName: argsParam && argsParam.projectName || 'Untitled Project',
+                projectDescription: argsParam && argsParam.projectDescription || ''
               });
               break;
               
             case 'addTask':
+              // Check required parameters
+              if (!argsParam || !argsParam.title) {
+                logger.error('Missing required parameter: title for addTask');
+                sendError(id, -32602, 'Missing required parameter: title for addTask');
+                return;
+              }
+              
               responseData = core.addTask(workspaceRoot, {
                 title: argsParam.title,
                 description: argsParam.description || '',
@@ -331,19 +341,41 @@ rl.on('line', async (line) => {
               break;
               
             case 'addSubtask':
-              responseData = core.addSubtask(workspaceRoot, argsParam.parentId, {
-                title: argsParam.title
-              });
+              // Check required parameters
+              if (!argsParam || !argsParam.parentId || !argsParam.title) {
+                logger.error('Missing required parameters for addSubtask: parentId and/or title');
+                sendError(id, -32602, 'Missing required parameters for addSubtask: parentId and/or title');
+                return;
+              }
+              
+              responseData = core.addSubtask(workspaceRoot, 
+                argsParam.parentId, 
+                {
+                  title: argsParam.title
+                }
+              );
               break;
               
             case 'listTasks':
               responseData = core.listTasks(workspaceRoot, {
-                status: argsParam.status
+                status: argsParam && argsParam.status
               });
               break;
               
             case 'updateStatus':
-              responseData = core.updateStatus(workspaceRoot, argsParam.id, argsParam.newStatus, argsParam.message || '');
+              // Check required parameters
+              if (!argsParam || !argsParam.id || !argsParam.newStatus) {
+                logger.error('Missing required parameters for updateStatus: id and/or newStatus');
+                sendError(id, -32602, 'Missing required parameters for updateStatus: id and/or newStatus');
+                return;
+              }
+              
+              responseData = core.updateStatus(
+                workspaceRoot, 
+                argsParam.id, 
+                argsParam.newStatus, 
+                argsParam.message || ''
+              );
               break;
               
             case 'getNextTask':
@@ -351,21 +383,24 @@ rl.on('line', async (line) => {
               break;
               
             case 'updateTask':
-              responseData = core.updateTask(workspaceRoot, argsParam.id, {
-                title: argsParam.title,
-                description: argsParam.description,
-                priority: argsParam.priority,
-                relatedFiles: argsParam.relatedFiles,
-                message: argsParam.message
-              });
+              responseData = core.updateTask(workspaceRoot, 
+                argsParam && argsParam.id, 
+                {
+                  title: argsParam && argsParam.title,
+                  description: argsParam && argsParam.description,
+                  priority: argsParam && argsParam.priority,
+                  relatedFiles: argsParam && argsParam.relatedFiles,
+                  message: argsParam && argsParam.message
+                }
+              );
               break;
               
             case 'removeTask':
-              responseData = core.removeTask(workspaceRoot, argsParam.id);
+              responseData = core.removeTask(workspaceRoot, argsParam && argsParam.id);
               break;
               
             case 'getContext':
-              responseData = core.getContext(workspaceRoot, argsParam.id);
+              responseData = core.getContext(workspaceRoot, argsParam && argsParam.id);
               break;
               
             case 'generateTaskFiles':
@@ -373,18 +408,25 @@ rl.on('line', async (line) => {
               break;
               
             case 'parsePrd':
-              responseData = await core.parsePrd(workspaceRoot, argsParam.filePath);
+              responseData = await core.parsePrd(workspaceRoot, argsParam && argsParam.filePath);
               break;
               
             case 'expandTask':
-              responseData = await core.expandTask(workspaceRoot, argsParam.taskId);
+              responseData = await core.expandTask(workspaceRoot, argsParam && argsParam.taskId);
               break;
               
             case 'reviseTasks':
-              responseData = await core.reviseTasks(workspaceRoot, {
-                fromTaskId: argsParam.fromTaskId,
-                prompt: argsParam.prompt
-              });
+              // Extract parameters from argsParam, not params
+              const fromTaskId = argsParam && argsParam.fromTaskId;
+              const prompt = argsParam && argsParam.prompt;
+              
+              if (!fromTaskId || !prompt) {
+                logger.error('Missing required parameters for reviseTasks: fromTaskId and/or prompt');
+                sendError(id, -32602, 'Missing required parameters for reviseTasks: fromTaskId and/or prompt');
+                return;
+              }
+              
+              responseData = await core.reviseTasks(workspaceRoot, fromTaskId, prompt);
               break;
               
             default:
