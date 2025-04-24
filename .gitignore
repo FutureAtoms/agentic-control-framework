@@ -30,6 +30,8 @@ tasks.json
 /tasks/
 .task_manager/
 .tmp/
+tasks-table.md
+test-output.md
 
 # Log files
 *.log # Ignore test directories and files
