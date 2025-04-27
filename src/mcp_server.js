@@ -38,13 +38,22 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Parse command line arguments and set workspace
-// We'll provide a better default than '/' if workspaceRoot is not provided
-let workspaceRoot = process.argv.find((arg, i, arr) => 
-  (arg === '--workspaceRoot' || arg === '-w') && i < arr.length - 1
-) ? process.argv[process.argv.findIndex(arg => 
-    arg === '--workspaceRoot' || arg === '-w'
-  ) + 1] : (process.env.WORKSPACE_ROOT || process.cwd());
+// Parse command line arguments and set workspace with improved environment variable support
+const getArg = (flag) => {
+  const index = process.argv.findIndex(arg => arg === flag);
+  return index !== -1 && index < process.argv.length - 1 ? process.argv[index + 1] : null;
+};
+
+// Order of precedence:
+// 1. Command line argument (--workspaceRoot or -w)
+// 2. ACF_PATH environment variable
+// 3. WORKSPACE_ROOT environment variable 
+// 4. Current working directory
+let workspaceRoot = getArg('--workspaceRoot') || 
+                     getArg('-w') || 
+                     process.env.ACF_PATH ||
+                     process.env.WORKSPACE_ROOT || 
+                     process.cwd();
 
 // Ensure workspace root is never just '/' which causes issues
 if (!workspaceRoot || workspaceRoot === '/') {

@@ -9,11 +9,14 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-// Get project root (where the package.json lives)
-const projectRoot = path.resolve(__dirname, '..');
+// Get project root with improved environment variable support
+// Order of precedence:
+// 1. ACF_PATH environment variable
+// 2. Path relative to this script
+const projectRoot = process.env.ACF_PATH || path.resolve(__dirname, '..');
 
 // Set up a place to store last used workspace
-const tmpDir = path.resolve(__dirname, '../.tmp');
+const tmpDir = path.resolve(projectRoot, '.tmp');
 const workspacePathFile = path.join(tmpDir, 'last-workspace.txt');
 
 // Create tmp directory if it doesn't exist
@@ -26,7 +29,11 @@ try {
 }
 
 // Read last workspace path if available
-let initialWorkspaceRoot = process.cwd(); // Default to current directory
+// Order of precedence:
+// 1. WORKSPACE_ROOT environment variable
+// 2. Last saved workspace path
+// 3. Current working directory
+let initialWorkspaceRoot = process.env.WORKSPACE_ROOT || process.cwd(); // Default to current directory
 try {
   if (fs.existsSync(workspacePathFile)) {
     const savedPath = fs.readFileSync(workspacePathFile, 'utf8').trim();
@@ -58,7 +65,8 @@ const serverProcess = spawn('node', [
   stdio: ['inherit', 'pipe', 'pipe'],
   env: {
     ...process.env,
-    WORKSPACE_ROOT: initialWorkspaceRoot
+    WORKSPACE_ROOT: initialWorkspaceRoot,
+    ACF_PATH: projectRoot
   }
 });
 

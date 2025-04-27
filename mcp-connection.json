@@ -1,6 +1,6 @@
 {
   "agentic-control-framework": {
-    "command": "/Users/abhilashchadhar/uncloud/cursor/task-master/bin/task-manager-mcp",
+    "command": "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/agentic-control-framework-mcp",
     "protocol": "MCP"
   }
-} 
+}

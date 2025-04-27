@@ -49,12 +49,24 @@ Check out our comprehensive [tutorial](docs/tutorial.md) to get started!
    npm install
    ```
 
-3. Make scripts executable:
+3. Run the automatic setup script (recommended):
    ```
-   chmod +x bin/task-manager bin/task-manager-mcp
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+   This script will:
+   - Make all required scripts executable
+   - Configure paths correctly for your system
+   - Set up environment variables
+   - Create necessary configuration files
+   - Provide instructions for Cursor IDE integration
+
+4. Alternatively, manually make scripts executable:
+   ```
+   chmod +x bin/task-manager bin/task-manager-mcp bin/agentic-control-framework-mcp
    ```
 
-4. Create a `.env` file with your API key (optional, but required for AI features):
+5. Create a `.env` file with your API key (optional, but required for AI features):
    ```
    GEMINI_API_KEY=your_api_key_here
    ```
@@ -83,22 +95,32 @@ agentic-control-framework/
 
 To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP server wrapper:
 
-1. Make the MCP server wrapper executable:
+1. **Recommended method**: Run the setup script to automatically configure everything:
+   ```
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+   Follow the on-screen instructions to complete the Cursor integration.
+
+2. Alternatively, you can manually set things up:
+
+   a. Make the MCP server wrapper executable:
    ```
    chmod +x bin/task-manager-mcp
    chmod +x bin/agentic-control-framework-mcp
    ```
 
-2. Link the script for system-wide use (optional):
+   b. Link the script for system-wide use (optional):
    ```
    # Install globally (may require sudo)
    sudo ln -s "$(pwd)/bin/agentic-control-framework-mcp" /usr/local/bin/agentic-control-framework-mcp
    
    # Or add to your PATH in .bashrc or .zshrc
-   export PATH="$PATH:/path/to/agentic-control-framework/bin"
+   export ACF_PATH="$(pwd)"
+   export PATH="$PATH:$ACF_PATH/bin"
    ```
 
-3. Configure Cursor MCP connection:
+   c. Configure Cursor MCP connection:
    - Open Cursor settings
    - Go to Extensions > MCP > Add connection
    - Add a new connection with these details:
@@ -106,7 +128,7 @@ To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP
      - Command: Path to your `bin/agentic-control-framework-mcp` script
      - Extension ID: Any unique identifier you prefer
 
-4. Now you can use ACF within Cursor by triggering the MCP extension
+3. Now you can use ACF within Cursor by triggering the MCP extension
 
 ## CLI Commands
 

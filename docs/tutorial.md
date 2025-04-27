@@ -44,34 +44,51 @@ This tutorial will guide you through setting up and using the Agentic Control Fr
    npm install
    ```
 
-3. (Optional) Set up Gemini API key for AI features:
+3. Run the automatic setup script (recommended):
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+   
+   The setup script will:
+   - Make all scripts executable
+   - Configure paths correctly for your system
+   - Offer to set up environment variables in your shell profile
+   - Create necessary configuration files
+   - Provide clear instructions for Cursor IDE integration
+
+4. (Optional) Set up Gemini API key for AI features:
    ```bash
    # Add to your .bashrc, .zshrc, or equivalent shell config
    export GEMINI_API_KEY="your_api_key_here"
    ```
+   Note: The setup script creates a `.env` file where you can also add your API key.
 
 ### MCP Server Setup (For Cursor IDE Integration)
 
-To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP server wrapper:
+If you used the setup script, it has already prepared your environment for MCP integration. Just follow the instructions displayed after running the script.
+
+For manual configuration, follow these steps:
 
 1. Make the wrapper scripts executable:
    ```bash
    chmod +x bin/task-manager-mcp
-   chmod +x bin/task-manager-mcp
+   chmod +x bin/agentic-control-framework-mcp
    ```
 
-2. Add the wrapper to your PATH (choose one option):
+2. Add the directory to your PATH (choose one option):
 
    **Option 1**: Add to your shell config
    ```bash
    # Add this to your .bashrc, .zshrc, or equivalent shell config file
-   export PATH="$PATH:/path/to/agentic-control-framework/bin"
+   export ACF_PATH="/full/path/to/agentic-control-framework"
+   export PATH="$PATH:$ACF_PATH/bin"
    ```
 
    **Option 2**: Create a symlink in a directory already in your PATH
    ```bash
    # Example for macOS/Linux
-   ln -s "$(pwd)/bin/task-manager-mcp" /usr/local/bin/task-manager-mcp
+   ln -s "$(pwd)/bin/agentic-control-framework-mcp" /usr/local/bin/agentic-control-framework-mcp
    ```
 
 3. Configuring Cursor to use the MCP integration:
@@ -81,7 +98,7 @@ To use the Agentic Control Framework with Cursor IDE, you need to set up the MCP
    c. Search for "MCP" in the settings search
    d. Under MCP Integrations, add a new integration:
       - Name: `Agentic Control Framework`
-      - Command: The path to your `bin/task-manager-mcp` script
+      - Command: The path to your `bin/agentic-control-framework-mcp` script
       - Protocol: `MCP`
    e. Save the settings
 
