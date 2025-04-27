@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { resolvePath } = require('./src/core');
+const { resolvePath } = require('../../src/core');
 
 // Test script to demonstrate path resolution
 const workspaceRoot = process.cwd();

@@ -1,7 +1,7 @@
 // Test script for expandTask function
 
-const core = require('./src/core');
-const logger = require('./src/logger');
+const core = require('../../src/core');
+const logger = require('../../src/logger');
 
 // Define the workspace root and the task ID to expand
 const workspaceRoot = process.cwd();

@@ -8,7 +8,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const core = require('./src/core');
+const core = require('../../src/core');
 
 // Check if Gemini API key is available
 if (!process.env.GEMINI_API_KEY) {
