@@ -14,6 +14,10 @@ The Agentic Control Framework (ACF) is a comprehensive task management system de
 - **Progress tracking:** Monitor task status, dependencies, and completion
 - **Customizable workflows:** Adapt to your specific project needs
 
+![Demo of Agentic Control Framework](demo.gif)
+
+Check out our comprehensive [tutorial](docs/tutorial.md) to get started!
+
 ## Features
 
 - Create and manage tasks with priorities, descriptions, and dependencies
