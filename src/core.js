@@ -5,6 +5,7 @@ const Table = require('cli-table3'); // Import cli-table3
 const chalk = require('chalk'); // Import chalk (v4)
 const logger = require('./logger'); // Import our logger module
 const os = require('os'); // Import os module
+const tableRenderer = require('./tableRenderer'); // Import the tableRenderer module
 
 // --- Path Calculation Helper ---
 // Helper function to get paths based on the script's location
@@ -75,6 +76,8 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
 
     try {
       fs.writeFileSync(tasksFilePath, JSON.stringify(initialData, null, 2));
+      // Generate the human-readable task table
+      tableRenderer.writeTaskTable(initialData, workspaceRoot);
       messages.push(`Created initial tasks file: ${tasksFilePath}`);
       messages.push(`  Project Name: ${projectName}`);
       if (projectDescription) messages.push(`  Added initial task for: ${projectDescription}`);
@@ -84,6 +87,13 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
   } else {
     messages.push(`Tasks file already exists: ${tasksFilePath}`);
     // Optional: Check if metadata needs updating in existing file?
+    // Ensure task table is in sync
+    try {
+      const tasksData = readTasks(workspaceRoot);
+      tableRenderer.writeTaskTable(tasksData, workspaceRoot);
+    } catch (error) {
+      logger.error(`Failed to sync task table during init: ${error.message}`);
+    }
   }
 
   const dirMsg = ensureDirExists(cursorRulesDir);
@@ -147,6 +157,8 @@ function writeTasks(workspaceRoot, data) { // Renamed argument
   const resolvedTasksFilePath = resolvePath(workspaceRoot, tasksFilePath);
   try {
     fs.writeFileSync(resolvedTasksFilePath, JSON.stringify(data, null, 2));
+    // Generate the human-readable task table whenever tasks are updated
+    tableRenderer.writeTaskTable(data, workspaceRoot);
   } catch (error) {
     // Throw an error instead of exiting
     throw new Error(`Error writing tasks file ${resolvedTasksFilePath}: ${error.message}`);
@@ -249,6 +261,15 @@ function listTasks(workspaceRoot, options) { // Renamed argument
         default: return status;
       }
     }
+  }
+  
+  // If human-readable format is requested, generate the task table
+  if (options && options.humanReadable) {
+    return {
+      success: true,
+      tasks: filteredTasks,
+      humanReadableTable: tableRenderer.generateTaskTable({...tasksData, tasks: filteredTasks}, workspaceRoot)
+    };
   }
   
   // Return the list of tasks
@@ -634,7 +655,7 @@ async function parsePrd(workspaceRoot, prdFilePath) { // Renamed argument
     const addedTasks = [];
     
     // Process each task
-    tasks.forEach(taskInfo => {
+    for (const taskInfo of tasks) {
       // Create the main task
       const newTask = {
         id: nextId,
@@ -679,17 +700,63 @@ async function parsePrd(workspaceRoot, prdFilePath) { // Renamed argument
       tasksData.tasks.push(newTask);
       addedTasks.push(newTask);
       nextId++;
+      
+      // Save after each task is added to ensure progress is preserved
+      tasksData.lastTaskId = nextId - 1;
+      writeTasks(workspaceRoot, tasksData);
+      logger.info(`Added and saved task: ${newTask.title} (ID: ${newTask.id})`);
+    }
+    
+    // Update lastTaskId (already updated in the loop)
+    // tasksData.lastTaskId = nextId - 1;
+    
+    // Final save
+    writeTasks(workspaceRoot, tasksData);
+    
+    // Generate a checkpoint report file
+    const reportPath = path.join(workspaceRoot, `prd_parsing_report_${new Date().toISOString().replace(/[:.]/g, '-')}.md`);
+    let reportContent = `# PRD Parsing Report\n\n`;
+    reportContent += `## Summary\n\n`;
+    reportContent += `- Generated ${addedTasks.length} tasks from PRD document\n`;
+    reportContent += `- Date: ${new Date().toLocaleString()}\n\n`;
+    
+    reportContent += `## Tasks Overview\n\n`;
+    addedTasks.forEach(task => {
+      reportContent += `### Task ${task.id}: ${task.title}\n`;
+      reportContent += `- Priority: ${task.priority}\n`;
+      reportContent += `- Status: ${task.status}\n`;
+      reportContent += `- Description: ${task.description}\n`;
+      
+      if (task.dependsOn && task.dependsOn.length > 0) {
+        reportContent += `- Depends on: ${task.dependsOn.join(', ')}\n`;
+      }
+      
+      if (task.subtasks && task.subtasks.length > 0) {
+        reportContent += `\n#### Subtasks:\n`;
+        task.subtasks.forEach(subtask => {
+          reportContent += `- ${subtask.id}: ${subtask.title}\n`;
+        });
+      }
+      reportContent += `\n`;
     });
     
-    // Update lastTaskId
-    tasksData.lastTaskId = nextId - 1;
+    // Identify testing tasks specifically
+    const testTasks = addedTasks.filter(task => task.title.startsWith('Test:') || task.title.includes('Test') || task.title.includes('Testing'));
+    if (testTasks.length > 0) {
+      reportContent += `## Testing Strategy\n\n`;
+      reportContent += `The following test tasks were generated:\n\n`;
+      testTasks.forEach(task => {
+        reportContent += `- ${task.title}\n`;
+      });
+      reportContent += `\nEnsure these tests are executed after their corresponding implementation tasks.\n`;
+    }
     
-    // Save changes
-    writeTasks(workspaceRoot, tasksData);
+    fs.writeFileSync(reportPath, reportContent);
+    logger.info(`Generated PRD parsing report at: ${reportPath}`);
     
     return { 
       success: true, 
-      message: `Created ${addedTasks.length} tasks from PRD document.`, 
+      message: `Created ${addedTasks.length} tasks from PRD document. Report saved to ${reportPath}`, 
       tasks: addedTasks
     };
   } catch (error) {
@@ -1073,6 +1140,29 @@ function getContext(workspaceRoot, id) {
   }
 }
 
+// Function to generate a human-readable task table file
+function generateHumanReadableTaskTable(workspaceRoot) {
+  try {
+    const tasksData = readTasks(workspaceRoot);
+    const tableRenderer = require('./tableRenderer');
+    const success = tableRenderer.writeTaskTable(tasksData, workspaceRoot);
+    
+    if (success) {
+      return { 
+        success: true, 
+        message: `Human-readable task table has been generated.` 
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Failed to generate human-readable task table.'
+      };
+    }
+  } catch (error) {
+    throw new Error(`Error generating human-readable task table: ${error.message}`);
+  }
+}
+
 // Export all the functions
 module.exports = {
   initProject,
@@ -1093,5 +1183,6 @@ module.exports = {
   // Utility exports for testing
   readTasks,
   writeTasks,
-  resolvePath
+  resolvePath,
+  generateHumanReadableTaskTable
 };

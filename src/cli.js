@@ -6,6 +6,7 @@ const readline = require('readline/promises'); // Import readline promises
 const { stdin: input, stdout: output } = require('process'); // Import streams
 const Table = require('cli-table3'); // Add cli-table3
 const chalk = require('chalk'); // Add chalk
+const path = require('path');
 
 program
   .version('0.1.0')
@@ -93,8 +94,22 @@ program
   .description('List all tasks')
   .option('-s, --status <status>', 'Filter tasks by status (e.g., todo, inprogress, done)')
   .option('--json', 'Output the raw JSON task data')
+  .option('--table', 'Output tasks in a table format')
+  .option('--human', 'Output tasks in a human-readable format with checkboxes')
   .action((options) => {
     try {
+        // If human-readable format is requested, include that option
+        if (options.human) {
+            // Load the tableRenderer module
+            const tableRenderer = require('./tableRenderer');
+            const tasksData = core.readTasks(process.cwd());
+            
+            // Generate and output the human-readable table
+            const humanReadableTable = tableRenderer.generateTaskTable(tasksData, process.cwd());
+            logger.output(humanReadableTable);
+            return;
+        }
+        
         const result = core.listTasks(process.cwd(), options);
 
         if (options.json) {
@@ -111,6 +126,8 @@ program
               return;
             }
           
+            // Only display the table if specifically requested or no other display format is specified
+            if (options.table || (!options.json && !options.human)) {
             // Define table structure
             const table = new Table({
               head: [chalk.cyan('ID'), chalk.cyan('Title'), chalk.cyan('Status'), chalk.cyan('Priority'), chalk.cyan('Depends On'), chalk.cyan('Subtasks')],
@@ -147,11 +164,34 @@ program
             });
           
             logger.outputTable(table);
+            }
           } else {
             logger.error("Failed to retrieve tasks.");
           }
     } catch (error) {
         logger.error(`Error listing tasks: ${error.message}`);
+        process.exitCode = 1;
+    }
+  });
+
+// generate-table command
+program
+  .command('generate-table')
+  .description('Generate a human-readable task table with checkboxes')
+  .action(() => {
+    try {
+      const tableRenderer = require('./tableRenderer');
+      const result = core.listTasks(process.cwd(), { humanReadable: true });
+      
+      if (result && result.success) {
+        const taskTablePath = path.resolve(process.cwd(), 'tasks-table.md');
+        tableRenderer.writeTaskTable(core.readTasks(process.cwd()), process.cwd());
+        logger.output(`Human-readable task table generated at: ${taskTablePath}`);
+      } else {
+        logger.error("Failed to generate task table.");
+      }
+    } catch (error) {
+      logger.error(`Error generating task table: ${error.message}`);
         process.exitCode = 1;
     }
   });

@@ -83,6 +83,37 @@ function sendError(id, code, message, data = {}) {
   logger.output(JSON.stringify(response));
 }
 
+// Helper function for the listTasks method
+function handleListTasks(requestId, params) {
+  try {
+    logger.debug(`Handling listTasks with params: ${JSON.stringify(params)}`);
+    
+    // Always include format options in params
+    const options = { 
+      ...params
+    };
+    
+    // Get the tasks data first
+    const tasksData = core.readTasks(workspaceRoot);
+    
+    // Generate human-readable table
+    const tableRenderer = require('./tableRenderer');
+    const humanReadableTable = tableRenderer.generateTaskTable(tasksData, workspaceRoot);
+    
+    // For all formats, pass format to core.listTasks
+    const result = core.listTasks(workspaceRoot, options);
+    
+    // Always include human-readable table with the response
+    return {
+      ...result,
+      taskTable: humanReadableTable
+    };
+  } catch (error) {
+    logger.error(`Error in listTasks: ${error.message}`);
+    throw error;
+  }
+}
+
 // Handle incoming lines from stdin (JSON-RPC requests)
 rl.on('line', async (line) => {
   let requestId = null; // Store ID for error handling
@@ -180,7 +211,8 @@ rl.on('line', async (line) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  status: { type: 'string', enum: ['todo', 'inprogress', 'done', 'blocked', 'error'], description: 'Optional status to filter by.' }
+                  status: { type: 'string', enum: ['todo', 'inprogress', 'done', 'blocked', 'error'], description: 'Optional status to filter by.' },
+                  format: { type: 'string', enum: ['json', 'table', 'human'], description: 'Optional output format. "human" provides a readable format with checkboxes.' }
                 }
               }
             },
@@ -282,6 +314,13 @@ rl.on('line', async (line) => {
                 },
                 required: ['fromTaskId', 'prompt']
               }
+            },
+            {
+              name: 'generateTaskTable',
+              description: 'Generates a human-readable Markdown file with task statuses and checkboxes.',
+              inputSchema: {
+                type: 'object'
+              }
             }
           ]
         });
@@ -357,9 +396,8 @@ rl.on('line', async (line) => {
               break;
               
             case 'listTasks':
-              responseData = core.listTasks(workspaceRoot, {
-                status: argsParam && argsParam.status
-              });
+              const listTasksResponse = handleListTasks(id, params);
+              responseData = listTasksResponse;
               break;
               
             case 'updateStatus':
@@ -427,6 +465,10 @@ rl.on('line', async (line) => {
               }
               
               responseData = await core.reviseTasks(workspaceRoot, fromTaskId, prompt);
+              break;
+              
+            case 'generateTaskTable':
+              responseData = core.generateHumanReadableTaskTable(workspaceRoot);
               break;
               
             default:

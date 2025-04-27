@@ -94,6 +94,18 @@ async function main() {
         
       case 'list':
         const listOptions = parseArgs(args);
+        
+        // Check if human-readable format was requested via --human flag
+        if (listOptions.human) {
+          const tableRenderer = require('../src/tableRenderer');
+          const tasksData = core.readTasks(workspaceRoot);
+          
+          // Generate and output the human-readable table
+          const humanReadableTable = tableRenderer.generateTaskTable(tasksData, workspaceRoot);
+          logger.output(humanReadableTable);
+          return;
+        }
+        
         result = core.listTasks(workspaceRoot, {
           status: listOptions.status || listOptions.s
         });
@@ -271,6 +283,10 @@ async function main() {
         result = core.generateTaskFiles(workspaceRoot);
         break;
         
+      case 'generate-table':
+        result = core.generateHumanReadableTaskTable(workspaceRoot);
+        break;
+        
       default:
         logger.output(`
 Usage: task-manager <command> [options]
@@ -279,6 +295,9 @@ Commands:
   init                        Initialize the task manager project
   add -t <title> [options]    Add a new task
   list [-s <status>]          List all tasks
+  list --human                List tasks in human-readable format with checkboxes
+  list --json                 List tasks in JSON format
+  generate-table              Generate a human-readable task table file
   add-subtask <id> -t <title> Add a subtask to a parent task
   status <id> <status> [-m]   Update the status of a task
   next                        Get the next actionable task
