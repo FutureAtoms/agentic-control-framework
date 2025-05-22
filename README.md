@@ -13,6 +13,7 @@ The Agentic Control Framework (ACF) is a comprehensive task management system de
 - **AI-powered features:** Break down tasks into subtasks, adapt to changing requirements
 - **Progress tracking:** Monitor task status, dependencies, and completion
 - **Customizable workflows:** Adapt to your specific project needs
+- **Filesystem operations:** Access files and directories securely through MCP
 
 ![Demo of Agentic Control Framework](demo.gif)
 
@@ -28,6 +29,7 @@ Check out our comprehensive [tutorial](docs/tutorial.md) to get started!
 - Use AI to expand tasks into detailed subtasks
 - Revise task plans when requirements change
 - Integrate with Cursor IDE through MCP (Model Control Protocol)
+- Securely access and manipulate the filesystem through MCP
 
 ## Installation
 
@@ -84,6 +86,7 @@ agentic-control-framework/
 ├── src/
 │   ├── cli.js            # CLI command definitions
 │   ├── core.js           # Core functionality
+│   ├── filesystem_tools.js # Filesystem operations for MCP
 │   ├── logger.js         # Standardized logging
 │   ├── mcp_server.js     # MCP server implementation
 │   └── prd_parser.js     # PRD parsing functionality
@@ -378,4 +381,39 @@ ISC
 ## Author
 
 Abhilash Chadhar
+
+## MCP Filesystem Tools
+
+The Agentic Control Framework includes secure filesystem operations through MCP. These tools are available when using the framework within Cursor IDE or any other MCP-compatible client.
+
+### File Operations
+
+- **read_file**: Read the complete contents of a file
+- **read_multiple_files**: Read multiple files at once
+- **write_file**: Create or overwrite a file with new content
+- **copy_file**: Copy files and directories
+- **move_file**: Move or rename files and directories
+- **delete_file**: Delete a file or directory
+
+### Directory Operations
+
+- **list_directory**: Get a detailed listing of files and directories
+- **create_directory**: Create a new directory
+- **tree**: Get a hierarchical representation of a directory structure
+
+### Search and Information
+
+- **search_files**: Search for files and directories matching a pattern
+- **get_file_info**: Retrieve detailed metadata about a file or directory
+- **list_allowed_directories**: List directories accessible to the MCP server
+
+### Security Features
+
+- Path validation to prevent directory traversal attacks
+- Configurable allowed directories (defaults to workspace root)
+- Symlink resolution with security checks
+- File size limits for safer operation
+- MIME type detection for proper content handling
+
+> **Note**: For security reasons, filesystem operations are restricted to the workspace directory by default.
  

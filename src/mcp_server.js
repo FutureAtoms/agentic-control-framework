@@ -9,6 +9,7 @@ const logger = require('./logger'); // Import our logger
 
 // Import the core functionality
 const core = require('./core');
+const filesystemTools = require('./filesystem_tools'); // Import filesystem tools
 
 // Create readline interface for JSON-RPC communication
 const rl = readline.createInterface({
@@ -61,7 +62,12 @@ if (!workspaceRoot || workspaceRoot === '/') {
   logger.info(`Invalid workspace root. Using current directory: ${workspaceRoot}`);
 }
 
+// Create an array of allowed directories for filesystem operations
+// For security, we only allow access to the workspace directory
+const allowedDirectories = [workspaceRoot];
+
 logger.info(`Starting server with workspace root: ${workspaceRoot}`);
+logger.info(`Allowed directories for filesystem operations: ${allowedDirectories.join(', ')}`);
 
 // Counter for generating unique request IDs
 let requestCounter = 1;
@@ -242,7 +248,11 @@ rl.on('line', async (line) => {
               name: 'getNextTask',
               description: 'Gets the next actionable task based on status, dependencies, and priority.',
               inputSchema: {
-                type: 'object'
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
               }
             },
             {
@@ -287,7 +297,11 @@ rl.on('line', async (line) => {
               name: 'generateTaskFiles',
               description: 'Generates individual Markdown files for each task in the tasks/ directory.',
               inputSchema: {
-                type: 'object'
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
               }
             },
             {
@@ -328,7 +342,155 @@ rl.on('line', async (line) => {
               name: 'generateTaskTable',
               description: 'Generates a human-readable Markdown file with task statuses and checkboxes.',
               inputSchema: {
-                type: 'object'
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            // Filesystem tools
+            {
+              name: 'read_file',
+              description: 'Read the complete contents of a file from the file system.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path to the file to read' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'read_multiple_files',
+              description: 'Read the contents of multiple files in a single operation.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  paths: { 
+                    type: 'array', 
+                    items: { type: 'string' },
+                    description: 'List of file paths to read' 
+                  }
+                },
+                required: ['paths']
+              }
+            },
+            {
+              name: 'write_file',
+              description: 'Create a new file or overwrite an existing file with new content.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path where to write the file' },
+                  content: { type: 'string', description: 'Content to write to the file' }
+                },
+                required: ['path', 'content']
+              }
+            },
+            {
+              name: 'copy_file',
+              description: 'Copy files and directories.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  source: { type: 'string', description: 'Source path of the file or directory' },
+                  destination: { type: 'string', description: 'Destination path' }
+                },
+                required: ['source', 'destination']
+              }
+            },
+            {
+              name: 'move_file',
+              description: 'Move or rename files and directories.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  source: { type: 'string', description: 'Source path of the file or directory' },
+                  destination: { type: 'string', description: 'Destination path' }
+                },
+                required: ['source', 'destination']
+              }
+            },
+            {
+              name: 'delete_file',
+              description: 'Delete a file or directory from the file system.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path to the file or directory to delete' },
+                  recursive: { type: 'boolean', description: 'Whether to recursively delete directories (default: false)' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'list_directory',
+              description: 'Get a detailed listing of all files and directories in a specified path.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path of the directory to list' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'create_directory',
+              description: 'Create a new directory or ensure a directory exists.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path of the directory to create' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'tree',
+              description: 'Returns a hierarchical JSON representation of a directory structure.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path of the directory to traverse' },
+                  depth: { type: 'number', description: 'Maximum depth to traverse (default: 3)' },
+                  follow_symlinks: { type: 'boolean', description: 'Whether to follow symbolic links (default: false)' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'search_files',
+              description: 'Recursively search for files and directories matching a pattern.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Starting path for the search' },
+                  pattern: { type: 'string', description: 'Search pattern to match against file names' }
+                },
+                required: ['path', 'pattern']
+              }
+            },
+            {
+              name: 'get_file_info',
+              description: 'Retrieve detailed metadata about a file or directory.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Path to the file or directory' }
+                },
+                required: ['path']
+              }
+            },
+            {
+              name: 'list_allowed_directories',
+              description: 'Returns the list of directories that this server is allowed to access.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
               }
             }
           ]
@@ -355,7 +517,10 @@ rl.on('line', async (line) => {
             case 'setWorkspace':
               if (argsParam && argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
                 workspaceRoot = argsParam.workspacePath;
+                // Update allowed directories when workspace changes
+                allowedDirectories[0] = workspaceRoot;
                 logger.info(`Workspace root set to: ${workspaceRoot}`);
+                logger.info(`Allowed directories updated: ${allowedDirectories.join(', ')}`);
                 responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
               } else {
                 const path = argsParam && argsParam.workspacePath ? argsParam.workspacePath : 'undefined';
@@ -478,6 +643,60 @@ rl.on('line', async (line) => {
               
             case 'generateTaskTable':
               responseData = core.generateHumanReadableTaskTable(workspaceRoot);
+              break;
+              
+            // Filesystem tools
+            case 'read_file':
+              responseData = filesystemTools.readFile(argsParam.path, allowedDirectories);
+              break;
+              
+            case 'read_multiple_files':
+              responseData = filesystemTools.readMultipleFiles(argsParam.paths, allowedDirectories);
+              break;
+              
+            case 'write_file':
+              responseData = filesystemTools.writeFile(argsParam.path, argsParam.content, allowedDirectories);
+              break;
+              
+            case 'copy_file':
+              responseData = filesystemTools.copyFile(argsParam.source, argsParam.destination, allowedDirectories);
+              break;
+              
+            case 'move_file':
+              responseData = filesystemTools.moveFile(argsParam.source, argsParam.destination, allowedDirectories);
+              break;
+              
+            case 'delete_file':
+              responseData = filesystemTools.deleteFile(argsParam.path, argsParam.recursive, allowedDirectories);
+              break;
+              
+            case 'list_directory':
+              responseData = filesystemTools.listDirectory(argsParam.path, allowedDirectories);
+              break;
+              
+            case 'create_directory':
+              responseData = filesystemTools.createDirectory(argsParam.path, allowedDirectories);
+              break;
+              
+            case 'tree':
+              responseData = filesystemTools.createDirectoryTree(
+                argsParam.path, 
+                argsParam.depth || 3, 
+                argsParam.follow_symlinks || false, 
+                allowedDirectories
+              );
+              break;
+              
+            case 'search_files':
+              responseData = filesystemTools.searchFiles(argsParam.path, argsParam.pattern, allowedDirectories);
+              break;
+              
+            case 'get_file_info':
+              responseData = filesystemTools.getFileInfo(argsParam.path, allowedDirectories);
+              break;
+              
+            case 'list_allowed_directories':
+              responseData = filesystemTools.listAllowedDirectories(allowedDirectories);
               break;
               
             default:
