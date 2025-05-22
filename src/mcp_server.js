@@ -62,9 +62,21 @@ if (!workspaceRoot || workspaceRoot === '/') {
   logger.info(`Invalid workspace root. Using current directory: ${workspaceRoot}`);
 }
 
+// Parse allowed directories from environment variable
+// Format: dir1:dir2:dir3 (colon-separated paths)
+const envAllowedDirs = process.env.ALLOWED_DIRS ? 
+  process.env.ALLOWED_DIRS.split(':').filter(Boolean) : 
+  [];
+
 // Create an array of allowed directories for filesystem operations
-// For security, we only allow access to the workspace directory
-const allowedDirectories = [workspaceRoot];
+// For security, always include the workspace directory, plus any from environment
+const allowedDirectories = [...new Set([workspaceRoot, ...envAllowedDirs])];
+
+// Check if readonly mode is enabled
+const readonlyMode = process.env.READONLY_MODE === 'true';
+if (readonlyMode) {
+  logger.info('Running in read-only mode. Write operations will be blocked.');
+}
 
 logger.info(`Starting server with workspace root: ${workspaceRoot}`);
 logger.info(`Allowed directories for filesystem operations: ${allowedDirectories.join(', ')}`);
@@ -127,6 +139,28 @@ function handleListTasks(requestId, params) {
     logger.error(`Error in listTasks: ${error.message}`);
     throw error;
   }
+}
+
+// Function to check if an operation is allowed in readonly mode
+function checkReadOnlyMode(toolName) {
+  if (!readonlyMode) {
+    return true; // Not in readonly mode, all operations allowed
+  }
+
+  // List of write operations that should be blocked in readonly mode
+  const writeOperations = [
+    'write_file', 
+    'copy_file', 
+    'move_file', 
+    'delete_file', 
+    'create_directory'
+  ];
+
+  if (writeOperations.includes(toolName)) {
+    return false; // This operation is not allowed in readonly mode
+  }
+
+  return true; // Read operation, allowed in readonly mode
 }
 
 // Handle incoming lines from stdin (JSON-RPC requests)
@@ -378,7 +412,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'write_file',
-              description: 'Create a new file or overwrite an existing file with new content.',
+              description: 'Create a new file or overwrite an existing file with new content.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
                 properties: {
@@ -390,7 +424,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'copy_file',
-              description: 'Copy files and directories.',
+              description: 'Copy files and directories.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
                 properties: {
@@ -402,7 +436,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'move_file',
-              description: 'Move or rename files and directories.',
+              description: 'Move or rename files and directories.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
                 properties: {
@@ -414,7 +448,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'delete_file',
-              description: 'Delete a file or directory from the file system.',
+              description: 'Delete a file or directory from the file system.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
                 properties: {
@@ -437,7 +471,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'create_directory',
-              description: 'Create a new directory or ensure a directory exists.',
+              description: 'Create a new directory or ensure a directory exists.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
                 properties: {
@@ -492,6 +526,17 @@ rl.on('line', async (line) => {
                 },
                 required: ['random_string']
               }
+            },
+            {
+              name: 'get_filesystem_status',
+              description: 'Returns the current status of filesystem operations, including read-only mode and allowed directories.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
             }
           ]
         });
@@ -518,7 +563,12 @@ rl.on('line', async (line) => {
               if (argsParam && argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
                 workspaceRoot = argsParam.workspacePath;
                 // Update allowed directories when workspace changes
-                allowedDirectories[0] = workspaceRoot;
+                const index = allowedDirectories.indexOf(allowedDirectories[0]);
+                if (index !== -1) {
+                  allowedDirectories[index] = workspaceRoot;
+                } else {
+                  allowedDirectories.unshift(workspaceRoot);
+                }
                 logger.info(`Workspace root set to: ${workspaceRoot}`);
                 logger.info(`Allowed directories updated: ${allowedDirectories.join(', ')}`);
                 responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
@@ -655,18 +705,50 @@ rl.on('line', async (line) => {
               break;
               
             case 'write_file':
+              // Check if we're in readonly mode
+              if (!checkReadOnlyMode('write_file')) {
+                responseData = { 
+                  success: false, 
+                  message: 'Operation not allowed: Server is running in read-only mode'
+                };
+                break;
+              }
               responseData = filesystemTools.writeFile(argsParam.path, argsParam.content, allowedDirectories);
               break;
               
             case 'copy_file':
+              // Check if we're in readonly mode
+              if (!checkReadOnlyMode('copy_file')) {
+                responseData = { 
+                  success: false, 
+                  message: 'Operation not allowed: Server is running in read-only mode'
+                };
+                break;
+              }
               responseData = filesystemTools.copyFile(argsParam.source, argsParam.destination, allowedDirectories);
               break;
               
             case 'move_file':
+              // Check if we're in readonly mode
+              if (!checkReadOnlyMode('move_file')) {
+                responseData = { 
+                  success: false, 
+                  message: 'Operation not allowed: Server is running in read-only mode'
+                };
+                break;
+              }
               responseData = filesystemTools.moveFile(argsParam.source, argsParam.destination, allowedDirectories);
               break;
               
             case 'delete_file':
+              // Check if we're in readonly mode
+              if (!checkReadOnlyMode('delete_file')) {
+                responseData = { 
+                  success: false, 
+                  message: 'Operation not allowed: Server is running in read-only mode'
+                };
+                break;
+              }
               responseData = filesystemTools.deleteFile(argsParam.path, argsParam.recursive, allowedDirectories);
               break;
               
@@ -675,6 +757,14 @@ rl.on('line', async (line) => {
               break;
               
             case 'create_directory':
+              // Check if we're in readonly mode
+              if (!checkReadOnlyMode('create_directory')) {
+                responseData = { 
+                  success: false, 
+                  message: 'Operation not allowed: Server is running in read-only mode'
+                };
+                break;
+              }
               responseData = filesystemTools.createDirectory(argsParam.path, allowedDirectories);
               break;
               
@@ -697,6 +787,20 @@ rl.on('line', async (line) => {
               
             case 'list_allowed_directories':
               responseData = filesystemTools.listAllowedDirectories(allowedDirectories);
+              break;
+              
+            case 'get_filesystem_status':
+              // Return the current status of filesystem operations
+              responseData = {
+                success: true,
+                readonly_mode: readonlyMode,
+                allowed_directories: allowedDirectories.map(dir => ({
+                  path: dir,
+                  resolvedPath: path.resolve(dir),
+                  exists: fs.existsSync(path.resolve(dir))
+                })),
+                workspace_root: workspaceRoot
+              };
               break;
               
             default:

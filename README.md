@@ -416,4 +416,31 @@ The Agentic Control Framework includes secure filesystem operations through MCP.
 - MIME type detection for proper content handling
 
 > **Note**: For security reasons, filesystem operations are restricted to the workspace directory by default.
+
+## Environment Variables
+
+The Agentic Control Framework supports the following environment variables to control its behavior:
+
+- `ACF_PATH` or `WORKSPACE_ROOT`: Sets the workspace root directory. Command-line arguments take precedence.
+- `ALLOWED_DIRS`: Colon-separated list of additional directories that the filesystem tools are allowed to access. Example: `/path/to/dir1:/path/to/dir2`.
+- `READONLY_MODE`: When set to `true`, disables all write operations in the filesystem tools.
+
+Example usage:
+
+```bash
+# Allow access to additional directories
+ALLOWED_DIRS="/home/user/documents:/tmp/shared" node src/mcp_server.js
+
+# Enable read-only mode for security
+READONLY_MODE=true node src/mcp_server.js
+```
+
+## Security Considerations
+
+The Agentic Control Framework includes several security features:
+
+1. **Path Validation**: All filesystem operations validate paths to prevent directory traversal attacks.
+2. **Workspace Isolation**: By default, filesystem operations are restricted to the workspace directory.
+3. **Allowed Directories**: Additional directories can be explicitly allowed using the `ALLOWED_DIRS` environment variable.
+4. **Read-Only Mode**: Enable `READONLY_MODE=true` to prevent any write operations, allowing only read operations.
  

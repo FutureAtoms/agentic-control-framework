@@ -691,31 +691,16 @@ function createDirectoryTree(dirPath, depth = 3, followSymlinks = false, allowed
 }
 
 /**
- * Lists allowed directories
- * @param {Array<string>} allowedDirs - List of allowed directories
- * @returns {object} - Response object with allowed directories
+ * Lists all allowed directories
+ * @param {string[]} allowedDirectories - List of allowed directory paths
+ * @returns {object} - Success message with list of allowed directories
  */
-function listAllowedDirectories(allowedDirs) {
-  try {
-    if (!allowedDirs || !Array.isArray(allowedDirs) || allowedDirs.length === 0) {
-      return { success: false, message: 'No allowed directories configured' };
-    }
-
-    // Resolve paths
-    const resolvedDirs = allowedDirs.map(dir => ({
-      path: dir,
-      resolvedPath: path.resolve(dir),
-      exists: fs.existsSync(path.resolve(dir))
-    }));
-
-    return {
-      success: true,
-      directories: resolvedDirs
-    };
-  } catch (error) {
-    logger.error(`Error listing allowed directories: ${error.message}`);
-    return { success: false, message: `Error listing allowed directories: ${error.message}` };
-  }
+function listAllowedDirectories(allowedDirectories) {
+  return {
+    success: true,
+    message: 'Allowed directories listed successfully',
+    directories: allowedDirectories
+  };
 }
 
 module.exports = {
