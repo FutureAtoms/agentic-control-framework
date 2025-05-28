@@ -1,0 +1,56 @@
+# mcp-proxy configuration for Agentic Control Framework
+# Converts STDIO-based ACF server to HTTP/SSE without code changes
+
+servers:
+  acf:
+    command: "node"
+    args: ["/app/bin/agentic-control-framework-mcp"]
+    env:
+      WORKSPACE_ROOT: "/data"
+      ALLOWED_DIRS: "/data:/tmp"
+      ACF_PATH: "/app"
+      DEBUG: "false"
+    description: "Agentic Control Framework - 64+ Tools for AI Agents"
+    
+# Server configuration
+host: "0.0.0.0"  # For Docker deployment
+port: 8080
+cors:
+  enabled: true
+  origins: 
+    - "https://claude.ai"
+    - "https://cursor.sh" 
+    - "https://codeium.com"
+    - "*"  # For development - restrict in production
+
+# Authentication configuration
+auth:
+  type: "bearer"
+  tokens:
+    - "acf-demo-token-2024"
+    - "acf-free-tier-token"
+  # Production tokens should be set via environment variables
+  # AUTH_TOKENS="token1,token2,token3"
+
+# Performance settings
+performance:
+  maxConnections: 10
+  connectionTimeout: 30000
+  keepAlive: true
+  requestTimeout: 120000
+
+# Logging
+logging:
+  level: "info"
+  format: "json"
+  
+# Health check endpoint
+healthCheck:
+  enabled: true
+  path: "/health"
+  
+# Rate limiting (requests per minute per token)
+rateLimit:
+  enabled: true
+  requests: 1000
+  window: 60000 

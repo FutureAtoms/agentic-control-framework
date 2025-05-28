@@ -1,0 +1,37 @@
+app = "acf-mcp-proxy"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile.proxy"
+
+[env]
+  NODE_ENV = "production"
+  WORKSPACE_ROOT = "/data"
+  ALLOWED_DIRS = "/data:/tmp"
+  ACF_PATH = "/app"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/health"
+
+[machine]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1gb"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1 
