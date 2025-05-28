@@ -1,0 +1,116 @@
+name: Notify Upstream Changes
+
+on:
+  workflow_run:
+    workflows: ["Check Upstream MCP Updates"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Check for updates
+      id: check-updates
+      run: |
+        # Check if upstream-versions.json was modified in the last workflow run
+        if git diff HEAD~1 HEAD --name-only | grep -q ".github/upstream-versions.json"; then
+          echo "UPDATES_FOUND=true" >> $GITHUB_OUTPUT
+        else
+          echo "UPDATES_FOUND=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Send Slack notification
+      if: steps.check-updates.outputs.UPDATES_FOUND == 'true' && env.SLACK_WEBHOOK_URL != ''
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        curl -X POST -H 'Content-type: application/json' \
+          --data '{
+            "text": "🔄 ACF Upstream Updates Available",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*ACF Upstream MCP Updates Available*\n\nNew versions have been detected in upstream MCP repositories."
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Issues"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream-update"
+                  },
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Run Sync Script"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/actions/workflows/sync-upstream.yml"
+                  }
+                ]
+              }
+            ]
+          }' \
+          $SLACK_WEBHOOK_URL
+          
+    - name: Send Discord notification
+      if: steps.check-updates.outputs.UPDATES_FOUND == 'true' && env.DISCORD_WEBHOOK_URL != ''
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+          -d '{
+            "content": "🔄 **ACF Upstream Updates Available**",
+            "embeds": [{
+              "title": "New MCP Updates Detected",
+              "description": "New versions have been detected in upstream MCP repositories. Check the GitHub issues for details.",
+              "color": 3447003,
+              "fields": [
+                {
+                  "name": "Action Required",
+                  "value": "Review changes and run sync script"
+                }
+              ],
+              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'"
+            }]
+          }' \
+          $DISCORD_WEBHOOK_URL
+          
+    - name: Send email notification
+      if: steps.check-updates.outputs.UPDATES_FOUND == 'true' && env.EMAIL_NOTIFICATION == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: ACF Upstream MCP Updates Available
+        to: ${{ secrets.EMAIL_TO }}
+        from: ACF Bot <acf-bot@example.com>
+        body: |
+          Hello,
+          
+          New versions have been detected in upstream MCP repositories:
+          
+          - Desktop Commander MCP
+          - Playwright MCP
+          
+          Please review the changes and run the sync script to update ACF.
+          
+          View issues: https://github.com/${{ github.repository }}/issues?q=is%3Aissue+is%3Aopen+label%3Aupstream-update
+          
+          Best regards,
+          ACF Bot

@@ -421,9 +421,30 @@ function getFileInfo(filePath, allowedDirs) {
       accessed: stats.atime.toISOString(),
       mimeType,
       permissions: {
-        readable: fs.accessSync(resolvedPath, fs.constants.R_OK, () => false) || true,
-        writable: fs.accessSync(resolvedPath, fs.constants.W_OK, () => false) || true,
-        executable: fs.accessSync(resolvedPath, fs.constants.X_OK, () => false) || true
+        readable: (() => {
+          try {
+            fs.accessSync(resolvedPath, fs.constants.R_OK);
+            return true;
+          } catch {
+            return false;
+          }
+        })(),
+        writable: (() => {
+          try {
+            fs.accessSync(resolvedPath, fs.constants.W_OK);
+            return true;
+          } catch {
+            return false;
+          }
+        })(),
+        executable: (() => {
+          try {
+            fs.accessSync(resolvedPath, fs.constants.X_OK);
+            return true;
+          } catch {
+            return false;
+          }
+        })()
       }
     };
   } catch (error) {

@@ -172,7 +172,7 @@ function generateMarkdownOutput(tasksData, tasks) {
   const filledBars = Math.round((completionPercentage / 100) * progressBarWidth);
   const emptyBars = progressBarWidth - filledBars;
   
-  const progressBar = `[${'█'.repeat(filledBars)}${' '.repeat(emptyBars)}] ${completionPercentage}%`;
+  const progressBar = `[${'█'.repeat(Math.max(0, filledBars))}${' '.repeat(Math.max(0, emptyBars))}] ${completionPercentage}%`;
   output += `\n${progressBar}\n\n`;
   
   // Sort tasks by ID

@@ -11,6 +11,14 @@ const logger = require('./logger'); // Import our logger
 const core = require('./core');
 const filesystemTools = require('./filesystem_tools'); // Import filesystem tools
 
+// Import new tools
+const terminalTools = require('./tools/terminal_tools');
+const searchTools = require('./tools/search_tools');
+const editTools = require('./tools/edit_tools');
+const enhancedFsTools = require('./tools/enhanced_filesystem_tools');
+const browserTools = require('./tools/browser_tools');
+const applescriptTools = require('./tools/applescript_tools');
+
 // Create readline interface for JSON-RPC communication
 const rl = readline.createInterface({
   input: process.stdin,
@@ -386,11 +394,13 @@ rl.on('line', async (line) => {
             // Filesystem tools
             {
               name: 'read_file',
-              description: 'Read the complete contents of a file from the file system.',
+              description: 'Read the complete contents of a file from the file system or from a URL.',
               inputSchema: {
                 type: 'object',
                 properties: {
-                  path: { type: 'string', description: 'Path to the file to read' }
+                  path: { type: 'string', description: 'Path to the file to read or URL to fetch' },
+                  isUrl: { type: 'boolean', description: 'Whether the path is a URL (optional, auto-detected if starts with http:// or https://)' },
+                  timeout: { type: 'number', description: 'Timeout for URL requests in milliseconds (optional, default: 30000)' }
                 },
                 required: ['path']
               }
@@ -536,6 +546,435 @@ rl.on('line', async (line) => {
                   random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
                 },
                 required: ['random_string']
+              }
+            },
+            
+            // Desktop Commander MCP Tools
+            {
+              name: 'get_config',
+              description: 'Get the complete server configuration as JSON',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'set_config_value',
+              description: 'Set a specific configuration value by key',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  key: { type: 'string', description: 'Configuration key to set' },
+                  value: { description: 'Value to set for the configuration key' }
+                },
+                required: ['key', 'value']
+              }
+            },
+            {
+              name: 'execute_command',
+              description: 'Execute a terminal command with timeout',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  command: { type: 'string', description: 'Command to execute' },
+                  shell: { type: 'string', description: 'Shell to use (optional)' },
+                  timeout_ms: { type: 'number', description: 'Timeout in milliseconds (optional)' }
+                },
+                required: ['command']
+              }
+            },
+            {
+              name: 'read_output',
+              description: 'Read new output from a running terminal session',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  pid: { type: 'number', description: 'Process ID of the running command' }
+                },
+                required: ['pid']
+              }
+            },
+            {
+              name: 'force_terminate',
+              description: 'Force terminate a running terminal session',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  pid: { type: 'number', description: 'Process ID to terminate' }
+                },
+                required: ['pid']
+              }
+            },
+            {
+              name: 'list_sessions',
+              description: 'List all active terminal sessions',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'list_processes',
+              description: 'List all running processes',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'kill_process',
+              description: 'Terminate a running process by PID',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  pid: { type: 'number', description: 'Process ID to kill' }
+                },
+                required: ['pid']
+              }
+            },
+            {
+              name: 'search_code',
+              description: 'Search for text/code patterns within file contents using ripgrep',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  path: { type: 'string', description: 'Starting path for the search' },
+                  pattern: { type: 'string', description: 'Search pattern' },
+                  ignoreCase: { type: 'boolean', description: 'Case insensitive search (default: true)' },
+                  filePattern: { type: 'string', description: 'File pattern filter (optional)' },
+                  contextLines: { type: 'number', description: 'Number of context lines (optional)' },
+                  includeHidden: { type: 'boolean', description: 'Include hidden files (optional)' },
+                  maxResults: { type: 'number', description: 'Maximum results (default: 100)' },
+                  timeoutMs: { type: 'number', description: 'Timeout in milliseconds (optional)' }
+                },
+                required: ['path', 'pattern']
+              }
+            },
+            {
+              name: 'edit_block',
+              description: 'Apply surgical text replacements to files',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  file_path: { type: 'string', description: 'Path to the file to edit' },
+                  old_string: { type: 'string', description: 'Text to replace' },
+                  new_string: { type: 'string', description: 'Replacement text' },
+                  expected_replacements: { type: 'number', description: 'Expected number of replacements (default: 1)' }
+                },
+                required: ['file_path', 'old_string', 'new_string']
+              }
+            },
+            
+            // Playwright MCP Browser Tools
+            {
+              name: 'browser_navigate',
+              description: 'Navigate to a URL',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string', description: 'The URL to navigate to' }
+                },
+                required: ['url']
+              }
+            },
+            {
+              name: 'browser_navigate_back',
+              description: 'Go back to the previous page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_navigate_forward',
+              description: 'Go forward to the next page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_click',
+              description: 'Perform click on a web page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  element: { type: 'string', description: 'Human-readable element description' },
+                  ref: { type: 'string', description: 'Exact target element reference from the page snapshot' }
+                },
+                required: ['element', 'ref']
+              }
+            },
+            {
+              name: 'browser_type',
+              description: 'Type text into editable element',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  element: { type: 'string', description: 'Human-readable element description' },
+                  ref: { type: 'string', description: 'Exact target element reference' },
+                  text: { type: 'string', description: 'Text to type into the element' },
+                  submit: { type: 'boolean', description: 'Whether to submit entered text (press Enter after)' },
+                  slowly: { type: 'boolean', description: 'Whether to type one character at a time' }
+                },
+                required: ['element', 'ref', 'text']
+              }
+            },
+            {
+              name: 'browser_hover',
+              description: 'Hover over element on page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  element: { type: 'string', description: 'Human-readable element description' },
+                  ref: { type: 'string', description: 'Exact target element reference' }
+                },
+                required: ['element', 'ref']
+              }
+            },
+            {
+              name: 'browser_drag',
+              description: 'Perform drag and drop between two elements',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  startElement: { type: 'string', description: 'Human-readable source element description' },
+                  startRef: { type: 'string', description: 'Exact source element reference' },
+                  endElement: { type: 'string', description: 'Human-readable target element description' },
+                  endRef: { type: 'string', description: 'Exact target element reference' }
+                },
+                required: ['startElement', 'startRef', 'endElement', 'endRef']
+              }
+            },
+            {
+              name: 'browser_select_option',
+              description: 'Select an option in a dropdown',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  element: { type: 'string', description: 'Human-readable element description' },
+                  ref: { type: 'string', description: 'Exact target element reference' },
+                  values: { type: 'array', items: { type: 'string' }, description: 'Array of values to select' }
+                },
+                required: ['element', 'ref', 'values']
+              }
+            },
+            {
+              name: 'browser_press_key',
+              description: 'Press a key on the keyboard',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  key: { type: 'string', description: 'Name of the key to press (e.g., ArrowLeft, a)' }
+                },
+                required: ['key']
+              }
+            },
+            {
+              name: 'browser_take_screenshot',
+              description: 'Take a screenshot of the current page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  element: { type: 'string', description: 'Human-readable element description (optional)' },
+                  ref: { type: 'string', description: 'Element reference for element screenshot (optional)' },
+                  filename: { type: 'string', description: 'File name to save the screenshot (optional)' },
+                  raw: { type: 'boolean', description: 'Whether to return PNG format (default: false for JPEG)' }
+                }
+              }
+            },
+            {
+              name: 'browser_snapshot',
+              description: 'Capture accessibility snapshot of the current page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_pdf_save',
+              description: 'Save page as PDF',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  filename: { type: 'string', description: 'File name to save the PDF (optional)' }
+                }
+              }
+            },
+            {
+              name: 'browser_console_messages',
+              description: 'Returns all console messages',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_file_upload',
+              description: 'Upload one or multiple files',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  paths: { type: 'array', items: { type: 'string' }, description: 'Array of file paths to upload' }
+                },
+                required: ['paths']
+              }
+            },
+            {
+              name: 'browser_wait',
+              description: 'Wait for a specified time in seconds',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  time: { type: 'number', description: 'Time to wait in seconds (max 10)' }
+                },
+                required: ['time']
+              }
+            },
+            {
+              name: 'browser_wait_for',
+              description: 'Wait for text to appear or disappear or a specified time',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  text: { type: 'string', description: 'Text to wait for to appear' },
+                  textGone: { type: 'string', description: 'Text to wait for to disappear' },
+                  time: { type: 'number', description: 'Time to wait in seconds' }
+                }
+              }
+            },
+            {
+              name: 'browser_resize',
+              description: 'Resize the browser window',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  width: { type: 'number', description: 'Width of the browser window' },
+                  height: { type: 'number', description: 'Height of the browser window' }
+                },
+                required: ['width', 'height']
+              }
+            },
+            {
+              name: 'browser_handle_dialog',
+              description: 'Handle a dialog',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  accept: { type: 'boolean', description: 'Whether to accept the dialog' },
+                  promptText: { type: 'string', description: 'Text for prompt dialogs (optional)' }
+                },
+                required: ['accept']
+              }
+            },
+            {
+              name: 'browser_close',
+              description: 'Close the page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_install',
+              description: 'Install the browser specified in the config',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_tab_list',
+              description: 'List browser tabs',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'browser_tab_new',
+              description: 'Open a new tab',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  url: { type: 'string', description: 'URL to navigate to in the new tab (optional)' }
+                }
+              }
+            },
+            {
+              name: 'browser_tab_select',
+              description: 'Select a tab by index',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  index: { type: 'number', description: 'The index of the tab to select' }
+                },
+                required: ['index']
+              }
+            },
+            {
+              name: 'browser_tab_close',
+              description: 'Close a tab',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  index: { type: 'number', description: 'Index of the tab to close (optional, closes current if not provided)' }
+                }
+              }
+            },
+            {
+              name: 'browser_network_requests',
+              description: 'Returns all network requests since loading the page',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            
+            // AppleScript Tools
+            {
+              name: 'applescript_execute',
+              description: 'Run AppleScript code to interact with Mac applications and system features. This tool can access and manipulate data in Notes, Calendar, Contacts, Messages, Mail, Finder, Safari, and other Apple applications. Common use cases include but not limited to: - Retrieve or create notes in Apple Notes - Access or add calendar events and appointments - List contacts or modify contact details - Search for and organize files using Spotlight or Finder - Get system information like battery status, disk space, or network details - Read or organize browser bookmarks or history - Access or send emails, messages, or other communications - Read, write, or manage file contents - Execute shell commands and capture the output',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  code_snippet: { type: 'string', description: 'Multi-line appleScript code to execute' },
+                  timeout: { type: 'number', description: 'Command execution timeout in seconds (default: 60)' }
+                },
+                required: ['code_snippet']
               }
             }
           ]
@@ -697,7 +1136,15 @@ rl.on('line', async (line) => {
               
             // Filesystem tools
             case 'read_file':
-              responseData = filesystemTools.readFile(argsParam.path, allowedDirectories);
+              // Use enhanced read_file with URL support
+              if (argsParam.isUrl || (argsParam.path && (argsParam.path.startsWith('http://') || argsParam.path.startsWith('https://')))) {
+                responseData = await enhancedFsTools.readFileEnhanced(argsParam.path, allowedDirectories, {
+                  isUrl: true,
+                  timeout: argsParam.timeout
+                });
+              } else {
+                responseData = filesystemTools.readFile(argsParam.path, allowedDirectories);
+              }
               break;
               
             case 'read_multiple_files':
@@ -801,6 +1248,182 @@ rl.on('line', async (line) => {
                 })),
                 workspace_root: workspaceRoot
               };
+              break;
+              
+            // Desktop Commander MCP Tools cases
+            case 'get_config':
+              responseData = terminalTools.getConfig();
+              break;
+              
+            case 'set_config_value':
+              responseData = terminalTools.setConfigValue(argsParam.key, argsParam.value);
+              break;
+              
+            case 'execute_command':
+              responseData = await terminalTools.executeCommand(argsParam.command, {
+                shell: argsParam.shell,
+                timeout_ms: argsParam.timeout_ms
+              });
+              break;
+              
+            case 'read_output':
+              responseData = terminalTools.readOutput(argsParam.pid);
+              break;
+              
+            case 'force_terminate':
+              responseData = await terminalTools.forceTerminate(argsParam.pid);
+              break;
+              
+            case 'list_sessions':
+              responseData = terminalTools.listSessions();
+              break;
+              
+            case 'list_processes':
+              responseData = await terminalTools.listProcesses();
+              break;
+              
+            case 'kill_process':
+              responseData = await terminalTools.killProcess(argsParam.pid);
+              break;
+              
+            case 'search_code':
+              responseData = await searchTools.searchCode(argsParam.path, argsParam.pattern, {
+                ignoreCase: argsParam.ignoreCase,
+                filePattern: argsParam.filePattern,
+                contextLines: argsParam.contextLines,
+                includeHidden: argsParam.includeHidden,
+                maxResults: argsParam.maxResults,
+                timeoutMs: argsParam.timeoutMs
+              });
+              break;
+              
+            case 'edit_block':
+              responseData = editTools.editBlock(argsParam.file_path, argsParam.old_string, argsParam.new_string, {
+                expected_replacements: argsParam.expected_replacements
+              });
+              break;
+              
+            // Playwright MCP Browser Tools cases
+            case 'browser_navigate':
+              responseData = await browserTools.browserNavigate(argsParam.url);
+              break;
+              
+            case 'browser_navigate_back':
+              responseData = await browserTools.browserNavigateBack();
+              break;
+              
+            case 'browser_navigate_forward':
+              responseData = await browserTools.browserNavigateForward();
+              break;
+              
+            case 'browser_click':
+              responseData = await browserTools.browserClick(argsParam.element, argsParam.ref);
+              break;
+              
+            case 'browser_type':
+              responseData = await browserTools.browserType(argsParam.element, argsParam.ref, argsParam.text, {
+                submit: argsParam.submit,
+                slowly: argsParam.slowly
+              });
+              break;
+              
+            case 'browser_hover':
+              responseData = await browserTools.browserHover(argsParam.element, argsParam.ref);
+              break;
+              
+            case 'browser_drag':
+              responseData = await browserTools.browserDrag(argsParam.startElement, argsParam.startRef, argsParam.endElement, argsParam.endRef);
+              break;
+              
+            case 'browser_select_option':
+              responseData = await browserTools.browserSelectOption(argsParam.element, argsParam.ref, argsParam.values);
+              break;
+              
+            case 'browser_press_key':
+              responseData = await browserTools.browserPressKey(argsParam.key);
+              break;
+              
+            case 'browser_take_screenshot':
+              responseData = await browserTools.browserTakeScreenshot({
+                element: argsParam.element,
+                ref: argsParam.ref,
+                filename: argsParam.filename,
+                raw: argsParam.raw
+              });
+              break;
+              
+            case 'browser_snapshot':
+              responseData = await browserTools.browserSnapshot();
+              break;
+              
+            case 'browser_pdf_save':
+              responseData = await browserTools.browserPdfSave({
+                filename: argsParam.filename
+              });
+              break;
+              
+            case 'browser_console_messages':
+              responseData = await browserTools.browserConsoleMessages();
+              break;
+              
+            case 'browser_file_upload':
+              responseData = await browserTools.browserFileUpload(argsParam.paths);
+              break;
+              
+            case 'browser_wait':
+              responseData = await browserTools.browserWait(argsParam.time);
+              break;
+              
+            case 'browser_wait_for':
+              responseData = await browserTools.browserWaitFor({
+                text: argsParam.text,
+                textGone: argsParam.textGone,
+                time: argsParam.time
+              });
+              break;
+              
+            case 'browser_resize':
+              responseData = await browserTools.browserResize(argsParam.width, argsParam.height);
+              break;
+              
+            case 'browser_handle_dialog':
+              responseData = await browserTools.browserHandleDialog(argsParam.accept, argsParam.promptText);
+              break;
+              
+            case 'browser_close':
+              responseData = await browserTools.browserClose();
+              break;
+              
+            case 'browser_install':
+              responseData = await browserTools.browserInstall();
+              break;
+              
+            case 'browser_tab_list':
+              responseData = await browserTools.browserTabList();
+              break;
+              
+            case 'browser_tab_new':
+              responseData = await browserTools.browserTabNew(argsParam.url);
+              break;
+              
+            case 'browser_tab_select':
+              responseData = await browserTools.browserTabSelect(argsParam.index);
+              break;
+              
+            case 'browser_tab_close':
+              responseData = await browserTools.browserTabClose(argsParam.index);
+              break;
+              
+            case 'browser_network_requests':
+              responseData = await browserTools.browserNetworkRequests();
+              break;
+              
+            // AppleScript Tool case
+            case 'applescript_execute':
+              responseData = await applescriptTools.executeAppleScript(
+                argsParam.code_snippet,
+                argsParam.timeout || 60
+              );
               break;
               
             default:
