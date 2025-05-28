@@ -1,341 +1,380 @@
-# ACF MCP-Proxy Cloud Deployment
+# ACF MCP-Proxy Deployment Guide
 
-This directory contains everything you need to deploy the Agentic Control Framework (ACF) to the cloud using mcp-proxy as a bridge. This approach converts your existing STDIO-based ACF server to HTTP/SSE without modifying any existing code.
+Deploy your Agentic Control Framework (ACF) to the cloud in under 1 hour with zero code changes using mcp-proxy bridge.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Commercial Ready)
 
-1. **Test locally**: `./test-mcp-proxy.sh`
-2. **Deploy to Google Cloud Run**: `./cloud-run/deploy.sh`
-3. **Use with Claude Desktop**: Copy the generated configuration
+The fastest path to commercial deployment using mcp-proxy to convert your existing STDIO-based ACF server to HTTP/SSE:
 
-## Why mcp-proxy?
+```bash
+# Deploy with authentication and monetization
+./quick-deploy.sh gcp --with-auth
 
-- ✅ **Zero code changes** to your existing ACF server
-- ✅ **Deploy in under 1 hour** 
-- ✅ **Full functionality** - all 64+ tools work immediately
-- ✅ **Bridge solution** - use this while building full cloud implementation
-- ✅ **Production ready** - mcp-proxy is battle-tested
+# Deploy proxy only (no auth)
+./quick-deploy.sh railway --proxy-only
 
-## Architecture
+# Test locally first
+./quick-deploy.sh local --with-auth
+```
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────┐     HTTP/SSE    ┌─────────────┐     STDIO    ┌─────────────┐
-│   Claude/   │ ◄─────────────► │  mcp-proxy  │ ◄──────────► │  Your ACF   │
-│   Client    │                 │  (Bridge)   │              │   Server    │
-└─────────────┘                 └─────────────┘              └─────────────┘
-                                       ▲
-                                       │ Deploy to
-                                       ▼
-                                ┌─────────────┐
-                                │ Cloud Platform│
-                                │ (GCP/Railway)│
-                                └─────────────┘
+│   Claude/   │ ◄─────────────► │  Auth Proxy │ ◄──────────► │ mcp-proxy   │ ◄─► │ Your ACF │
+│   Client    │                 │ (Optional)  │              │  (Bridge)   │     │ Server   │
+└─────────────┘                 └─────────────┘              └─────────────┘     └─────────┘
+                                        ▲                            ▲
+                                        │ Deploy to                  │
+                                        ▼                            ▼
+                                 ┌─────────────┐            ┌─────────────┐
+                                 │  Cloud      │            │  Cloud      │
+                                 │  Platform   │            │  Platform   │
+                                 └─────────────┘            └─────────────┘
 ```
 
-## Deployment Options
+## 🎯 Features
 
-### 🏆 Google Cloud Run (Recommended)
+### Core Features
+- **Zero Code Changes**: Use your existing ACF server as-is
+- **Full Functionality**: All 64+ tools work immediately
+- **HTTP/SSE Bridge**: Convert STDIO to web-compatible protocols
+- **Production Ready**: Battle-tested mcp-proxy foundation
 
-**Pros:**
-- Serverless scaling
-- Pay per request
-- Easy SSL/HTTPS
-- Built-in monitoring
+### Commercial Features (with `--with-auth`)
+- **User Authentication**: Token-based access control
+- **Tiered Pricing**: Free, Pro, Enterprise tiers
+- **Stripe Integration**: Automated payment processing
+- **Usage Tracking**: Per-user request monitoring
+- **Rate Limiting**: Prevent abuse and manage costs
+- **Professional UI**: Landing page and user dashboard
 
-**Deploy:**
+## 📦 Supported Platforms
+
+| Platform | Deployment Time | Cost | Best For |
+|----------|----------------|------|----------|
+| **Google Cloud Run** | 5 minutes | Pay-per-request | Production, Auto-scaling |
+| **Railway** | 2 minutes | $5/month | Simple deployment |
+| **Fly.io** | 3 minutes | Free tier available | Edge performance |
+| **Local Docker** | 1 minute | Free | Development, Testing |
+
+## 🔧 Prerequisites
+
+- Node.js 18+ and npm
+- Docker and Docker Compose
+- Platform-specific CLI (gcloud, railway, or fly)
+
+## 🚀 Deployment Options
+
+### Option 1: Google Cloud Run (Recommended)
+
+Best for production with automatic scaling and pay-per-request pricing.
+
 ```bash
 # Set your project ID
 export GCP_PROJECT_ID="your-project-id"
 
-# Deploy
-./cloud-run/deploy.sh
+# Deploy with full commercial features
+./quick-deploy.sh gcp --with-auth
+
+# Or deploy proxy only
+./quick-deploy.sh gcp --proxy-only
 ```
 
-**Cost:** ~$5-20/month for moderate usage
+**Requirements:**
+- Google Cloud account with billing enabled
+- `gcloud` CLI installed and authenticated
 
-### 🚂 Railway (Simplest)
+### Option 2: Railway (Simplest)
 
-**Pros:**
-- Easiest deployment
-- Great for testing
-- Automatic SSL
+Perfect for quick testing and simple deployments.
 
-**Deploy:**
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway up
+# Deploy to Railway
+./quick-deploy.sh railway --with-auth
 ```
 
-**Cost:** ~$5/month for hobby plan
+**Requirements:**
+- Railway account (free tier available)
+- `railway` CLI will be installed automatically
 
-### ✈️ Fly.io (Good Performance)
+### Option 3: Fly.io (Performance)
 
-**Pros:**
-- Edge locations
-- Good performance
-- Generous free tier
+Great for edge performance with global distribution.
 
-**Deploy:**
 ```bash
-# Install Fly CLI
-curl -L https://fly.io/install.sh | sh
-
-# Deploy
-fly launch
-fly deploy
+# Deploy to Fly.io
+./quick-deploy.sh fly --with-auth
 ```
 
-**Cost:** Free tier available, ~$5-10/month
+**Requirements:**
+- Fly.io account
+- `fly` CLI will be installed automatically
 
-## Files Overview
+### Option 4: Local Development
 
-```
-deployment/
-├── README.md                   # This file
-├── cloud-run/
-│   └── deploy.sh              # Google Cloud Run deployment
-├── railway/
-│   └── railway.json          # Railway configuration  
-├── fly/
-│   └── fly.toml              # Fly.io configuration
-├── mcp-proxy-config.yaml     # mcp-proxy configuration
-├── Dockerfile.proxy          # Docker image for all platforms
-└── test-mcp-proxy.sh         # Local testing script
+Test your deployment locally before going to production.
+
+```bash
+# Start local deployment with Docker Compose
+./quick-deploy.sh local --with-auth
+
+# Test proxy only
+./quick-deploy.sh test
 ```
 
-## Configuration
+## 💰 Monetization Setup
 
-### Authentication
+When deploying with `--with-auth`, you get a complete commercial solution:
 
-The deployment uses bearer token authentication. Default tokens:
-- `acf-demo-token-2024` - For testing
-- `acf-free-tier-token` - For free tier users
+### 1. Configure Payment Processing
 
-**Production:** Set environment variable `AUTH_TOKENS="token1,token2,token3"`
+Set up Stripe for payment processing:
+
+```bash
+export STRIPE_SECRET_KEY="sk_test_..."
+export STRIPE_PUBLISHABLE_KEY="pk_test_..."
+export STRIPE_PRO_PRICE_ID="price_..."
+export STRIPE_ENTERPRISE_PRICE_ID="price_..."
+```
+
+### 2. Set Up User Database
+
+Configure Supabase for user management:
+
+```bash
+export SUPABASE_URL="https://your-project.supabase.co"
+export SUPABASE_ANON_KEY="eyJ..."
+```
+
+### 3. Pricing Tiers
+
+| Tier | Price | Requests/Month | Tools | Support |
+|------|-------|----------------|-------|---------|
+| **Free** | $0 | 100 | 15 basic tools | Community |
+| **Pro** | $29 | 10,000 | All 64+ tools | Priority |
+| **Enterprise** | $199 | 100,000 | All + Custom | 24/7 |
+
+### 4. Landing Page
+
+Professional landing page included at your deployed URL with:
+- Feature showcase
+- Pricing tiers
+- User registration
+- Payment processing
+- Token management
+
+## 🔐 Authentication & Security
+
+### Token Management
+
+The auth proxy handles token validation:
+
+```javascript
+// Free tier tokens
+acf_free_1703123456_abc123
+
+// Pro tier tokens
+acf_pro_1703123456_def456
+
+// Enterprise tokens  
+acf_enterprise_1703123456_ghi789
+```
+
+### Rate Limiting
+
+Per-tier rate limits:
+- **Free**: 10 requests/minute
+- **Pro**: 100 requests/minute  
+- **Enterprise**: 1000 requests/minute
+
+### CORS Configuration
+
+Configured for major AI platforms:
+- Claude Desktop
+- Cursor IDE
+- Continue IDE
+- Codeium
+
+## 📊 Monitoring & Analytics
+
+### Health Checks
+
+Monitor your deployment:
+
+```bash
+# Check service health
+curl https://your-deployment.com/health
+
+# Check metrics
+curl https://your-deployment.com/metrics
+```
+
+### Usage Analytics
+
+Built-in analytics track:
+- Request counts per user
+- Tool usage patterns
+- Error rates
+- Response times
+
+## 🎛️ Configuration
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `WORKSPACE_ROOT` | Container workspace directory | `/data` |
-| `ALLOWED_DIRS` | Directories ACF can access | `/data:/tmp` |
-| `ACF_PATH` | Path to ACF installation | `/app` |
-| `NODE_ENV` | Node environment | `production` |
-| `AUTH_TOKENS` | Comma-separated auth tokens | (from config) |
+#### Core Configuration
+```bash
+NODE_ENV=production
+WORKSPACE_ROOT=/data
+ALLOWED_DIRS=/data:/tmp:/workspace
+```
 
-## Claude Desktop Configuration
+#### Auth & Payments (Optional)
+```bash
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
-After deployment, add this to your Claude Desktop settings:
+# Database Configuration  
+SUPABASE_URL=https://...
+SUPABASE_ANON_KEY=eyJ...
+
+# Service URLs
+BASE_URL=https://your-domain.com
+MCP_PROXY_URL=http://mcp-proxy:8080
+```
+
+### Custom Configuration
+
+Modify `mcp-proxy-config.yaml` for custom settings:
+
+```yaml
+# Performance tuning
+performance:
+  maxConnections: 50
+  requestTimeout: 300000
+  
+# Custom rate limits
+rateLimit:
+  requests: 2000
+  window: 60000
+```
+
+## 🔧 Claude Desktop Integration
+
+Add your deployed service to Claude Desktop:
 
 ```json
 {
   "mcpServers": {
     "acf": {
-      "url": "https://your-deployed-url.com/sse",
-      "transport": "sse", 
+      "url": "https://your-deployment.com/sse",
+      "transport": "sse",
       "headers": {
-        "Authorization": "Bearer your-token-here"
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
       }
     }
   }
 }
 ```
 
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `/health` | Health check |
-| `/sse` | Server-Sent Events stream |
-| `/messages` | HTTP message endpoint |
-
-## Testing
-
-### Local Testing
-
-```bash
-# Test everything locally
-./test-mcp-proxy.sh
-
-# Test specific components
-mcp-proxy --config mcp-proxy-config.yaml  # Start proxy
-curl http://localhost:8080/health          # Test health
-curl http://localhost:8080/sse             # Test SSE
-```
-
-### Production Testing
-
-```bash
-# Test deployed service
-curl https://your-url.com/health
-
-# Test with authentication
-curl -H "Authorization: Bearer your-token" \
-     https://your-url.com/sse
-```
-
-## Monitoring
-
-### Health Checks
-
-All platforms include automatic health checks on `/health` endpoint.
-
-### Logs
-
-View logs using platform-specific commands:
-
-```bash
-# Google Cloud Run
-gcloud run services logs tail acf-mcp-proxy --region us-central1
-
-# Railway
-railway logs
-
-# Fly.io
-fly logs
-```
-
-### Metrics
-
-Basic metrics available through platform dashboards:
-- Request count
-- Response times
-- Error rates
-- Resource usage
-
-## Scaling
-
-### Automatic Scaling
-
-All platforms support automatic scaling:
-
-| Platform | Min Instances | Max Instances | Scale Trigger |
-|----------|---------------|---------------|---------------|
-| Cloud Run | 1 | 10 | HTTP requests |
-| Railway | 1 | 5 | CPU/Memory |
-| Fly.io | 1 | Variable | Traffic |
-
-### Manual Scaling
-
-```bash
-# Google Cloud Run
-gcloud run services update acf-mcp-proxy \
-  --max-instances 20 --region us-central1
-
-# Fly.io  
-fly scale count 3
-
-# Railway - through dashboard
-```
-
-## Security
-
-### HTTPS/SSL
-
-All platforms provide automatic HTTPS/SSL certificates.
-
-### Authentication
-
-Bearer token authentication is enabled by default. Tokens can be:
-1. Set in `mcp-proxy-config.yaml`
-2. Provided via `AUTH_TOKENS` environment variable
-3. Managed through external auth service
-
-### CORS
-
-CORS is configured to allow:
-- `https://claude.ai`
-- `https://cursor.sh`
-- `https://codeium.com`
-- `*` (for development only)
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-**Service won't start:**
+#### 1. Health Check Fails
 ```bash
 # Check logs
-docker run acf-mcp-proxy-test  # Test locally
+docker logs acf-mcp-proxy
+
+# Verify configuration
+./quick-deploy.sh test
 ```
 
-**Health check fails:**
+#### 2. Authentication Errors
 ```bash
-# Verify ACF server
-node ./bin/agentic-control-framework-mcp
+# Verify token format
+echo "Bearer acf-demo-token-2024" | base64
+
+# Check CORS settings
+curl -H "Origin: https://claude.ai" https://your-deployment.com/sse
 ```
 
-**Authentication errors:**
+#### 3. Rate Limiting
 ```bash
-# Check token in request
-curl -v -H "Authorization: Bearer token" URL
+# Check usage limits
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+     https://your-deployment.com/metrics
 ```
 
-**Tools not working:**
-```bash
-# Verify tools list
-curl -X POST URL/messages \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-```
+### Debug Mode
 
-### Getting Help
-
-1. **Check logs** first using platform-specific commands
-2. **Test locally** with `./test-mcp-proxy.sh`
-3. **Verify configuration** in `mcp-proxy-config.yaml`
-4. **Check ACF server** directly with bin script
-
-## Performance Optimization
-
-### Memory Settings
-
-Adjust memory based on usage:
-```yaml
-# mcp-proxy-config.yaml
-performance:
-  maxConnections: 10      # Concurrent connections
-  connectionTimeout: 30000 # 30 seconds
-  requestTimeout: 120000   # 2 minutes
-```
-
-### Container Resources
-
-Platform-specific resource settings:
+Enable debug logging:
 
 ```bash
-# Cloud Run
---memory 1Gi --cpu 1
+# Local debugging
+DEBUG=true ./quick-deploy.sh local
 
-# Fly.io (fly.toml)
-memory = "1gb"
-cpus = 1
-
-# Railway (railway.json)
-"memory": 1024, "cpu": 1000
+# Production debugging
+export DEBUG=true
 ```
 
-## Next Steps
+## 🚢 Production Deployment
 
-1. **Deploy and test** with demo tokens
-2. **Set up production authentication**
-3. **Configure monitoring and alerting**
-4. **Add custom domain** (optional)
-5. **Set up CI/CD** for automatic deployments
-6. **Plan migration** to full cloud-native implementation
+### Security Checklist
 
-## Migration Path
+- [ ] Replace demo tokens with production tokens
+- [ ] Configure custom domain with SSL
+- [ ] Set up monitoring and alerting
+- [ ] Configure backup and disaster recovery
+- [ ] Review and tighten CORS settings
+- [ ] Set up log aggregation
+- [ ] Configure secrets management
 
-This mcp-proxy deployment is designed as a bridge solution:
+### Performance Optimization
 
-1. **Phase 1:** Deploy with mcp-proxy (immediate)
-2. **Phase 2:** Add monitoring and analytics 
-3. **Phase 3:** Build native cloud implementation
-4. **Phase 4:** Migrate traffic to native version
-5. **Phase 5:** Deprecate mcp-proxy bridge
+1. **Enable CDN**: Use CloudFlare for static assets
+2. **Database Scaling**: Upgrade Supabase plan as needed
+3. **Caching**: Enable Redis for token caching
+4. **Load Balancing**: Scale horizontally with multiple instances
 
-The mcp-proxy approach lets you start monetizing immediately while building the full solution. 
+### Monitoring Setup
+
+1. **Uptime Monitoring**: Set up Pingdom/StatusCake
+2. **Error Tracking**: Configure Sentry
+3. **Analytics**: Set up Google Analytics
+4. **Business Metrics**: Track revenue and usage
+
+## 💡 Next Steps
+
+### Immediate (Day 1)
+1. Deploy to your preferred platform
+2. Test with Claude Desktop
+3. Set up basic monitoring
+
+### Short Term (Week 1)
+1. Configure custom domain
+2. Set up production authentication
+3. Add monitoring and alerting
+
+### Long Term (Month 1)
+1. Optimize performance
+2. Add custom features
+3. Scale based on usage
+4. Plan cloud-native migration
+
+## 🆘 Support
+
+- **Documentation**: Full docs in `/docs`
+- **Issues**: GitHub Issues for bug reports
+- **Enterprise**: Contact for enterprise support
+- **Community**: Discord server for discussions
+
+## 📜 License
+
+This deployment configuration is part of the Agentic Control Framework. See LICENSE for details.
+
+---
+
+**Ready to deploy?** Choose your platform and run the quick-deploy script! 🚀 

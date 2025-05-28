@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACF MCP Server - 64+ AI Tools for Agents</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .tool-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .tool-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-robot text-2xl text-purple-600"></i>
+                    <span class="text-xl font-bold text-gray-800">ACF MCP Server</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#features" class="text-gray-600 hover:text-purple-600">Features</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-purple-600">Pricing</a>
+                    <a href="#docs" class="text-gray-600 hover:text-purple-600">Documentation</a>
+                    <a href="#contact" class="text-gray-600 hover:text-purple-600">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                64+ AI Tools in One MCP Server
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+                The most comprehensive Model Context Protocol server for AI agents. 
+                File operations, browser automation, code execution, and more.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="signupFree()" 
+                        class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-rocket mr-2"></i>Start Free
+                </button>
+                <button onclick="scrollToSection('pricing')" 
+                        class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                    <i class="fas fa-dollar-sign mr-2"></i>View Pricing
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Powerful AI Tools</h2>
+                <p class="text-xl text-gray-600">Everything your AI agent needs to be productive</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-purple-600 text-3xl mb-4">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">File System Operations</h3>
+                    <p class="text-gray-600">Complete file management: read, write, copy, move, delete, search, and organize files.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded">16 tools</span>
+                    </div>
+                </div>
+
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-blue-600 text-3xl mb-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Browser Automation</h3>
+                    <p class="text-gray-600">Full browser control: navigate, click, type, screenshot, and interact with web pages.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">20 tools</span>
+                    </div>
+                </div>
+
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-green-600 text-3xl mb-4">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Code Execution</h3>
+                    <p class="text-gray-600">Execute commands, run scripts, manage processes, and handle long-running tasks.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">8 tools</span>
+                    </div>
+                </div>
+
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-red-600 text-3xl mb-4">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Code Search</h3>
+                    <p class="text-gray-600">Advanced code search with ripgrep, pattern matching, and semantic search capabilities.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded">4 tools</span>
+                    </div>
+                </div>
+
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-yellow-600 text-3xl mb-4">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Apple Integration</h3>
+                    <p class="text-gray-600">Native macOS automation with AppleScript for Notes, Calendar, Mail, and system control.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">12 tools</span>
+                    </div>
+                </div>
+
+                <div class="tool-card bg-gray-50 p-6 rounded-lg shadow-md">
+                    <div class="text-indigo-600 text-3xl mb-4">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Task Management</h3>
+                    <p class="text-gray-600">Project management, task tracking, dependencies, and workflow automation.</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">4+ tools</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-100">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Simple, Transparent Pricing</h2>
+                <p class="text-xl text-gray-600">Choose the plan that fits your needs</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Free Tier -->
+                <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Free</h3>
+                        <div class="text-4xl font-bold text-purple-600 mb-2">$0</div>
+                        <p class="text-gray-600 mb-6">Perfect for testing</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>100 requests/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>15 basic tools</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Community support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Claude Desktop integration</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="signupFree()" 
+                            class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Get Started Free
+                    </button>
+                </div>
+
+                <!-- Pro Tier -->
+                <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-purple-500 relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">POPULAR</span>
+                    </div>
+                    
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Pro</h3>
+                        <div class="text-4xl font-bold text-purple-600 mb-2">$29</div>
+                        <p class="text-gray-600 mb-6">per month</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>10,000 requests/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>All 64+ tools</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Advanced browser automation</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Usage analytics</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="signupPro()" 
+                            class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Subscribe to Pro
+                    </button>
+                </div>
+
+                <!-- Enterprise Tier -->
+                <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Enterprise</h3>
+                        <div class="text-4xl font-bold text-purple-600 mb-2">$199</div>
+                        <p class="text-gray-600 mb-6">per month</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>100,000 requests/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>All tools + custom tools</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>24/7 dedicated support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Custom integrations</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>On-premise deployment</span>
+                        </li>
+                    </ul>
+                    
+                    <button onclick="signupEnterprise()" 
+                            class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-8">Easy Integration</h2>
+            <p class="text-xl text-gray-600 mb-12">Works with all major AI platforms</p>
+            
+            <div class="bg-gray-900 text-white p-6 rounded-lg max-w-4xl mx-auto">
+                <h3 class="text-lg font-semibold mb-4">Claude Desktop Configuration</h3>
+                <pre class="text-left text-sm"><code>{
+  "mcpServers": {
+    "acf": {
+      "url": "https://your-acf-server.com/sse",
+      "transport": "sse",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      }
+    }
+  }
+}</code></pre>
+            </div>
+            
+            <div class="mt-8 flex justify-center space-x-8">
+                <div class="text-center">
+                    <i class="fab fa-python text-4xl text-blue-500 mb-2"></i>
+                    <p class="text-gray-600">Claude</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-code text-4xl text-purple-500 mb-2"></i>
+                    <p class="text-gray-600">Cursor</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-robot text-4xl text-green-500 mb-2"></i>
+                    <p class="text-gray-600">Continue</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-brain text-4xl text-red-500 mb-2"></i>
+                    <p class="text-gray-600">Codeium</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">ACF MCP Server</h4>
+                    <p class="text-gray-400">The most comprehensive AI tool server for autonomous agents.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-white">Features</a></li>
+                        <li><a href="#pricing" class="hover:text-white">Pricing</a></li>
+                        <li><a href="/docs" class="hover:text-white">Documentation</a></li>
+                        <li><a href="/status" class="hover:text-white">Status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/help" class="hover:text-white">Help Center</a></li>
+                        <li><a href="/contact" class="hover:text-white">Contact</a></li>
+                        <li><a href="/community" class="hover:text-white">Community</a></li>
+                        <li><a href="/security" class="hover:text-white">Security</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 ACF MCP Server. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Token Display Modal -->
+    <div id="tokenModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4">Your API Token</h3>
+            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                <code id="tokenDisplay" class="text-sm break-all"></code>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Add this token to your Claude Desktop configuration. Keep it secure!
+            </p>
+            <div class="flex space-x-3">
+                <button onclick="copyToken()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                    Copy Token
+                </button>
+                <button onclick="closeModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function signupFree() {
+            try {
+                const response = await fetch('/api/signup/free', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: prompt('Enter your email (optional):') || '' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.token) {
+                    displayToken(data.token, data.tier);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to create account'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function signupPro() {
+            try {
+                const response = await fetch('/api/create-checkout-session', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier: 'pro' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sessionId) {
+                    stripe.redirectToCheckout({ sessionId: data.sessionId });
+                } else {
+                    alert('Error: Failed to create checkout session');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function signupEnterprise() {
+            // For now, redirect to contact form
+            window.location.href = '/contact?plan=enterprise';
+        }
+
+        function displayToken(token, tier) {
+            document.getElementById('tokenDisplay').textContent = token;
+            document.getElementById('tokenModal').classList.remove('hidden');
+            document.getElementById('tokenModal').classList.add('flex');
+        }
+
+        function copyToken() {
+            const token = document.getElementById('tokenDisplay').textContent;
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Token copied to clipboard!');
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('tokenModal').classList.add('hidden');
+            document.getElementById('tokenModal').classList.remove('flex');
+        }
+
+        // Close modal on background click
+        document.getElementById('tokenModal').addEventListener('click', (e) => {
+            if (e.target.id === 'tokenModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html> 
