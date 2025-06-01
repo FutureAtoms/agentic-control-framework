@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "acf-local": {
+      "url": "http://localhost:8080/sse",
+      "transport": "sse"
+    }
+  }
+}
