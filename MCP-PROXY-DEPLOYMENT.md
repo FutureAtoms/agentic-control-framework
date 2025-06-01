@@ -8,7 +8,7 @@ This branch implements a **complete commercial deployment solution** for the Age
 
 ### ✅ Zero Code Changes
 - Use your existing ACF server exactly as-is
-- mcp-proxy converts STDIO to HTTP/SSE automatically
+- **mcp-proxy** (npm package) converts STDIO to HTTP/SSE automatically
 - All 64+ tools work immediately without modification
 
 ### 💰 Complete Monetization
@@ -53,6 +53,8 @@ This branch implements a **complete commercial deployment solution** for the Age
 - **`deployment/README.md`** - Comprehensive deployment guide
 
 ## 🚀 Quick Start
+
+> **Want to test locally first?** See [WORKING-EXAMPLE.md](./WORKING-EXAMPLE.md) for a 5-minute local setup!
 
 ### 1. Deploy with Authentication (Recommended)
 ```bash
