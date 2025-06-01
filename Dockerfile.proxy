@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install mcp-proxy globally
-RUN npm install -g @sparfenyuk/mcp-proxy
+RUN npm install -g mcp-proxy
 
 # Copy package files first for better caching
 COPY package*.json ./

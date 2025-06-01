@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mcp-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - WORKSPACE_ROOT=/data
+      - ALLOWED_DIRS=/data:/tmp
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
+volumes:
+  data:

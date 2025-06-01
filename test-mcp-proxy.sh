@@ -35,7 +35,7 @@ check_mcp_proxy() {
     
     if ! command -v mcp-proxy &> /dev/null; then
         warn "mcp-proxy not found, installing..."
-        npm install -g @sparfenyuk/mcp-proxy
+        npm install -g mcp-proxy
         success "mcp-proxy installed"
     else
         success "mcp-proxy is available"
