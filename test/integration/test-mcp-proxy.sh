@@ -5,6 +5,10 @@
 
 set -e
 
+# Get the script directory and ACF root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ACF_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -47,7 +51,11 @@ test_acf_server() {
     log "Testing ACF server directly..."
     
     # Start ACF server in background and test basic functionality
-    timeout 10s node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd) &
+    if command -v gtimeout &> /dev/null; then
+        gtimeout 10s node "$ACF_ROOT/bin/agentic-control-framework-mcp" --workspaceRoot "$ACF_ROOT" &
+    else
+        node "$ACF_ROOT/bin/agentic-control-framework-mcp" --workspaceRoot "$ACF_ROOT" &
+    fi
     ACF_PID=$!
     
     sleep 3
@@ -65,7 +73,7 @@ test_mcp_proxy_integration() {
     log "Testing mcp-proxy integration..."
     
     # Start mcp-proxy with ACF
-    mcp-proxy --config mcp-proxy-config.yaml &
+    mcp-proxy --port 8080 --debug node "$ACF_ROOT/bin/agentic-control-framework-mcp" --workspaceRoot "$ACF_ROOT" &
     PROXY_PID=$!
     
     # Wait for startup
@@ -185,10 +193,8 @@ main() {
     test_acf_server
     test_mcp_proxy_integration
     
-    # Ask about Docker test
-    read -p "Run Docker test? (requires Docker) (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Skip Docker test in automated mode
+    if [ "$1" = "--with-docker" ]; then
         test_docker_build
     fi
     

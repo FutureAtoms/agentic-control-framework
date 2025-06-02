@@ -224,10 +224,17 @@ function listDirectory(dirPath, allowedDirs) {
       };
     });
 
+    // Create content string for compatibility
+    const contentLines = contents.map(item => 
+      `${item.type === 'directory' ? '[DIR]' : '[FILE]'} ${item.name} (${item.size} bytes, modified: ${item.modified})`
+    );
+    const content = `Directory listing for ${dirPath}:\n${contentLines.join('\n')}`;
+
     return {
       success: true,
       path: dirPath,
-      contents
+      contents,
+      content // Add content field for compatibility
     };
   } catch (error) {
     logger.error(`Error listing directory: ${error.message}`);
@@ -366,11 +373,17 @@ function searchFiles(searchPath, pattern, allowedDirs) {
       type: fs.statSync(match).isDirectory() ? 'directory' : 'file'
     }));
 
+    // Create content string for compatibility
+    const content = results.length > 0 
+      ? `Found ${results.length} files matching "${pattern}":\n${results.map(r => `${r.type === 'directory' ? '[DIR]' : '[FILE]'} ${r.path}`).join('\n')}`
+      : `No files found matching "${pattern}" in ${searchPath}`;
+
     return {
       success: true,
       results,
       count: results.length,
-      pattern
+      pattern,
+      content // Add content field for compatibility
     };
   } catch (error) {
     logger.error(`Error searching files: ${error.message}`);

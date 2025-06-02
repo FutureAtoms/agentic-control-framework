@@ -42,11 +42,21 @@ async function searchCode(searchPath, pattern, options = {}) {
       };
     }
 
+    // Check if pattern looks like a file pattern (e.g., *.js, *.py)
+    let searchPattern = pattern;
+    let filePattern = options.filePattern;
+    
+    if (pattern.startsWith('*.') || pattern.includes('*.')) {
+      // This is likely a file pattern, not a search pattern
+      filePattern = pattern;
+      searchPattern = '.'; // Search for any character (i.e., any line)
+    }
+
     // Build ripgrep arguments
     const args = [];
     
-    // Add pattern
-    args.push(pattern);
+    // Add search pattern
+    args.push(searchPattern);
     
     // Add path
     args.push(resolvedPath);
@@ -56,8 +66,8 @@ async function searchCode(searchPath, pattern, options = {}) {
       args.push('-i'); // Case insensitive by default
     }
     
-    if (options.filePattern) {
-      args.push('-g', options.filePattern);
+    if (filePattern) {
+      args.push('-g', filePattern);
     }
     
     if (options.contextLines && options.contextLines > 0) {
@@ -149,10 +159,29 @@ async function searchCode(searchPath, pattern, options = {}) {
       }
     }
 
+    // Format content for display
+    let content = '';
+    if (matches.length === 0) {
+      content = `No matches found for pattern "${pattern}" in ${resolvedPath}`;
+    } else {
+      const displayMatches = matches.slice(0, maxResults);
+      content = `Found ${matches.length} matches for pattern "${pattern}":\n\n`;
+      
+      for (const match of displayMatches) {
+        content += `${match.relativePath || match.path}:${match.lineNumber}: ${match.line}\n`;
+      }
+      
+      if (matches.length > maxResults) {
+        content += `\n... and ${matches.length - maxResults} more matches (truncated)`;
+      }
+    }
+
     return {
       success: true,
+      content,
       searchPath: resolvedPath,
-      pattern,
+      pattern: searchPattern,
+      filePattern,
       matchCount: matches.length,
       matches: matches.slice(0, maxResults),
       truncated: matches.length > maxResults,

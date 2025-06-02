@@ -103,8 +103,44 @@ async function executeCommand(command, options = {}) {
 
     const shell = options.shell || config.defaultShell;
     const timeout = options.timeout_ms || config.commandTimeout;
+    const waitForCompletion = options.waitForCompletion !== false; // Default to true
 
-    // Create a new session
+    // For simple commands, wait for completion
+    if (waitForCompletion) {
+      try {
+        const result = await execa(shell, ['-c', command], {
+          timeout,
+          reject: false
+        });
+
+        const output = result.stdout || '';
+        const error = result.stderr || '';
+        const success = result.exitCode === 0;
+
+        return {
+          success,
+          content: output || error || (success ? 'Command completed successfully' : 'Command failed'),
+          command,
+          shell,
+          exitCode: result.exitCode,
+          stdout: output,
+          stderr: error,
+          message: success ? 'Command completed successfully' : `Command failed with exit code ${result.exitCode}`
+        };
+      } catch (error) {
+        if (error.code === 'ETIMEDOUT') {
+          return {
+            success: false,
+            message: `Command timed out after ${timeout}ms`,
+            command,
+            content: 'Command timed out'
+          };
+        }
+        throw error;
+      }
+    }
+
+    // For long-running commands, return session info
     const sessionId = ++sessionCounter;
     const session = {
       id: sessionId,
@@ -149,49 +185,24 @@ async function executeCommand(command, options = {}) {
       session.endTime = Date.now();
     });
 
-    // Return initial response
-    const initialOutput = await new Promise((resolve) => {
-      let output = '';
-      let resolved = false;
-
-      const collectOutput = (data) => {
-        if (!resolved) {
-          output += data.toString();
-          if (output.length > 1000 || Date.now() - session.startTime > 500) {
-            resolved = true;
-            resolve(output);
-          }
-        }
-      };
-
-      subprocess.stdout.on('data', collectOutput);
-      subprocess.stderr.on('data', collectOutput);
-
-      // Timeout for initial output
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          resolve(output || 'Command started, no output yet...');
-        }
-      }, 500);
-    });
-
+    // Return initial response for session-based execution
     return {
       success: true,
       pid: session.pid,
       sessionId,
       command,
       shell,
-      initialOutput: initialOutput || 'Command started successfully',
       status: session.status,
-      message: `Command started with PID ${session.pid}`
+      message: `Command started with PID ${session.pid}`,
+      content: `Command started with PID ${session.pid}`
     };
 
   } catch (error) {
     logger.error(`Error executing command: ${error.message}`);
     return {
       success: false,
-      message: error.message
+      message: error.message,
+      content: error.message
     };
   }
 }
