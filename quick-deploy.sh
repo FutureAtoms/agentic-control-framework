@@ -80,11 +80,11 @@ check_dependencies() {
 install_mcp_proxy() {
     log "Installing mcp-proxy..."
     
-    if ! command -v mcp-proxy &> /dev/null; then
-        npm install -g mcp-proxy
-        success "mcp-proxy installed globally"
+    # Use npx to run mcp-proxy without global installation to avoid package conflicts
+    if npx mcp-proxy --help &> /dev/null; then
+        success "mcp-proxy available via npx"
     else
-        success "mcp-proxy already installed"
+        error "Failed to access mcp-proxy via npx"
     fi
 }
 
@@ -244,7 +244,7 @@ test_local() {
     log "Testing local deployment..."
     
     # Start mcp-proxy with ACF server in background
-    mcp-proxy --port 8080 --debug node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd) &
+    npx mcp-proxy --port 8080 --debug node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd) &
     MCP_PID=$!
     
     # Wait for startup

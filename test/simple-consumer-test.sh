@@ -114,7 +114,8 @@ test_core_mcp() {
     log_test "Core MCP functionality"
     
     if node test/comprehensive_mcp_test.js > "$TEMP_DIR/mcp.log" 2>&1; then
-        if grep -q "PASSED\|All tests completed\|✓\|SUCCESS" "$TEMP_DIR/mcp.log"; then
+        # Check for comprehensive MCP test success patterns
+        if grep -q "Test report generated\|TEST RESULTS SUMMARY\|✅.*Protocol.*working\|Total Test Categories.*5" "$TEMP_DIR/mcp.log"; then
             log_pass "Core MCP test completed"
             return 0
         fi
