@@ -16,7 +16,7 @@
     "start": "node ./src/mcp_server.js --workspaceRoot $(pwd)",
     "start:auth": "node auth-proxy.js",
     "start:local": "docker-compose up --build",
-    "test": "mocha 'test/**/*.js'"
+    "test": "mocha 'test/mcp/**/*.js'"
   },
   "keywords": [
     "task",
