@@ -65,33 +65,50 @@ test_update_and_subtask() {
 
 test_dependency_and_workflow() {
     echo "Testing: dependency, priority, and status workflow"
-    # 'next' should be Task 1, as it's the only one with no dependencies
-    assert_contains "$($TASK_MANAGER_CMD next)" "Next actionable task (ID: 1)"
 
-    # Trying to start Task 2 should fail
-    assert_fail "$TASK_MANAGER_CMD" status 2 inprogress
+    # 'next' should return Task 2 (ID 2) due to 'critical' priority.
+    # The output is a table, so we check for the title.
+    local next_output
+    next_output=$($TASK_MANAGER_CMD next)
+    assert_contains "$next_output" "Task 1: Critical"
 
-    # Progress Task 1
+    # Trying to start Task 3 should fail as its dependency (Task 1) is not 'done'.
+    assert_fail "$TASK_MANAGER_CMD" status 3 inprogress
+
+    # Complete Task 2.
+    $TASK_MANAGER_CMD status 2 done > /dev/null
+    
+    # 'next' should now return Task 1 (ID 1).
+    # Note: test_update_and_subtask has changed its title to "Task 1: Updated".
+    next_output=$($TASK_MANAGER_CMD next)
+    assert_contains "$next_output" "Task 1: Updated"
+    
+    # Complete Task 1.
     $TASK_MANAGER_CMD status 1 done > /dev/null
-    
-    # Now, 'next' should be Task 2
-    assert_contains "$($TASK_MANAGER_CMD next)" "Next actionable task (ID: 2)"
-    
-    # Move Task 2 to 'testing'
-    $TASK_MANAGER_CMD status 2 testing > /dev/null
+
+    # Now that Task 1 is done, 'next' should return Task 3.
+    next_output=$($TASK_MANAGER_CMD next)
+    assert_contains "$next_output" "Task 2: High"
+
+    # Move Task 3 to 'testing', which should auto-generate subtasks.
+    $TASK_MANAGER_CMD status 3 testing > /dev/null
     output_list=$($TASK_MANAGER_CMD list --human)
     assert_contains "$output_list" "Write unit and integration tests"
 
-    # Trying to mark Task 2 as 'done' should fail
-    assert_fail "$TASK_MANAGER_CMD" status 2 done
+    # Trying to mark Task 3 'done' should fail because its subtasks are not complete.
+    assert_fail "$TASK_MANAGER_CMD" status 3 done
     
-    # Complete subtasks and then the parent task
-    $TASK_MANAGER_CMD status 2.1 done > /dev/null
-    $TASK_MANAGER_CMD status 2.2 done > /dev/null
-    $TASK_MANAGER_CMD status 2 done > /dev/null
+    # Complete the auto-generated subtasks.
+    $TASK_MANAGER_CMD status 3.1 done > /dev/null
+    $TASK_MANAGER_CMD status 3.2 done > /dev/null
+
+    # Now, completing Task 3 should succeed.
+    $TASK_MANAGER_CMD status 3 done > /dev/null
     
+    # Verify Task 3 is marked 'done' in the human-readable list.
     output_list=$($TASK_MANAGER_CMD list --human)
-    assert_contains "$output_list" "✅ done"
+    task_3_line=$(echo "$output_list" | grep '| #3 |')
+    assert_contains "$task_3_line" "✅ done"
 }
 
 test_remove() {
