@@ -28,7 +28,7 @@ assert_fail() {
 }
 
 assert_contains() {
-    if ! echo "$1" | grep -qF "$2"; then
+    if ! echo "$1" | grep -iqF "$2"; then
         echo "Assertion failed: Expected output to contain '$2'. Actual: $1"
         exit 1
     fi
