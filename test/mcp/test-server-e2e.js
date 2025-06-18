@@ -19,13 +19,14 @@ describe('MCP Server E2E Tests', () => {
         
         serverProcess = spawn('node', [MCP_SERVER_PATH], { cwd: ACF_ROOT, env: { ...process.env, ACF_WORKSPACE: TEST_WORKSPACE } });
 
-        serverProcess.stdout.on('data', data => {
-            if (data.toString().includes('MCP Server running')) {
+        const serverReady = (data) => {
+            if (data.toString().includes('Server ready and listening')) {
                 done();
             }
-        });
-
-        serverProcess.stderr.on('data', data => console.error(`Server stderr: ${data}`));
+        };
+        
+        serverProcess.stdout.on('data', serverReady);
+        serverProcess.stderr.on('data', serverReady);
     });
 
     after(() => {
