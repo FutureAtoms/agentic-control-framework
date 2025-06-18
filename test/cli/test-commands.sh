@@ -73,7 +73,7 @@ test_dependency_and_workflow() {
     assert_contains "$next_output" "Task 1: Critical"
 
     # Trying to start Task 3 should fail as its dependency (Task 1) is not 'done'.
-    assert_fail "$TASK_MANAGER_CMD" status 3 inprogress
+    assert_fail $TASK_MANAGER_CMD status 3 inprogress
 
     # Complete Task 2.
     $TASK_MANAGER_CMD status 2 done > /dev/null
@@ -83,6 +83,9 @@ test_dependency_and_workflow() {
     next_output=$($TASK_MANAGER_CMD next)
     assert_contains "$next_output" "Task 1: Updated"
     
+    # Must complete subtask 1.1 before parent task 1
+    $TASK_MANAGER_CMD status 1.1 done > /dev/null
+
     # Complete Task 1.
     $TASK_MANAGER_CMD status 1 done > /dev/null
 
@@ -96,7 +99,7 @@ test_dependency_and_workflow() {
     assert_contains "$output_list" "Write unit and integration tests"
 
     # Trying to mark Task 3 'done' should fail because its subtasks are not complete.
-    assert_fail "$TASK_MANAGER_CMD" status 3 done
+    assert_fail $TASK_MANAGER_CMD status 3 done
     
     # Complete the auto-generated subtasks.
     $TASK_MANAGER_CMD status 3.1 done > /dev/null
