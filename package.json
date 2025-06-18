@@ -35,7 +35,7 @@
   "license": "ISC",
   "dependencies": {
     "@vscode/ripgrep": "^1.15.9",
-    "axios": "^1.8.4",
+    "axios": "^1.7.2",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
@@ -62,7 +62,7 @@
     "stripe": "^14.7.0"
   },
   "devDependencies": {
-    "chai": "^5.2.0",
-    "mocha": "^11.7.0"
+    "chai": "^4.3.10",
+    "mocha": "^10.7.0"
   }
 }

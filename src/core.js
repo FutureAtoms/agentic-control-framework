@@ -299,9 +299,10 @@ function listTasks(workspaceRoot, options) { // Renamed argument
 }
 
 // Function to add a subtask to a parent task
-function addSubtask(workspaceRoot, parentId, options, tasksData) { // Renamed argument, added tasksData
+function addSubtask(workspaceRoot, parentId, options, tasksData) {
+  const shouldWrite = options.write !== false;
   if (!tasksData) {
-    tasksData = readTasks(workspaceRoot); // Read tasks only if not provided
+    tasksData = readTasks(workspaceRoot);
   }
   const { task: parentTask } = findTask(tasksData, parentId);
 
@@ -335,8 +336,9 @@ function addSubtask(workspaceRoot, parentId, options, tasksData) { // Renamed ar
   parentTask.subtasks.push(newSubtask);
   parentTask.lastSubtaskIndex = subTaskIndex;
   
-  // No need to write here if we're in the middle of a status update
-  // writeTasks(workspaceRoot, tasksData); 
+  if (shouldWrite) {
+    writeTasks(workspaceRoot, tasksData);
+  }
 
   // Return data instead of logging
   return { success: true, message: `Added new subtask (ID: ${newSubtaskId}) to task ${parentId}: "${newSubtask.title}"`, subtaskId: newSubtaskId };
@@ -383,12 +385,12 @@ function updateStatus(workspaceRoot, id, newStatus, message) { // Added message 
   // If a task is moved to 'testing', auto-generate testing subtasks
   if (item && !item.id.toString().includes('.') && newStatus.toLowerCase() === 'testing') {
     const testingSubtasks = [
-      { title: `Write unit and integration tests for '${item.title}'` },
-      { title: `Ensure all tests are passing for '${item.title}'` }
+      { title: `Write unit and integration tests for '${item.title}'`, write: false },
+      { title: `Ensure all tests are passing for '${item.title}'`, write: false }
     ];
 
     testingSubtasks.forEach(subtaskOptions => {
-      addSubtask(workspaceRoot, item.id, subtaskOptions, tasksData); // Pass tasksData to avoid re-reading
+      addSubtask(workspaceRoot, item.id, subtaskOptions, tasksData);
     });
   }
 
