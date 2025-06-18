@@ -21,7 +21,7 @@ function getWorkspacePaths(workspaceRoot) { // Added workspaceRoot argument
   // Here we can't use resolvePath to avoid circular dependency,
   // but we ensure all paths are absolute by using path.resolve
   return {
-    tasksFilePath: path.resolve(workspaceRoot, 'tasks.json'),
+    tasksFilePath: path.resolve(workspaceRoot, 'tasks.tks.json'),
     cursorRulesDir: path.resolve(workspaceRoot, '.cursor', 'rules'),
     cursorRulesFile: path.resolve(workspaceRoot, '.cursor', 'rules', 'task_manager_workflow.mdc'),
     taskFilesDir: path.resolve(workspaceRoot, 'tasks')
@@ -48,6 +48,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
 
   const { tasksFilePath, cursorRulesDir, cursorRulesFile } = getWorkspacePaths(workspaceRoot); // Pass argument
   const { projectName = "Untitled Project", projectDescription = "" } = options;
+  logger.info(`[DEBUG] initProject: projectDescription = "${projectDescription}"`); // Added for debugging
   let messages = []; // Collect messages to return
 
   if (!fs.existsSync(tasksFilePath)) {

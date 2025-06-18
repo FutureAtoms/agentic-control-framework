@@ -53,11 +53,6 @@ const getArg = (flag) => {
   return index !== -1 && index < process.argv.length - 1 ? process.argv[index + 1] : null;
 };
 
-// Order of precedence:
-// 1. Command line argument (--workspaceRoot or -w)
-// 2. ACF_PATH environment variable
-// 3. WORKSPACE_ROOT environment variable 
-// 4. Current working directory
 let workspaceRoot = getArg('--workspaceRoot') || 
                      getArg('-w') || 
                      process.env.ACF_PATH ||
