@@ -69,9 +69,10 @@ program
   .description('Add a new task')
   .requiredOption('-t, --title <title>', 'Title of the task')
   .option('-d, --description <description>', 'Description of the task')
-  .option('-p, --priority <priority>', 'Priority (low, medium, high)', 'medium')
+  .option('-p, --priority <priority>', 'Priority (low, medium, high, critical)', 'medium')
   .option('--depends-on <ids>', 'Comma-separated list of task IDs this task depends on')
   .option('--related-files <paths>', 'Comma-separated list of relevant file paths')
+  .option('--tests <tests>', 'Comma-separated list of tests to verify completion')
   .action((options) => {
     try {
         const result = core.addTask(process.cwd(), options);
@@ -174,33 +175,13 @@ program
     }
   });
 
-// generate-table command
-program
-  .command('generate-table')
-  .description('Generate a human-readable task table with checkboxes')
-  .action(() => {
-    try {
-      const tableRenderer = require('./tableRenderer');
-      const result = core.listTasks(process.cwd(), { humanReadable: true });
-      
-      if (result && result.success) {
-        const taskTablePath = path.resolve(process.cwd(), 'tasks-table.md');
-        tableRenderer.writeTaskTable(core.readTasks(process.cwd()), process.cwd());
-        logger.output(`Human-readable task table generated at: ${taskTablePath}`);
-      } else {
-        logger.error("Failed to generate task table.");
-      }
-    } catch (error) {
-      logger.error(`Error generating task table: ${error.message}`);
-        process.exitCode = 1;
-    }
-  });
-
 // add-subtask command
 program
   .command('add-subtask <parent-id>')
-  .description('Add a subtask to a specific parent task')
+  .description('Add a subtask to a parent task')
   .requiredOption('-t, --title <title>', 'Title of the subtask')
+  .option('--related-files <paths>', 'Comma-separated list of relevant file paths')
+  .option('--tests <tests>', 'Comma-separated list of tests to verify completion')
   .action((parentId, options) => {
     try {
         const result = core.addSubtask(process.cwd(), parentId, options);
@@ -219,15 +200,36 @@ program
 // status command
 program
   .command('status <id> <new-status>')
-  .description('Update the status of a task or subtask (e.g., todo, inprogress, done, blocked, error)')
+  .description('Update the status of a task or subtask (e.g., todo, inprogress, testing, done, blocked, error)')
   .option('-m, --message <message>', 'Add a message to the activity log')
+  .option('--related-files <paths>', 'Comma-separated list of relevant file paths (required for "done" status)')
+  .option('--skip-validation', 'Skip validation of related files for "done" status (use with caution)')
   .action((id, newStatus, options) => {
     try {
-        const validStatuses = ['todo', 'inprogress', 'done', 'blocked', 'error'];
+        const validStatuses = ['todo', 'inprogress', 'testing', 'done', 'blocked', 'error'];
         if (!validStatuses.includes(newStatus.toLowerCase())) {
           logger.warn(`"${newStatus}" is not a standard status. Allowed: ${validStatuses.join(', ')}`);
         }
-        const result = core.updateStatus(process.cwd(), id, newStatus.toLowerCase(), options.message);
+        
+        // For "done" status, ensure related files are specified or handle with the task update
+        if (newStatus.toLowerCase() === 'done' && options.relatedFiles) {
+          // First update the related files
+          const updateResult = core.updateTask(process.cwd(), id, { relatedFiles: options.relatedFiles });
+          if (!updateResult.success) {
+            logger.error(`Error updating related files: ${updateResult.message}`);
+            process.exitCode = 1;
+            return;
+          }
+        }
+        
+        const result = core.updateStatus(
+          process.cwd(), 
+          id, 
+          newStatus.toLowerCase(), 
+          options.message, 
+          { skipValidation: options.skipValidation }
+        );
+        
         if (result.success) {
             logger.output(result.message);
         } else {
@@ -303,11 +305,13 @@ program
 // update command
 program
   .command('update <id>')
-  .description('Update task or subtask details')
-  .option('-t, --title <title>', 'New title')
-  .option('-d, --description <description>', 'New description')
-  .option('-p, --priority <priority>', 'New priority (low, medium, high)')
-  .option('--related-files <paths>', 'Comma-separated list of relevant file paths')
+  .description('Update the details of a task')
+  .option('-t, --title <title>', 'New title for the task')
+  .option('-d, --description <description>', 'New description for the task')
+  .option('-p, --priority <priority>', 'New priority (low, medium, high, critical)')
+  .option('--depends-on <ids>', 'New comma-separated list of task IDs this task depends on')
+  .option('--related-files <paths>', 'New comma-separated list of relevant file paths')
+  .option('--tests <tests>', 'Comma-separated list of tests to verify completion')
   .option('-m, --message <message>', 'Add a message to the activity log')
   .action((id, options) => {
     try {
@@ -316,12 +320,14 @@ program
         if (options.title) updateOptions.title = options.title;
         if (options.description) updateOptions.description = options.description;
         if (options.priority) updateOptions.priority = options.priority;
-        if (options.relatedFiles) updateOptions.relatedFiles = options.relatedFiles;
+        if (options.dependsOn) updateOptions.dependsOn = options.dependsOn.split(',').map(id => id.trim());
+        if (options.relatedFiles) updateOptions.relatedFiles = options.relatedFiles.split(',').map(path => path.trim());
+        if (options.tests) updateOptions.tests = options.tests.split(',').map(test => test.trim());
         if (options.message) updateOptions.message = options.message;
         
         // Check if any options are provided
         if (Object.keys(updateOptions).length === 0) {
-            logger.error("No update options provided. Use -t, -d, -p, --related-files, or -m to specify changes.");
+            logger.error("No update options provided. Use -t, -d, -p, --depends-on, --related-files, --tests, or -m to specify changes.");
             process.exitCode = 1;
             return;
         }
@@ -379,6 +385,14 @@ program
                     logger.output(`\nRelated Files:`);
                     context.relatedFiles.forEach(file => {
                         logger.output(`- ${file}`);
+                    });
+                }
+                
+                // Show tests if available
+                if (context.tests && context.tests.length > 0) {
+                    logger.output(`\nTests:`);
+                    context.tests.forEach(test => {
+                        logger.output(`- ${test}`);
                     });
                 }
                 
@@ -504,6 +518,25 @@ program
         process.exitCode = 1;
     }
   });
+
+// New command for updating subtasks
+program
+    .command('update-subtask <id>')
+    .description('Update the details of a subtask (e.g., title).')
+    .option('-t, --title <title>', 'New title for the subtask.')
+    // Add other options here if more subtask fields become updatable
+    .action((id, options) => {
+        if (!id.includes('.')) {
+            console.error(chalk.red('Error: Invalid subtask ID. Subtask IDs must be in the format "parentID.subtaskID" (e.g., "1.1").'));
+            return;
+        }
+        try {
+            const result = core.updateSubtask(process.cwd(), id, options);
+            console.log(chalk.green(result.message));
+        } catch (error) {
+            console.error(chalk.red(`Error: ${error.message}`));
+        }
+    });
 
 program.parse(process.argv);
 

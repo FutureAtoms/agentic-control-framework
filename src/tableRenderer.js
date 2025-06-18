@@ -63,14 +63,15 @@ function generateCliOutput(tasksData, tasks) {
   // CLI status summary with colors
   output += `${chalk.green('✓')} ${chalk.bold('Done')}: ${statusCounts.done} | `;
   output += `${chalk.yellow('⟳')} ${chalk.bold('In Progress')}: ${statusCounts.inprogress} | `;
+  output += `${chalk.blue('🔬')} ${chalk.bold('Testing')}: ${statusCounts.testing} | `;
   output += `${chalk.gray('○')} ${chalk.bold('Todo')}: ${statusCounts.todo} | `;
   output += `${chalk.red('⨯')} ${chalk.bold('Blocked')}: ${statusCounts.blocked} | `;
   output += `${chalk.bgRed.white('!')} ${chalk.bold('Error')}: ${statusCounts.error}\n\n`;
   
   // Progress bar
-  const totalTasks = tasks.length;
+  const totalTasks = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   const completedTasks = statusCounts.done;
-  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completionPercentage = totalTasks > 0 ? Math.min(100, Math.round((completedTasks / totalTasks) * 100)) : 0;
   
   output += chalk.bold(`Progress: ${completionPercentage}%\n\n`);
   
@@ -156,14 +157,15 @@ function generateMarkdownOutput(tasksData, tasks) {
   // Markdown status summary with emoji
   output += `**✅ Done**: ${statusCounts.done} | `;
   output += `**🔄 In Progress**: ${statusCounts.inprogress} | `;
+  output += `**🔬 Testing**: ${statusCounts.testing} | `;
   output += `**⬜ Todo**: ${statusCounts.todo} | `;
   output += `**❌ Blocked**: ${statusCounts.blocked} | `;
   output += `**⚠️ Error**: ${statusCounts.error}\n\n`;
   
   // Progress bar
-  const totalTasks = tasks.length;
+  const totalTasks = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   const completedTasks = statusCounts.done;
-  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completionPercentage = totalTasks > 0 ? Math.min(100, Math.round((completedTasks / totalTasks) * 100)) : 0;
   
   output += `**Progress**: ${completionPercentage}%\n`;
   
@@ -223,6 +225,7 @@ function countTasksByStatus(tasks) {
   const counts = {
     todo: 0,
     inprogress: 0,
+    testing: 0,
     done: 0,
     blocked: 0,
     error: 0
@@ -270,6 +273,8 @@ function getStatusWithEmoji(status) {
       return `✅ ${status}`;
     case 'inprogress':
       return `🔄 ${status}`;
+    case 'testing':
+      return `🔬 ${status}`;
     case 'blocked':
       return `❌ ${status}`;
     case 'error':
@@ -292,6 +297,8 @@ function getColoredStatus(status) {
       return chalk.green(`${symbol} ${status}`);
     case 'inprogress':
       return chalk.yellow(`${symbol} ${status}`);
+    case 'testing':
+      return chalk.blue(`${symbol} ${status}`);
     case 'blocked':
       return chalk.red(`${symbol} ${status}`);
     case 'error':
@@ -314,6 +321,8 @@ function getColoredStatusSymbol(status) {
       return chalk.green(symbol);
     case 'inprogress':
       return chalk.yellow(symbol);
+    case 'testing':
+      return chalk.blue(symbol);
     case 'blocked':
       return chalk.red(symbol);
     case 'error':
@@ -336,6 +345,8 @@ function getStatusSymbol(status) {
       return '[x]'; // Checked checkbox
     case 'inprogress':
       return '[/]'; // In-progress indicator
+    case 'testing':
+      return '[T]'; // Testing indicator
     case 'blocked':
       return '[!]'; // Blocked indicator
     case 'error':
@@ -353,6 +364,8 @@ function getStatusSymbol(status) {
  */
 function getColoredPriority(priority) {
   switch(priority.toLowerCase()) {
+    case 'critical':
+      return chalk.bgMagenta.white.bold(' CRITICAL ');
     case 'high':
       return chalk.bgRed.white(' HIGH ');
     case 'medium':
@@ -371,6 +384,8 @@ function getColoredPriority(priority) {
 function getPriorityBadge(priority) {
   // Use Markdown-friendly badges for priority indicators
   switch(priority.toLowerCase()) {
+    case 'critical':
+      return '🔥 **CRITICAL**';
     case 'high':
       return '🔴 **HIGH**';
     case 'medium':

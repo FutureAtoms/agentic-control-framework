@@ -81,6 +81,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
       messages.push(`Created initial tasks file: ${tasksFilePath}`);
       messages.push(`  Project Name: ${projectName}`);
       if (projectDescription) messages.push(`  Added initial task for: ${projectDescription}`);
+      messages.push(`View the auto-generated task board at tasks-table.md`);
     } catch (error) {
        throw new Error(`Failed to write tasks file ${tasksFilePath}: ${error.message}`);
     }
@@ -91,6 +92,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
     try {
       const tasksData = readTasks(workspaceRoot);
       tableRenderer.writeTaskTable(tasksData, workspaceRoot);
+      messages.push(`Tasks file already exists. The task board at tasks-table.md has been synced.`);
     } catch (error) {
       logger.error(`Failed to sync task table during init: ${error.message}`);
     }
@@ -150,6 +152,25 @@ function readTasks(workspaceRoot) { // Renamed argument
   }
 }
 
+// Helper function to find a task or subtask by its ID
+function findTask(tasksData, id) {
+  const idString = String(id);
+  if (idString.includes('.')) {
+    const [parentId, subtaskIndex] = idString.split('.').map(Number);
+    const parentTask = tasksData.tasks.find(task => task.id === parentId);
+    if (parentTask && parentTask.subtasks) {
+      // The subtask ID in the file is a string like "1.1", "1.2", etc.
+      const subtask = parentTask.subtasks.find(sub => sub.id === idString);
+      return { subtask, parentTask };
+    }
+  } else {
+    const taskId = parseInt(idString, 10);
+    const task = tasksData.tasks.find(task => task.id === taskId);
+    return { task };
+  }
+  return {}; // Return empty object if not found
+}
+
 // Function to write tasks to the file
 function writeTasks(workspaceRoot, data) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
@@ -159,6 +180,7 @@ function writeTasks(workspaceRoot, data) { // Renamed argument
     fs.writeFileSync(resolvedTasksFilePath, JSON.stringify(data, null, 2));
     // Generate the human-readable task table whenever tasks are updated
     tableRenderer.writeTaskTable(data, workspaceRoot);
+    logger.info(`Tasks updated. View the auto-generated task board at tasks-table.md`);
   } catch (error) {
     // Throw an error instead of exiting
     throw new Error(`Error writing tasks file ${resolvedTasksFilePath}: ${error.message}`);
@@ -277,11 +299,12 @@ function listTasks(workspaceRoot, options) { // Renamed argument
 }
 
 // Function to add a subtask to a parent task
-function addSubtask(workspaceRoot, parentId, options) { // Renamed argument
-  const tasksData = readTasks(workspaceRoot); // Pass argument
-  
-  // Find the parent task
-  const parentTask = tasksData.tasks.find(task => task.id === parseInt(parentId));
+function addSubtask(workspaceRoot, parentId, options, tasksData) { // Renamed argument, added tasksData
+  if (!tasksData) {
+    tasksData = readTasks(workspaceRoot); // Read tasks only if not provided
+  }
+  const { task: parentTask } = findTask(tasksData, parentId);
+
   if (!parentTask) {
     throw new Error(`Parent task with ID ${parentId} not found.`);
   }
@@ -293,11 +316,11 @@ function addSubtask(workspaceRoot, parentId, options) { // Renamed argument
   
   // Create new subtask index
   const subTaskIndex = parentTask.lastSubtaskIndex + 1;
-  const subTaskId = `${parentId}.${subTaskIndex}`;
+  const newSubtaskId = `${parentId}.${subTaskIndex}`;
   
   // Create new subtask
   const newSubtask = {
-    id: subTaskId,
+    id: newSubtaskId,
     title: options.title,
     status: 'todo',
     createdAt: new Date().toISOString(),
@@ -312,193 +335,190 @@ function addSubtask(workspaceRoot, parentId, options) { // Renamed argument
   parentTask.subtasks.push(newSubtask);
   parentTask.lastSubtaskIndex = subTaskIndex;
   
-  // Update tasks.json
-  writeTasks(workspaceRoot, tasksData); // Pass argument
-  
-  return { success: true, message: `Added subtask (ID: ${subTaskId}): "${newSubtask.title}" to task "${parentTask.title}"`, subtaskId: subTaskId };
+  // No need to write here if we're in the middle of a status update
+  // writeTasks(workspaceRoot, tasksData); 
+
+  // Return data instead of logging
+  return { success: true, message: `Added new subtask (ID: ${newSubtaskId}) to task ${parentId}: "${newSubtask.title}"`, subtaskId: newSubtaskId };
 }
 
 // Function to update the status of a task or subtask
 function updateStatus(workspaceRoot, id, newStatus, message) { // Added message parameter
   const tasksData = readTasks(workspaceRoot); // Pass argument
-  
-  // Normalize status
-  newStatus = newStatus.toLowerCase();
-  
-  // Check if this is a subtask (ID contains a period)
-  if (id.includes('.')) {
-    const [parentId, subtaskIndex] = id.split('.');
-    const parentTask = tasksData.tasks.find(task => task.id === parseInt(parentId));
-    
-    if (!parentTask) {
-      throw new Error(`Parent task with ID ${parentId} not found.`);
-    }
-    
-    const subtask = parentTask.subtasks.find(st => st.id === id);
-    if (!subtask) {
-      throw new Error(`Subtask with ID ${id} not found.`);
-    }
-    
-    // Update status
-    const oldStatus = subtask.status;
-    subtask.status = newStatus;
-    subtask.updatedAt = new Date().toISOString();
-    
-    // Add activity log
-    const logMessage = message || `Status changed from ${oldStatus} to ${newStatus}`;
-    addActivityLog(subtask, logMessage, 'status');
-    
-    writeTasks(workspaceRoot, tasksData); // Pass argument
-    return { success: true, message: `Updated subtask "${subtask.title}" (ID: ${id}) status to ${newStatus}` };
-  } else {
-    // Main task
-    const task = tasksData.tasks.find(task => task.id === parseInt(id));
-    if (!task) {
-      throw new Error(`Task with ID ${id} not found.`);
-    }
-    
-    // Update status
-    const oldStatus = task.status;
-    task.status = newStatus;
-    task.updatedAt = new Date().toISOString();
-    
-    // Add activity log
-    const logMessage = message || `Status changed from ${oldStatus} to ${newStatus}`;
-    addActivityLog(task, logMessage, 'status');
-    
-    writeTasks(workspaceRoot, tasksData); // Pass argument
-    return { success: true, message: `Updated task "${task.title}" (ID: ${id}) status to ${newStatus}` };
+  const { task, subtask, parentTask } = findTask(tasksData, id);
+  const item = task || subtask;
+
+  if (!item) {
+    return { success: false, message: `Task or subtask with ID ${id} not found.` };
   }
+
+  // Prevent starting a task if dependencies are not met
+  if (['inprogress', 'testing'].includes(newStatus.toLowerCase())) {
+    if (item.dependsOn && item.dependsOn.length > 0) {
+      const dependenciesMet = item.dependsOn.every(depId => {
+        const dependency = tasksData.tasks.find(t => t.id === depId);
+        return dependency && dependency.status === 'done';
+      });
+
+      if (!dependenciesMet) {
+        return { success: false, message: `Cannot start task ${id}. It has unmet dependencies.` };
+      }
+    }
+  }
+
+  // Prevent marking a task as done if it has incomplete subtasks
+  if (newStatus.toLowerCase() === 'done' && item.subtasks && item.subtasks.some(s => s.status !== 'done')) {
+    return { success: false, message: `Cannot mark task ${id} as done. All its subtasks must be completed first.` };
+  }
+
+  const oldStatus = item.status;
+  item.status = newStatus.toLowerCase();
+  
+  const logMessage = message 
+    ? `Status changed from "${oldStatus}" to "${newStatus}". Message: ${message}`
+    : `Status changed from "${oldStatus}" to "${newStatus}"`;
+
+  addActivityLog(item, logMessage);
+
+  // If a task is moved to 'testing', auto-generate testing subtasks
+  if (item && !item.id.toString().includes('.') && newStatus.toLowerCase() === 'testing') {
+    const testingSubtasks = [
+      { title: `Write unit and integration tests for '${item.title}'` },
+      { title: `Ensure all tests are passing for '${item.title}'` }
+    ];
+
+    testingSubtasks.forEach(subtaskOptions => {
+      addSubtask(workspaceRoot, item.id, subtaskOptions, tasksData); // Pass tasksData to avoid re-reading
+    });
+  }
+
+  // If a subtask is updated, also update the parent task's timestamp
+  if (parentTask) {
+    parentTask.updatedAt = new Date().toISOString();
+  }
+  
+  writeTasks(workspaceRoot, tasksData); // Pass argument
+  return { success: true, message: `Status of ${subtask ? 'subtask' : 'task'} ${id} updated to ${newStatus}.` };
 }
 
 // Function to get the next actionable task
 function getNextTask(workspaceRoot) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
+  const tasks = tasksData.tasks;
   
-  // Filter for todo tasks
-  const todoTasks = tasksData.tasks.filter(task => task.status === 'todo');
-  
-  if (todoTasks.length === 0) {
-    logger.debug("No actionable tasks found (check statuses and dependencies).");
-    return { success: false, message: "No actionable tasks found." };
-  }
-  
-  // Sort by priority (high > medium > low)
-  const priorityValues = { 'high': 3, 'medium': 2, 'low': 1 };
-  todoTasks.sort((a, b) => {
-    // Sort first by priority
-    const priorityDiff = (priorityValues[b.priority] || 0) - (priorityValues[a.priority] || 0);
-    if (priorityDiff !== 0) return priorityDiff;
-    
-    // Then by ID (older tasks first)
-    return a.id - b.id;
-  });
-  
-  // Filter out tasks with dependencies on non-done tasks
-  const actionableTasks = todoTasks.filter(task => {
-    // If no dependencies, it's actionable
-    if (!task.dependsOn || task.dependsOn.length === 0) return true;
-    
-    // Check if all dependencies are done
-    return task.dependsOn.every(depId => {
-      const depTask = tasksData.tasks.find(t => t.id === depId);
-      return depTask && depTask.status === 'done';
+  const actionableTasks = tasks.filter(task => {
+    // Task must be in 'todo' or 'inprogress' status
+    const isActionableStatus = task.status === 'todo' || task.status === 'inprogress';
+    if (!isActionableStatus) return false;
+
+    // All dependencies must be 'done'
+    const dependenciesMet = task.dependsOn.every(depId => {
+      const dependency = tasks.find(t => t.id === depId);
+      return dependency && dependency.status === 'done';
     });
+    
+    return dependenciesMet;
   });
-  
+
   if (actionableTasks.length === 0) {
-    return { success: false, message: "No actionable tasks found (all todo tasks have unmet dependencies)." };
+    return { success: false, message: "No actionable tasks found. All tasks are either done, blocked by dependencies, or have other statuses." };
   }
   
+  // Sort by priority: critical > high > medium > low
+  const priorityOrder = { 'critical': 1, 'high': 2, 'medium': 3, 'low': 4 };
+  actionableTasks.sort((a, b) => {
+    return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
+  });
+  
+  // Return the highest priority actionable task
   const nextTask = actionableTasks[0];
   
-  // For CLI, format nicely
-  logger.debug('Next Actionable Task:');
-  logger.debug(`  ID: ${nextTask.id}`);
-  logger.debug(`  Title: ${nextTask.title}`);
-  logger.debug(`  Status: ${nextTask.status}`);
-  logger.debug(`  Priority: ${nextTask.priority}`);
-  if (nextTask.description) {
-    logger.debug(`  Description: ${nextTask.description}`);
-  }
-  if (nextTask.subtasks && nextTask.subtasks.length > 0) {
-    logger.debug('  Subtasks:');
-    nextTask.subtasks.forEach(sub => logger.debug(`    - [${sub.status}] ${sub.title} (ID: ${sub.id})`));
-  }
-  
-  return { success: true, task: nextTask, message: `Next task: "${nextTask.title}" (ID: ${nextTask.id}, Priority: ${nextTask.priority})` };
+  return { 
+    success: true, 
+    message: `Next actionable task (ID: ${nextTask.id}): "${nextTask.title}"`,
+    task: nextTask 
+  };
 }
 
-// Function to update fields of a task or subtask
-function updateTask(workspaceRoot, id, options) { // Renamed argument
+// Function to update a task. For subtasks, use updateSubtask.
+function updateTask(workspaceRoot, id, options) {
   const tasksData = readTasks(workspaceRoot);
-  let itemUpdated = false;
-  let item = null; // Store the item being updated
-  const idString = String(id);
+  const { task, subtask } = findTask(tasksData, id);
 
-  const { title, description, priority, relatedFiles, message } = options;
-  const updates = {};
-  if (title !== undefined) updates.title = title;
-  if (!idString.includes('.')) {
-      if (description !== undefined) updates.description = description;
-      if (priority !== undefined) updates.priority = priority;
-      if (relatedFiles !== undefined) {
-        const parseCommaSeparated = (str) => typeof str === 'string' ? str.split(',').map(s => s.trim()).filter(Boolean) : [];
-        updates.relatedFiles = parseCommaSeparated(relatedFiles);
-      }
+  if (subtask) {
+    // Delegate to the new updateSubtask function for subtasks
+    return updateSubtask(workspaceRoot, id, options);
   }
 
-  if (Object.keys(updates).length === 0 && !message) {
-      return { success: false, message: "No update options or message provided."};
+  if (!task) {
+    return { success: false, message: `Task with ID ${id} not found.` };
   }
 
-  // Find the task or subtask
-  if (idString.includes('.')) {
-    const parts = idString.split('.');
-    const parentId = parseInt(parts[0]);
-    const parentTask = tasksData.tasks.find(task => task.id === parentId);
-    if (parentTask) {
-        if (!parentTask.subtasks) parentTask.subtasks = [];
-        const subtaskIndex = parentTask.subtasks.findIndex(sub => sub.id === idString);
-        if (subtaskIndex !== -1) {
-            item = parentTask.subtasks[subtaskIndex];
-            if(updates.title !== undefined) {
-                 item.title = updates.title;
-                 itemUpdated = true;
-            }
-            parentTask.updatedAt = new Date().toISOString();
-        }
-    }
+  // It's a main task, proceed with updating
+  let updated = false;
+  const parseCommaSeparated = (str) => (typeof str === 'string' ? str.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+  if (options.title !== undefined) {
+    task.title = options.title;
+    addActivityLog(task, `Title updated to: "${options.title}"`);
+    updated = true;
+  }
+  if (options.description !== undefined) {
+    task.description = options.description;
+    addActivityLog(task, 'Description updated.');
+    updated = true;
+  }
+  if (options.priority !== undefined) {
+    task.priority = options.priority;
+    addActivityLog(task, `Priority updated to: ${options.priority}`);
+    updated = true;
+  }
+  if (options.dependsOn !== undefined) {
+    task.dependsOn = options.dependsOn.split(',').map(depId => parseInt(depId.trim())).filter(depId => !isNaN(depId));
+    addActivityLog(task, `Dependencies updated to: ${task.dependsOn.join(', ')}`);
+    updated = true;
+  }
+  if (options.relatedFiles !== undefined) {
+    task.relatedFiles = parseCommaSeparated(options.relatedFiles);
+    addActivityLog(task, 'Related files updated.');
+    updated = true;
+  }
+
+  if (updated) {
+    task.updatedAt = new Date().toISOString();
+    writeTasks(workspaceRoot, tasksData);
+    return { success: true, message: `Task ${id} updated successfully.` };
   } else {
-    const taskId = parseInt(idString);
-    item = tasksData.tasks.find(task => task.id === taskId);
+    return { success: false, message: `No updates provided for task ${id}.` };
+  }
+}
+
+// Function to update a subtask
+function updateSubtask(workspaceRoot, subtaskId, options) {
+  const tasksData = readTasks(workspaceRoot);
+  const { subtask, parentTask } = findTask(tasksData, subtaskId);
+
+  if (!subtask) {
+    return { success: false, message: `Subtask with ID ${subtaskId} not found.` };
   }
 
-  if(item) {
-        if (Object.keys(updates).length > 0 && !idString.includes('.')) {
-             if (updates.relatedFiles && item.relatedFiles === undefined) item.relatedFiles = [];
-             Object.assign(item, updates);
-             itemUpdated = true;
-        } else if (updates.title !== undefined && idString.includes('.')) {
-             item.title = updates.title;
-             itemUpdated = true;
-        }
+  let updated = false;
 
-       if (message) {
-           addActivityLog(item, message, 'log');
-           itemUpdated = true;
-       }
+  if (options.title !== undefined) {
+    subtask.title = options.title;
+    addActivityLog(subtask, `Title updated to: "${options.title}"`);
+    updated = true;
+  }
+  // Currently, only the title of a subtask can be updated.
+  // Add other fields here if needed in the future.
 
-        if (itemUpdated) {
-           item.updatedAt = new Date().toISOString();
-           writeTasks(workspaceRoot, tasksData);
-           const successMsg = `Updated task/subtask "${item.title}" (ID: ${idString}).${message ? ' Logged: "' + message + '"' : ''}`;
-           return { success: true, message: successMsg };
-        } else {
-             return { success: true, message: `No fields updated for task/subtask "${item.title}" (ID: ${idString}).${message ? ' Logged: "' + message + '"' : ''}` };
-        }
+  if (updated) {
+    subtask.updatedAt = new Date().toISOString();
+    parentTask.updatedAt = new Date().toISOString(); // Also update parent task's timestamp
+    writeTasks(workspaceRoot, tasksData);
+    return { success: true, message: `Subtask ${subtaskId} updated successfully.` };
   } else {
-        throw new Error(`Task or subtask with ID ${idString} not found.`);
+    return { success: false, message: `No updates provided for subtask ${subtaskId}.` };
   }
 }
 
@@ -1172,6 +1192,7 @@ module.exports = {
   updateStatus,
   getNextTask,
   updateTask,
+  updateSubtask,
   removeTask,
   generateTaskFiles,
   getContext,

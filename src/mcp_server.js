@@ -241,11 +241,12 @@ rl.on('line', async (line) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  title: { type: 'string', description: 'The title of the task.' },
-                  description: { type: 'string', description: 'Optional description for the task.' },
-                  priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Optional priority (low, medium, high). Defaults to medium.' },
-                  dependsOn: { type: 'string', description: 'Optional comma-separated string of task IDs it depends on.' },
-                  relatedFiles: { type: 'string', description: 'Optional comma-separated string of relevant file paths.' }
+                  title: { type: 'string', description: 'The title of the task.', required: true },
+                  description: { type: 'string' },
+                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
+                  dependsOn: { type: 'string' },
+                  relatedFiles: { type: 'string' },
+                  tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
                 },
                 required: ['title']
               }
@@ -258,6 +259,8 @@ rl.on('line', async (line) => {
                 properties: {
                   parentId: { type: 'number', description: 'The ID of the parent task.' },
                   title: { type: 'string', description: 'The title of the subtask.' },
+                  relatedFiles: { type: 'string', description: 'Optional comma-separated string of relevant file paths.' },
+                  tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
                 },
                 required: ['parentId', 'title']
               }
@@ -268,7 +271,7 @@ rl.on('line', async (line) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  status: { type: 'string', enum: ['todo', 'inprogress', 'done', 'blocked', 'error'], description: 'Optional status to filter by.' },
+                  status: { type: 'string', enum: ['todo', 'inprogress', 'testing', 'done', 'blocked', 'error'], description: 'Optional status to filter by.' },
                   format: { type: 'string', enum: ['json', 'table', 'human'], description: 'Optional output format. "human" provides a readable format with checkboxes.' }
                 }
               }
@@ -280,7 +283,7 @@ rl.on('line', async (line) => {
                 type: 'object',
                 properties: {
                   id: { type: 'string', description: 'The ID of the task or subtask (e.g., 1 or 1.1).' },
-                  newStatus: { type: 'string', enum: ['todo', 'inprogress', 'done', 'blocked', 'error'], description: 'The new status.' },
+                  newStatus: { type: 'string', enum: ['todo', 'inprogress', 'testing', 'done', 'blocked', 'error'], description: 'The new status.' },
                   message: { type: 'string', description: 'Optional message to add to the activity log.' }
                 },
                 required: ['id', 'newStatus']
@@ -299,18 +302,33 @@ rl.on('line', async (line) => {
             },
             {
               name: 'updateTask',
-              description: 'Updates the details of a task or subtask.',
+              description: 'Updates the details of a task (title, description, priority, etc.). Does not update status.',
               inputSchema: {
                 type: 'object',
                 properties: {
-                  id: { type: 'string', description: 'The ID of the task or subtask.' },
-                  title: { type: 'string', description: 'Optional new title.' },
-                  description: { type: 'string', description: 'Optional new description (applies to main tasks).' },
-                  priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Optional new priority (applies to main tasks).' },
-                  relatedFiles: { type: 'string', description: 'Optional comma-separated string of relevant file paths (replaces existing).' },
-                  message: { type: 'string', description: 'Optional message to add to the activity log.' }
+                  id: { type: 'string', description: 'The ID of the task to update.', required: true },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+                  dependsOn: { type: 'string' },
+                  relatedFiles: { type: 'string' },
+                  tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
                 },
                 required: ['id']
+              }
+            },
+            {
+              name: 'updateSubtask',
+              description: 'Updates the details of a subtask (e.g., title).',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The ID of the subtask to update (e.g., "1.1").' },
+                  title: { type: 'string', description: 'The new title for the subtask.' },
+                  relatedFiles: { type: 'string', description: 'Optional comma-separated string of relevant file paths.' },
+                  tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
+                },
+                required: ['id', 'title']
               }
             },
             {
@@ -1038,7 +1056,8 @@ rl.on('line', async (line) => {
                 description: argsParam.description || '',
                 priority: argsParam.priority || 'medium',
                 dependsOn: argsParam.dependsOn || '',
-                relatedFiles: argsParam.relatedFiles || ''
+                relatedFiles: argsParam.relatedFiles || '',
+                tests: argsParam.tests || ''
               });
               break;
               
@@ -1053,7 +1072,9 @@ rl.on('line', async (line) => {
               responseData = core.addSubtask(workspaceRoot, 
                 argsParam.parentId, 
                 {
-                  title: argsParam.title
+                  title: argsParam.title,
+                  relatedFiles: argsParam.relatedFiles || '',
+                  tests: argsParam.tests || ''
                 }
               );
               break;
@@ -1071,11 +1092,34 @@ rl.on('line', async (line) => {
                 return;
               }
               
+              // If the status is being set to "done" and relatedFiles are provided, update them first
+              if (argsParam.newStatus === 'done' && argsParam.relatedFiles) {
+                try {
+                  // Update the related files first
+                  const updateResult = core.updateTask(
+                    workspaceRoot, 
+                    argsParam.id, 
+                    { relatedFiles: argsParam.relatedFiles }
+                  );
+                  
+                  if (!updateResult.success) {
+                    logger.error(`Failed to update related files: ${updateResult.message}`);
+                    sendError(id, -32000, `Failed to update related files: ${updateResult.message}`);
+                    return;
+                  }
+                } catch (error) {
+                  logger.error(`Error updating related files: ${error.message}`);
+                  sendError(id, -32000, `Error updating related files: ${error.message}`);
+                  return;
+                }
+              }
+              
               responseData = core.updateStatus(
                 workspaceRoot, 
                 argsParam.id, 
                 argsParam.newStatus, 
-                argsParam.message || ''
+                argsParam.message || '',
+                { skipValidation: argsParam.skipValidation }
               );
               break;
               
@@ -1084,24 +1128,19 @@ rl.on('line', async (line) => {
               break;
               
             case 'updateTask':
-              responseData = core.updateTask(workspaceRoot, 
-                argsParam && argsParam.id, 
-                {
-                  title: argsParam && argsParam.title,
-                  description: argsParam && argsParam.description,
-                  priority: argsParam && argsParam.priority,
-                  relatedFiles: argsParam && argsParam.relatedFiles,
-                  message: argsParam && argsParam.message
-                }
-              );
+              responseData = core.updateTask(workspaceRoot, argsParam.id, argsParam);
+              break;
+              
+            case 'updateSubtask':
+              responseData = core.updateSubtask(workspaceRoot, argsParam.id, argsParam);
               break;
               
             case 'removeTask':
-              responseData = core.removeTask(workspaceRoot, argsParam && argsParam.id);
+              responseData = core.removeTask(workspaceRoot, argsParam.id);
               break;
               
             case 'getContext':
-              responseData = core.getContext(workspaceRoot, argsParam && argsParam.id);
+              responseData = core.getContext(workspaceRoot, argsParam.id);
               break;
               
             case 'generateTaskFiles':

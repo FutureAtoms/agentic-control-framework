@@ -203,6 +203,25 @@ async function main() {
         });
         break;
         
+      case 'update-subtask':
+        const updateSubtaskOptions = parseArgs(args);
+        const subtaskId = updateSubtaskOptions.id || updateSubtaskOptions._args?.[0];
+        
+        if (!subtaskId) {
+          console.error('[ERROR] Subtask ID is required for updating a subtask');
+          process.exit(1);
+        }
+        
+        if (!subtaskId.includes('.')) {
+          console.error('[ERROR] Invalid subtask ID. Subtask IDs must be in the format "parentID.subtaskID" (e.g., "1.1")');
+          process.exit(1);
+        }
+        
+        result = core.updateSubtask(workspaceRoot, subtaskId, {
+          title: updateSubtaskOptions.title || updateSubtaskOptions.t
+        });
+        break;
+        
       case 'remove':
         const removeOptions = parseArgs(args);
         const removeId = removeOptions.id || removeOptions._args?.[0];
@@ -302,6 +321,7 @@ Commands:
   status <id> <status> [-m]   Update the status of a task
   next                        Get the next actionable task
   update <id> [options]       Update details of a task
+  update-subtask <id> -t <title> Update the title of a subtask
   remove <id>                 Remove a task
   get-context <id>            Get detailed context for a task
   generate                    Generate task files
