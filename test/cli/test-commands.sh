@@ -18,7 +18,7 @@ assert_success() {
 
 assert_fail() {
     set +e
-    "$@"
+    "$@" > /dev/null 2>&1
     local exit_code=$?
     set -e
     if [ $exit_code -eq 0 ]; then
