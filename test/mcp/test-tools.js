@@ -4,18 +4,15 @@ const path = require('path');
 const os = require('os');
 const core = require('../../src/core');
 
-const TEST_WORKSPACE = fs.mkdtempSync(path.join(os.tmpdir(), 'acf-mcp-test-'));
-
 describe('MCP Core Logic Tests', () => {
+    let TEST_WORKSPACE;
+
     beforeEach(() => {
-        if (fs.existsSync(TEST_WORKSPACE)) {
-            fs.rmSync(TEST_WORKSPACE, { recursive: true, force: true });
-        }
-        fs.mkdirSync(TEST_WORKSPACE);
+        TEST_WORKSPACE = fs.mkdtempSync(path.join(os.tmpdir(), 'acf-mcp-test-'));
         core.initProject(TEST_WORKSPACE, { projectName: 'MCP Core Test' });
     });
 
-    after(() => {
+    afterEach(() => {
         fs.rmSync(TEST_WORKSPACE, { recursive: true, force: true });
     });
 

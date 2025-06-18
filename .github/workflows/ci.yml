@@ -22,12 +22,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      
+      - name: Clean npm cache and install dependencies
+        run: |
+          npm cache clean --force
+          npm install
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Rebuild sharp
-        run: npm rebuild sharp
+      - name: Reinstall sharp for Linux
+        run: npm install --platform=linux --arch=x64 sharp
 
       - name: Run MCP and E2E Tests
         run: npm test
