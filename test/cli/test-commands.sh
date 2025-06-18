@@ -6,7 +6,7 @@ set -x
 # --- Test Setup ---
 TEST_WORKSPACE=$(mktemp -d -t acf-cli-test.XXXXXX)
 ACF_ROOT=$(pwd)
-TASK_MANAGER_CMD="node $ACF_ROOT/bin/task-cli.js --workspace $TEST_WORKSPACE"
+TASK_MANAGER_CMD="node $ACF_ROOT/bin/task-cli.js"
 
 # --- Helper Functions ---
 assert_success() {
