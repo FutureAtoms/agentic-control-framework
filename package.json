@@ -16,7 +16,7 @@
     "start": "node ./src/mcp_server.js --workspaceRoot $(pwd)",
     "start:auth": "node auth-proxy.js",
     "start:local": "docker-compose up --build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha 'test/**/*.js'"
   },
   "keywords": [
     "task",
@@ -60,5 +60,9 @@
     "helmet": "^7.1.0",
     "http-proxy-middleware": "^2.0.6",
     "stripe": "^14.7.0"
+  },
+  "devDependencies": {
+    "chai": "^5.2.0",
+    "mocha": "^11.7.0"
   }
 }

@@ -26,11 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Make test scripts executable
+      - name: Run MCP and E2E Tests
+        run: npm test
+
+      - name: Make CLI test script executable
         run: chmod +x test/cli/test-commands.sh
 
       - name: Run CLI Tests
-        run: bash test/cli/test-commands.sh
-
-      - name: Run MCP Tests
-        run: node test/mcp/test-tools.js 
+        run: bash test/cli/test-commands.sh 
