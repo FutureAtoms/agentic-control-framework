@@ -37,7 +37,7 @@ assert_contains() {
 # --- Test Cases ---
 test_init() {
     echo "Testing: init"
-    output=$($TASK_MANAGER_CMD init --project-name "CLI Test Project" --project-description "A test project")
+    output=$($TASK_MANAGER_CMD init --project-name "CLI Test Project" --project-description "A test project for the CLI")
     assert_success
     assert_contains "$output" "Created initial tasks file"
 }
