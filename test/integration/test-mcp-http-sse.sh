@@ -8,7 +8,7 @@
 # tool handling logic, which is common to all transport layers (HTTP, SSE, etc.).
 #
 # NOTE: This test script is designed to be resilient to pre-existing state
-# in the workspace (e.g., an existing tasks.tks.json file). Instead of asserting
+# in the workspace (e.g., an existing .acf/tasks.json file). Instead of asserting
 # exact state, it asserts state changes (e.g., task count increasing).
 
 set -e
@@ -107,12 +107,19 @@ send_request() {
 test_init_project() {
     header "Testing 'initProject' tool"
     ((REQUEST_COUNT++))
-    local request_body="{\"jsonrpc\":\"2.0\",\"id\":$REQUEST_COUNT,\"method\":\"tools/run\",\"params\":{\"tool\":\"initProject\",\"args\":{\"projectName\":\"Test Project\"}}}"
+    local request_body="{\"jsonrpc\":\"2.0\",\"id\":$REQUEST_COUNT,\"method\":\"tools/run\",\"params\":{\"tool\":\"initProject\",\"args\":{\"projectName\":\"Test Project\", \"editor\":\"cursor\"}}}"
     local response=$(send_request "$request_body" "$REQUEST_COUNT")
     if echo "$response" | grep -q '"success":true'; then
         success "initProject successful."
     else
         error "initProject failed. Response: $response"
+    fi
+
+    # Verify that the editor-specific directory and rules file were created
+    if [ -f "$TEST_WORKSPACE/.cursor/rules/acf_rules.md" ]; then
+        success "Editor-specific rules file created successfully."
+    else
+        error "Editor-specific rules file was not created."
     fi
 }
 

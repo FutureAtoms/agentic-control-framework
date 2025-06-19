@@ -226,7 +226,8 @@ rl.on('line', async (line) => {
                 type: 'object',
                 properties: {
                   projectName: { type: 'string', description: 'Optional name for the project.' },
-                  projectDescription: { type: 'string', description: 'Optional goal or description for the project.' }
+                  projectDescription: { type: 'string', description: 'Optional goal or description for the project.' },
+                  editor: { type: 'string', description: 'Optional editor type for generating specific rule files (e.g., cursor, claude).', enum: ['cursor', 'claude', 'cline', 'void'] }
                 }
               }
             },
@@ -1000,11 +1001,11 @@ rl.on('line', async (line) => {
         
         // Extract the parameters we need
         const toolName = method === 'tools/call' ? params.name : params.tool; // Adjust based on MCP version
-        const argsParam = method === 'tools/call' 
+        const args = method === 'tools/call' 
           ? (params.arguments || params.parameters || {}) // Try both argument formats with fallback
           : (params.args || {});
         
-        logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(argsParam)}`);
+        logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(args)}`);
         
         try {
           // Handle the specific tool requests
@@ -1012,8 +1013,8 @@ rl.on('line', async (line) => {
           
           switch (toolName) {
             case 'setWorkspace':
-              if (argsParam && argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
-                workspaceRoot = argsParam.workspacePath;
+              if (args.workspacePath && fs.existsSync(args.workspacePath)) {
+                workspaceRoot = args.workspacePath;
                 // Update allowed directories when workspace changes
                 const index = allowedDirectories.indexOf(allowedDirectories[0]);
                 if (index !== -1) {
@@ -1025,7 +1026,7 @@ rl.on('line', async (line) => {
                 logger.info(`Allowed directories updated: ${allowedDirectories.join(', ')}`);
                 responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
               } else {
-                const path = argsParam && argsParam.workspacePath ? argsParam.workspacePath : 'undefined';
+                const path = args.workspacePath ? args.workspacePath : 'undefined';
                 logger.error(`Invalid workspace path: ${path}`);
                 responseData = { success: false, message: `Invalid or non-existent workspace path: ${path}` };
               }
@@ -1033,43 +1034,44 @@ rl.on('line', async (line) => {
               
             case 'initProject':
               responseData = core.initProject(workspaceRoot, {
-                projectName: argsParam && argsParam.projectName || 'Untitled Project',
-                projectDescription: argsParam && argsParam.projectDescription || ''
+                projectName: args.projectName || 'Untitled Project',
+                projectDescription: args.projectDescription || '',
+                editor: args.editor
               });
               break;
               
             case 'addTask':
               // Check required parameters
-              if (!argsParam || !argsParam.title) {
+              if (!args || !args.title) {
                 logger.error('Missing required parameter: title for addTask');
                 sendError(id, -32602, 'Missing required parameter: title for addTask');
                 return;
               }
               
               responseData = core.addTask(workspaceRoot, {
-                title: argsParam.title,
-                description: argsParam.description || '',
-                priority: argsParam.priority || 'medium',
-                dependsOn: argsParam.dependsOn || '',
-                relatedFiles: argsParam.relatedFiles || '',
-                tests: argsParam.tests || ''
+                title: args.title,
+                description: args.description || '',
+                priority: args.priority || 'medium',
+                dependsOn: args.dependsOn || '',
+                relatedFiles: args.relatedFiles || '',
+                tests: args.tests || ''
               });
               break;
               
             case 'addSubtask':
               // Check required parameters
-              if (!argsParam || !argsParam.parentId || !argsParam.title) {
+              if (!args || !args.parentId || !args.title) {
                 logger.error('Missing required parameters for addSubtask: parentId and/or title');
                 sendError(id, -32602, 'Missing required parameters for addSubtask: parentId and/or title');
                 return;
               }
               
               responseData = core.addSubtask(workspaceRoot, 
-                argsParam.parentId, 
+                args.parentId, 
                 {
-                  title: argsParam.title,
-                  relatedFiles: argsParam.relatedFiles || '',
-                  tests: argsParam.tests || ''
+                  title: args.title,
+                  relatedFiles: args.relatedFiles || '',
+                  tests: args.tests || ''
                 }
               );
               break;
@@ -1081,20 +1083,20 @@ rl.on('line', async (line) => {
               
             case 'updateStatus':
               // Check required parameters
-              if (!argsParam || !argsParam.id || !argsParam.newStatus) {
+              if (!args || !args.id || !args.newStatus) {
                 logger.error('Missing required parameters for updateStatus: id and/or newStatus');
                 sendError(id, -32602, 'Missing required parameters for updateStatus: id and/or newStatus');
                 return;
               }
               
               // If the status is being set to "done" and relatedFiles are provided, update them first
-              if (argsParam.newStatus === 'done' && argsParam.relatedFiles) {
+              if (args.newStatus === 'done' && args.relatedFiles) {
                 try {
                   // Update the related files first
                   const updateResult = core.updateTask(
                     workspaceRoot, 
-                    argsParam.id, 
-                    { relatedFiles: argsParam.relatedFiles }
+                    args.id, 
+                    { relatedFiles: args.relatedFiles }
                   );
                   
                   if (!updateResult.success) {
@@ -1111,10 +1113,10 @@ rl.on('line', async (line) => {
               
               responseData = core.updateStatus(
                 workspaceRoot, 
-                argsParam.id, 
-                argsParam.newStatus, 
-                argsParam.message || '',
-                { skipValidation: argsParam.skipValidation }
+                args.id, 
+                args.newStatus, 
+                args.message || '',
+                { skipValidation: args.skipValidation }
               );
               break;
               
@@ -1123,19 +1125,19 @@ rl.on('line', async (line) => {
               break;
               
             case 'updateTask':
-              responseData = core.updateTask(workspaceRoot, argsParam.id, argsParam);
+              responseData = core.updateTask(workspaceRoot, args.id, args);
               break;
               
             case 'updateSubtask':
-              responseData = core.updateSubtask(workspaceRoot, argsParam.id, argsParam);
+              responseData = core.updateSubtask(workspaceRoot, args.id, args);
               break;
               
             case 'removeTask':
-              responseData = core.removeTask(workspaceRoot, argsParam.id);
+              responseData = core.removeTask(workspaceRoot, args.id);
               break;
               
             case 'getContext':
-              responseData = core.getContext(workspaceRoot, argsParam.id);
+              responseData = core.getContext(workspaceRoot, args.id);
               break;
               
             case 'generateTaskFiles':
@@ -1143,17 +1145,17 @@ rl.on('line', async (line) => {
               break;
               
             case 'parsePrd':
-              responseData = await core.parsePrd(workspaceRoot, argsParam && argsParam.filePath);
+              responseData = await core.parsePrd(workspaceRoot, args && args.filePath);
               break;
               
             case 'expandTask':
-              responseData = await core.expandTask(workspaceRoot, argsParam && argsParam.taskId);
+              responseData = await core.expandTask(workspaceRoot, args && args.taskId);
               break;
               
             case 'reviseTasks':
-              // Extract parameters from argsParam, not params
-              const fromTaskId = argsParam && argsParam.fromTaskId;
-              const prompt = argsParam && argsParam.prompt;
+              // Extract parameters from args, not params
+              const fromTaskId = args && args.fromTaskId;
+              const prompt = args && args.prompt;
               
               if (!fromTaskId || !prompt) {
                 logger.error('Missing required parameters for reviseTasks: fromTaskId and/or prompt');
@@ -1171,18 +1173,18 @@ rl.on('line', async (line) => {
             // Filesystem tools
             case 'read_file':
               // Use enhanced read_file with URL support
-              if (argsParam.isUrl || (argsParam.path && (argsParam.path.startsWith('http://') || argsParam.path.startsWith('https://')))) {
-                responseData = await enhancedFsTools.readFileEnhanced(argsParam.path, allowedDirectories, {
+              if (args.isUrl || (args.path && (args.path.startsWith('http://') || args.path.startsWith('https://')))) {
+                responseData = await enhancedFsTools.readFileEnhanced(args.path, allowedDirectories, {
                   isUrl: true,
-                  timeout: argsParam.timeout
+                  timeout: args.timeout
                 });
               } else {
-                responseData = filesystemTools.readFile(argsParam.path, allowedDirectories);
+                responseData = filesystemTools.readFile(args.path, allowedDirectories);
               }
               break;
               
             case 'read_multiple_files':
-              responseData = filesystemTools.readMultipleFiles(argsParam.paths, allowedDirectories);
+              responseData = filesystemTools.readMultipleFiles(args.paths, allowedDirectories);
               break;
               
             case 'write_file':
@@ -1194,7 +1196,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.writeFile(argsParam.path, argsParam.content, allowedDirectories);
+              responseData = filesystemTools.writeFile(args.path, args.content, allowedDirectories);
               break;
               
             case 'copy_file':
@@ -1206,7 +1208,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.copyFile(argsParam.source, argsParam.destination, allowedDirectories);
+              responseData = filesystemTools.copyFile(args.source, args.destination, allowedDirectories);
               break;
               
             case 'move_file':
@@ -1218,7 +1220,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.moveFile(argsParam.source, argsParam.destination, allowedDirectories);
+              responseData = filesystemTools.moveFile(args.source, args.destination, allowedDirectories);
               break;
               
             case 'delete_file':
@@ -1230,11 +1232,11 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.deleteFile(argsParam.path, argsParam.recursive, allowedDirectories);
+              responseData = filesystemTools.deleteFile(args.path, args.recursive, allowedDirectories);
               break;
               
             case 'list_directory':
-              responseData = filesystemTools.listDirectory(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.listDirectory(args.path, allowedDirectories);
               break;
               
             case 'create_directory':
@@ -1246,24 +1248,24 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.createDirectory(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.createDirectory(args.path, allowedDirectories);
               break;
               
             case 'tree':
               responseData = filesystemTools.createDirectoryTree(
-                argsParam.path, 
-                argsParam.depth || 3, 
-                argsParam.follow_symlinks || false, 
+                args.path, 
+                args.depth || 3, 
+                args.follow_symlinks || false, 
                 allowedDirectories
               );
               break;
               
             case 'search_files':
-              responseData = filesystemTools.searchFiles(argsParam.path, argsParam.pattern, allowedDirectories);
+              responseData = filesystemTools.searchFiles(args.path, args.pattern, allowedDirectories);
               break;
               
             case 'get_file_info':
-              responseData = filesystemTools.getFileInfo(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.getFileInfo(args.path, allowedDirectories);
               break;
               
             case 'list_allowed_directories':
@@ -1290,22 +1292,22 @@ rl.on('line', async (line) => {
               break;
               
             case 'set_config_value':
-              responseData = terminalTools.setConfigValue(argsParam.key, argsParam.value);
+              responseData = terminalTools.setConfigValue(args.key, args.value);
               break;
               
             case 'execute_command':
-              responseData = await terminalTools.executeCommand(argsParam.command, {
-                shell: argsParam.shell,
-                timeout_ms: argsParam.timeout_ms
+              responseData = await terminalTools.executeCommand(args.command, {
+                shell: args.shell,
+                timeout_ms: args.timeout_ms
               });
               break;
               
             case 'read_output':
-              responseData = terminalTools.readOutput(argsParam.pid);
+              responseData = terminalTools.readOutput(args.pid);
               break;
               
             case 'force_terminate':
-              responseData = await terminalTools.forceTerminate(argsParam.pid);
+              responseData = await terminalTools.forceTerminate(args.pid);
               break;
               
             case 'list_sessions':
@@ -1317,29 +1319,29 @@ rl.on('line', async (line) => {
               break;
               
             case 'kill_process':
-              responseData = await terminalTools.killProcess(argsParam.pid);
+              responseData = await terminalTools.killProcess(args.pid);
               break;
               
             case 'search_code':
-              responseData = await searchTools.searchCode(argsParam.path, argsParam.pattern, {
-                ignoreCase: argsParam.ignoreCase,
-                filePattern: argsParam.filePattern,
-                contextLines: argsParam.contextLines,
-                includeHidden: argsParam.includeHidden,
-                maxResults: argsParam.maxResults,
-                timeoutMs: argsParam.timeoutMs
+              responseData = await searchTools.searchCode(args.path, args.pattern, {
+                ignoreCase: args.ignoreCase,
+                filePattern: args.filePattern,
+                contextLines: args.contextLines,
+                includeHidden: args.includeHidden,
+                maxResults: args.maxResults,
+                timeoutMs: args.timeoutMs
               });
               break;
               
             case 'edit_block':
-              responseData = editTools.editBlock(argsParam.file_path, argsParam.old_string, argsParam.new_string, {
-                expected_replacements: argsParam.expected_replacements
+              responseData = editTools.editBlock(args.file_path, args.old_string, args.new_string, {
+                expected_replacements: args.expected_replacements
               });
               break;
               
             // Playwright MCP Browser Tools cases
             case 'browser_navigate':
-              responseData = await browserTools.browserNavigate(argsParam.url);
+              responseData = await browserTools.browserNavigate(args.url);
               break;
               
             case 'browser_navigate_back':
@@ -1351,38 +1353,38 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_click':
-              responseData = await browserTools.browserClick(argsParam.element, argsParam.ref);
+              responseData = await browserTools.browserClick(args.element, args.ref);
               break;
               
             case 'browser_type':
-              responseData = await browserTools.browserType(argsParam.element, argsParam.ref, argsParam.text, {
-                submit: argsParam.submit,
-                slowly: argsParam.slowly
+              responseData = await browserTools.browserType(args.element, args.ref, args.text, {
+                submit: args.submit,
+                slowly: args.slowly
               });
               break;
               
             case 'browser_hover':
-              responseData = await browserTools.browserHover(argsParam.element, argsParam.ref);
+              responseData = await browserTools.browserHover(args.element, args.ref);
               break;
               
             case 'browser_drag':
-              responseData = await browserTools.browserDrag(argsParam.startElement, argsParam.startRef, argsParam.endElement, argsParam.endRef);
+              responseData = await browserTools.browserDrag(args.startElement, args.startRef, args.endElement, args.endRef);
               break;
               
             case 'browser_select_option':
-              responseData = await browserTools.browserSelectOption(argsParam.element, argsParam.ref, argsParam.values);
+              responseData = await browserTools.browserSelectOption(args.element, args.ref, args.values);
               break;
               
             case 'browser_press_key':
-              responseData = await browserTools.browserPressKey(argsParam.key);
+              responseData = await browserTools.browserPressKey(args.key);
               break;
               
             case 'browser_take_screenshot':
               responseData = await browserTools.browserTakeScreenshot({
-                element: argsParam.element,
-                ref: argsParam.ref,
-                filename: argsParam.filename,
-                raw: argsParam.raw
+                element: args.element,
+                ref: args.ref,
+                filename: args.filename,
+                raw: args.raw
               });
               break;
               
@@ -1392,7 +1394,7 @@ rl.on('line', async (line) => {
               
             case 'browser_pdf_save':
               responseData = await browserTools.browserPdfSave({
-                filename: argsParam.filename
+                filename: args.filename
               });
               break;
               
@@ -1401,27 +1403,27 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_file_upload':
-              responseData = await browserTools.browserFileUpload(argsParam.paths);
+              responseData = await browserTools.browserFileUpload(args.paths);
               break;
               
             case 'browser_wait':
-              responseData = await browserTools.browserWait(argsParam.time);
+              responseData = await browserTools.browserWait(args.time);
               break;
               
             case 'browser_wait_for':
               responseData = await browserTools.browserWaitFor({
-                text: argsParam.text,
-                textGone: argsParam.textGone,
-                time: argsParam.time
+                text: args.text,
+                textGone: args.textGone,
+                time: args.time
               });
               break;
               
             case 'browser_resize':
-              responseData = await browserTools.browserResize(argsParam.width, argsParam.height);
+              responseData = await browserTools.browserResize(args.width, args.height);
               break;
               
             case 'browser_handle_dialog':
-              responseData = await browserTools.browserHandleDialog(argsParam.accept, argsParam.promptText);
+              responseData = await browserTools.browserHandleDialog(args.accept, args.promptText);
               break;
               
             case 'browser_close':
@@ -1437,15 +1439,15 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_tab_new':
-              responseData = await browserTools.browserTabNew(argsParam.url);
+              responseData = await browserTools.browserTabNew(args.url);
               break;
               
             case 'browser_tab_select':
-              responseData = await browserTools.browserTabSelect(argsParam.index);
+              responseData = await browserTools.browserTabSelect(args.index);
               break;
               
             case 'browser_tab_close':
-              responseData = await browserTools.browserTabClose(argsParam.index);
+              responseData = await browserTools.browserTabClose(args.index);
               break;
               
             case 'browser_network_requests':
@@ -1455,8 +1457,8 @@ rl.on('line', async (line) => {
             // AppleScript Tool case
             case 'applescript_execute':
               responseData = await applescriptTools.executeAppleScript(
-                argsParam.code_snippet,
-                argsParam.timeout || 60
+                args.code_snippet,
+                args.timeout || 60
               );
               break;
               

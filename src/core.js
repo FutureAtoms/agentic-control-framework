@@ -21,7 +21,7 @@ function getWorkspacePaths(workspaceRoot) { // Added workspaceRoot argument
   // Here we can't use resolvePath to avoid circular dependency,
   // but we ensure all paths are absolute by using path.resolve
   return {
-    tasksFilePath: path.resolve(workspaceRoot, 'tasks.tks.json'),
+    tasksFilePath: path.resolve(workspaceRoot, '.acf', 'tasks.json'),
     cursorRulesDir: path.resolve(workspaceRoot, '.cursor', 'rules'),
     cursorRulesFile: path.resolve(workspaceRoot, '.cursor', 'rules', 'task_manager_workflow.mdc'),
     taskFilesDir: path.resolve(workspaceRoot, 'tasks')
@@ -47,9 +47,14 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
   }
 
   const { tasksFilePath, cursorRulesDir, cursorRulesFile } = getWorkspacePaths(workspaceRoot); // Pass argument
-  const { projectName = "Untitled Project", projectDescription = "" } = options;
+  const { projectName = "Untitled Project", projectDescription = "", editor = null } = options;
   logger.info(`[DEBUG] initProject: projectDescription = "${projectDescription}"`); // Added for debugging
   let messages = []; // Collect messages to return
+
+  // Ensure the .acf directory exists
+  const acfDir = path.dirname(tasksFilePath);
+  const dirMsgAcf = ensureDirExists(acfDir);
+  if (dirMsgAcf) messages.push(dirMsgAcf);
 
   if (!fs.existsSync(tasksFilePath)) {
     const initialData = {
@@ -112,6 +117,33 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
     }
   } else {
     messages.push(`Cursor rules file already exists: ${cursorRulesFile}`);
+  }
+  
+  // Handle editor-specific setup
+  if (editor) {
+      const validEditors = ['cursor', 'claude', 'cline', 'void'];
+      if (validEditors.includes(editor)) {
+          const editorDir = path.resolve(workspaceRoot, `.${editor}`);
+          const editorRulesDir = path.resolve(editorDir, 'rules');
+          const editorRulesFile = path.resolve(editorRulesDir, 'acf_rules.md');
+
+          const editorDirMsg = ensureDirExists(editorRulesDir);
+          if (editorDirMsg) messages.push(editorDirMsg);
+
+          if (!fs.existsSync(editorRulesFile)) {
+              const placeholderContent = `# Agentic Control Framework Rules for ${editor}\n\nThis file defines workflow rules and automations for the ACF.\n\n## Example Rules\n\n- **On test pass**: Automatically run 'task-manager next' to proceed to the next task.\n- **On task completion**: Prompt user for a commit message.\n`;
+              try {
+                  fs.writeFileSync(editorRulesFile, placeholderContent);
+                  messages.push(`Created placeholder rules file for ${editor}: ${editorRulesFile}`);
+              } catch (error) {
+                  throw new Error(`Failed to write ${editor} rules file: ${error.message}`);
+              }
+          } else {
+              messages.push(`${editor} rules file already exists: ${editorRulesFile}`);
+          }
+      } else {
+          messages.push(`[WARN] Invalid editor type '${editor}'. No rules created. Valid options are: ${validEditors.join(', ')}`);
+      }
   }
   
   // Return success and collected messages
