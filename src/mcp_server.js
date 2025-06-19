@@ -1298,7 +1298,7 @@ rl.on('line', async (line) => {
             case 'execute_command':
               responseData = await terminalTools.executeCommand(args.command, {
                 shell: args.shell,
-                timeout_ms: args.timeout_ms
+                timeout_ms: args.timeout_ms ? parseInt(args.timeout_ms, 10) : undefined
               });
               break;
               

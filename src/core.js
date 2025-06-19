@@ -131,10 +131,32 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
           if (editorDirMsg) messages.push(editorDirMsg);
 
           if (!fs.existsSync(editorRulesFile)) {
-              const placeholderContent = `# Agentic Control Framework Rules for ${editor}\n\nThis file defines workflow rules and automations for the ACF.\n\n## Example Rules\n\n- **On test pass**: Automatically run 'task-manager next' to proceed to the next task.\n- **On task completion**: Prompt user for a commit message.\n`;
+              let finalContent = '';
+              const oldRulesFile = path.resolve(workspaceRoot, '.cursor', 'rules', 'task_manager_workflow.mdc');
+
+              // 1. Check for the old rules file and read its content
+              if (fs.existsSync(oldRulesFile)) {
+                  try {
+                      finalContent += fs.readFileSync(oldRulesFile, 'utf8') + '\n\n---\n\n';
+                      messages.push(`Migrated content from old rules file: ${oldRulesFile}`);
+                  } catch (error) {
+                      messages.push(`[WARN] Could not read old rules file at ${oldRulesFile}. Skipping migration.`);
+                  }
+              }
+
+              // 2. Add the new placeholder content
+              finalContent += `# Agentic Control Framework Rules for ${editor}\n\nThis file defines workflow rules and automations for the ACF.\n\n## Example Rules\n\n- **On test pass**: Automatically run 'task-manager next' to proceed to the next task.\n- **On task completion**: Prompt user for a commit message.\n`;
+
               try {
-                  fs.writeFileSync(editorRulesFile, placeholderContent);
-                  messages.push(`Created placeholder rules file for ${editor}: ${editorRulesFile}`);
+                  fs.writeFileSync(editorRulesFile, finalContent);
+                  messages.push(`Created consolidated rules file for ${editor}: ${editorRulesFile}`);
+                  
+                  // 3. Clean up the old file after successful migration
+                  if (fs.existsSync(oldRulesFile)) {
+                      fs.unlinkSync(oldRulesFile);
+                      messages.push(`Removed old rules file to avoid duplication.`);
+                  }
+
               } catch (error) {
                   throw new Error(`Failed to write ${editor} rules file: ${error.message}`);
               }

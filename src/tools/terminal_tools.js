@@ -16,11 +16,15 @@ let config = {
 };
 
 // Load config from file if exists
-const configPath = path.join(process.cwd(), 'config.json');
+const configPath = path.join(__dirname, '../../config.json');
 if (fs.existsSync(configPath)) {
   try {
     const fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     config = { ...config, ...fileConfig };
+    // Ensure commandTimeout is always a number
+    if (config.commandTimeout !== undefined) {
+      config.commandTimeout = parseInt(config.commandTimeout, 10);
+    }
   } catch (error) {
     logger.error(`Failed to load config file: ${error.message}`);
   }
@@ -102,7 +106,7 @@ async function executeCommand(command, options = {}) {
     }
 
     const shell = options.shell || config.defaultShell;
-    const timeout = options.timeout_ms || config.commandTimeout;
+    const timeout = options.timeout_ms ? parseInt(options.timeout_ms, 10) : config.commandTimeout;
     const waitForCompletion = options.waitForCompletion !== false; // Default to true
 
     // For simple commands, wait for completion
