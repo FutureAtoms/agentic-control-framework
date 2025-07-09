@@ -248,6 +248,80 @@ cd your-project
 ./path/to/acf/bin/task-manager table
 ```
 
+## 🎯 Numerical Priority System (1-1000)
+
+ACF features a sophisticated numerical priority system that replaces traditional 4-level priorities with a flexible 1-1000 scale, providing fine-grained control and intelligent dependency management.
+
+### Priority Ranges
+- **🟢 Low (1-399)**: Documentation, cleanup, nice-to-have features
+- **🟡 Medium (400-699)**: Standard development work, regular features
+- **🔴 High (700-899)**: Important features, significant bugs, urgent tasks
+- **🚨 Critical (900-1000)**: Security fixes, blocking issues, production emergencies
+
+### Basic Priority Usage
+```bash
+# Using numerical priorities (1-1000)
+./bin/task-manager add "Critical security fix" --priority 950
+./bin/task-manager add "Feature implementation" --priority 650
+./bin/task-manager add "Documentation update" --priority 200
+
+# Using string priorities (backward compatible)
+./bin/task-manager add "Bug fix" --priority high
+./bin/task-manager add "Cleanup task" --priority low
+```
+
+### Priority Manipulation Commands
+```bash
+# Increase priority by amount
+./bin/task-manager bump 123 --amount 100
+
+# Decrease priority by amount
+./bin/task-manager defer 123 --amount 50
+
+# Set to high priority range (700-899)
+./bin/task-manager prioritize 123
+
+# Set to low priority range (1-399)
+./bin/task-manager deprioritize 123
+
+# View priority statistics and distribution
+./bin/task-manager priority-stats
+
+# Analyze dependencies and critical paths
+./bin/task-manager dependency-analysis
+
+# Trigger intelligent priority recalculation
+./bin/task-manager recalculate-priorities
+```
+
+### Advanced Priority Features
+- **🔄 Automatic Uniqueness**: Every task gets a unique priority value
+- **📈 Dependency Boosts**: Tasks with dependents automatically get priority increases
+- **🔗 Critical Path Analysis**: Identifies and prioritizes bottleneck tasks
+- **⚡ Intelligent Recalculation**: Optimizes priorities based on dependencies and time
+- **📊 Distribution Optimization**: Prevents priority clustering and maintains meaningful differences
+
+### Priority Display Formats
+```bash
+# Clean table format (default)
+./bin/task-manager list --table
+┌─────┬────────────────────┬──────────┐
+│ ID  │ Title              │ Priority │
+├─────┼────────────────────┼──────────┤
+│ 24  │ Critical Bug Fix   │ 950      │
+│ 25  │ Feature Request    │ 650      │
+└─────┴────────────────────┴──────────┘
+
+# Human-readable with distribution stats
+./bin/task-manager list --human
+📊 Priority Distribution:
+🚨 Critical (900+): 2 | 🔴 High (700-899): 5 | 🟡 Medium (500-699): 8 | 🟢 Low (<500): 3
+```
+
+For complete documentation, see:
+- **[Priority System Guide](docs/priority-system.md)** - Comprehensive documentation
+- **[Migration Guide](docs/migration-guide.md)** - Upgrading from string priorities
+
 ### Automation Examples
 ```bash
 # Daily standup automation
@@ -335,7 +409,15 @@ Once configured, you can use natural language with your AI assistant:
 ```
 "Add a new high-priority task for implementing user authentication"
 
+"Create a critical priority task (950) for fixing the security vulnerability"
+
 "List all tasks that are currently in progress"
+
+"Show me priority statistics and distribution of all tasks"
+
+"Bump the priority of task #123 by 100 points"
+
+"Analyze dependencies and show me the critical path"
 
 "Read the contents of src/main.js and create a task for adding error handling"
 
@@ -346,13 +428,15 @@ Once configured, you can use natural language with your AI assistant:
 "Take a screenshot of the application login page"
 
 "Write a new file called docs/api.md with API documentation"
+
+"Recalculate all task priorities with dependency boosts enabled"
 ```
 
 ### Available Tools in MCP Mode
 
 | Category | Tools | Status |
 |----------|-------|--------|
-| **Task Management** | listTasks, addTask, updateStatus, getNextTask, etc. | ✅ Working |
+| **Task Management** | listTasks, addTask, updateStatus, getNextTask, priority tools | ✅ Working |
 | **Filesystem** | read_file, write_file, list_directory, search_files | ✅ Working |
 | **Terminal** | execute_command, list_processes, kill_process | ⚠️ Partial |
 | **Browser** | navigate, click, type, screenshot, pdf_save | ✅ Working |
@@ -427,7 +511,7 @@ export GCP_PROJECT_ID="your-project-id"
 
 ## 🔧 All Available Tools
 
-### Core ACF Tools (15 tools) ✅
+### Core ACF Tools (22 tools) ✅
 ```
 Task Management:
 - listTasks: List all tasks with filtering
@@ -445,6 +529,15 @@ Task Management:
 - reviseTasks: AI-powered task revision
 - setWorkspace: Configure workspace directory
 - initProject: Initialize new ACF project
+
+Priority Management (Numerical 1-1000 System):
+- recalculatePriorities: Intelligent priority recalculation with dependency analysis
+- getPriorityStatistics: Comprehensive priority distribution and statistics
+- getDependencyAnalysis: Critical path analysis and blocking task detection
+- bumpTaskPriority: Increase task priority by specified amount
+- deferTaskPriority: Decrease task priority by specified amount
+- prioritizeTask: Set task to high priority range (700-899)
+- deprioritizeTask: Set task to low priority range (1-399)
 ```
 
 ### Filesystem Tools (13 tools) ⚠️

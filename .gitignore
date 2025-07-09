@@ -26,11 +26,9 @@ yarn.lock
 Thumbs.db
 
 # Task manager files
-tasks.json
 /tasks/
 .task_manager/
 .tmp/
-tasks-table.md
 test-output.md
 
 # Log files
@@ -41,4 +39,3 @@ test_results.txt
 mcp_test.js
 .tmp/
 .task_manager/
-tasks.json
