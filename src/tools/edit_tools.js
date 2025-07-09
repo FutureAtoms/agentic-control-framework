@@ -28,17 +28,32 @@ function editBlock(filePath, oldString, newString, options = {}) {
     }
 
     // Read the file
-    const content = fs.readFileSync(resolvedPath, 'utf8');
+    let content = fs.readFileSync(resolvedPath, 'utf8');
     
     // Count expected replacements (default is 1)
     const expectedReplacements = options.expected_replacements || 1;
     
+    // Check for normalize_whitespace option (new feature)
+    const normalizeWhitespace = options.normalize_whitespace || false;
+    
+    // If normalize_whitespace is true, normalize both content and search strings
+    let searchString = oldString;
+    let replaceString = newString;
+    let originalContent = content;
+    
+    if (normalizeWhitespace) {
+      // Normalize line endings and multiple spaces
+      searchString = oldString.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/[ \t]+/g, ' ');
+      replaceString = newString.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/[ \t]+/g, ' ');
+    }
+    
     // Find all occurrences
-    const occurrences = findOccurrences(content, oldString);
+    const occurrences = findOccurrences(content, searchString);
     
     if (occurrences.length === 0) {
       // Try fuzzy matching if exact match not found
-      const fuzzyMatch = findFuzzyMatch(content, oldString);
+      const fuzzyMatch = findFuzzyMatch(originalContent, oldString);
       
       if (fuzzyMatch) {
         return {
@@ -46,14 +61,15 @@ function editBlock(filePath, oldString, newString, options = {}) {
           message: `No exact match found. Did you mean this?`,
           suggestion: fuzzyMatch.suggestion,
           diff: fuzzyMatch.diff,
-          hint: 'The search string was not found exactly as provided. Check whitespace and formatting.'
+          hint: 'The search string was not found exactly as provided. Check whitespace and formatting. You can also try setting normalize_whitespace: true.'
         };
       }
       
       return {
         success: false,
         message: 'Search string not found in file',
-        searchString: oldString
+        searchString: oldString,
+        hint: 'Try setting normalize_whitespace: true if whitespace differences are causing issues'
       };
     }
     
@@ -73,24 +89,70 @@ function editBlock(filePath, oldString, newString, options = {}) {
     }
     
     // Perform the replacement
-    let newContent = content;
+    let newContent = normalizeWhitespace ? originalContent : content;
     let replacementCount = 0;
     
     if (expectedReplacements === 1) {
       // Replace only the first occurrence
-      newContent = content.replace(oldString, newString);
-      replacementCount = 1;
+      if (normalizeWhitespace) {
+        // For normalized whitespace, we need to be more careful
+        const index = content.indexOf(searchString);
+        if (index !== -1) {
+          // Find the actual position in original content
+          let originalIndex = findOriginalPosition(originalContent, content, index);
+          if (originalIndex !== -1) {
+            // Determine the actual length to replace in original content
+            let endIndex = findOriginalPosition(originalContent, content, index + searchString.length);
+            newContent = originalContent.substring(0, originalIndex) + 
+                        replaceString + 
+                        originalContent.substring(endIndex);
+            replacementCount = 1;
+          }
+        }
+      } else {
+        newContent = content.replace(oldString, newString);
+        replacementCount = 1;
+      }
     } else {
       // Replace specified number of occurrences
-      let lastIndex = 0;
-      for (let i = 0; i < expectedReplacements && i < occurrences.length; i++) {
-        const index = content.indexOf(oldString, lastIndex);
-        if (index !== -1) {
-          newContent = newContent.substring(0, index) + 
-                      newString + 
-                      newContent.substring(index + oldString.length);
-          lastIndex = index + newString.length;
-          replacementCount++;
+      if (normalizeWhitespace) {
+        // Complex case - need to map positions
+        let normalizedContent = content;
+        let workingContent = originalContent;
+        
+        for (let i = 0; i < expectedReplacements && i < occurrences.length; i++) {
+          const index = normalizedContent.indexOf(searchString);
+          if (index !== -1) {
+            let originalIndex = findOriginalPosition(workingContent, normalizedContent, index);
+            let endIndex = findOriginalPosition(workingContent, normalizedContent, index + searchString.length);
+            
+            if (originalIndex !== -1 && endIndex !== -1) {
+              workingContent = workingContent.substring(0, originalIndex) + 
+                             replaceString + 
+                             workingContent.substring(endIndex);
+              
+              // Update normalized content for next iteration
+              normalizedContent = normalizedContent.substring(0, index) + 
+                                replaceString.replace(/[ \t]+/g, ' ') + 
+                                normalizedContent.substring(index + searchString.length);
+              
+              replacementCount++;
+            }
+          }
+        }
+        newContent = workingContent;
+      } else {
+        // Simple case - direct replacement
+        let lastIndex = 0;
+        for (let i = 0; i < expectedReplacements && i < occurrences.length; i++) {
+          const index = content.indexOf(oldString, lastIndex);
+          if (index !== -1) {
+            newContent = newContent.substring(0, index) + 
+                        newString + 
+                        newContent.substring(index + oldString.length);
+            lastIndex = index + newString.length;
+            replacementCount++;
+          }
         }
       }
     }
@@ -107,7 +169,7 @@ function editBlock(filePath, oldString, newString, options = {}) {
     fs.writeFileSync(resolvedPath, newContent, 'utf8');
     
     // Generate a diff for confirmation
-    const patches = diff.createPatch(filePath, content, newContent);
+    const patches = diff.createPatch(filePath, originalContent, newContent);
     
     return {
       success: true,
@@ -115,7 +177,8 @@ function editBlock(filePath, oldString, newString, options = {}) {
       path: resolvedPath,
       replacements: replacementCount,
       diff: patches,
-      lineCount
+      lineCount,
+      normalizedWhitespace: normalizeWhitespace
     };
     
   } catch (error) {
@@ -125,6 +188,35 @@ function editBlock(filePath, oldString, newString, options = {}) {
       message: error.message
     };
   }
+}
+
+/**
+ * Find the original position in content given a position in normalized content
+ */
+function findOriginalPosition(original, normalized, normalizedPos) {
+  let origPos = 0;
+  let normPos = 0;
+  
+  while (normPos < normalizedPos && origPos < original.length) {
+    // Skip whitespace differences
+    if (/\s/.test(original[origPos]) && /\s/.test(normalized[normPos])) {
+      // Skip all whitespace in original
+      let origStart = origPos;
+      while (origPos < original.length && /\s/.test(original[origPos])) {
+        origPos++;
+      }
+      // Skip single space in normalized
+      normPos++;
+    } else if (original[origPos] === normalized[normPos]) {
+      origPos++;
+      normPos++;
+    } else {
+      // Mismatch - this shouldn't happen if normalization is correct
+      return -1;
+    }
+  }
+  
+  return origPos;
 }
 
 /**

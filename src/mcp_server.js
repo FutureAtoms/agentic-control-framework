@@ -18,6 +18,7 @@ const editTools = require('./tools/edit_tools');
 const enhancedFsTools = require('./tools/enhanced_filesystem_tools');
 const browserTools = require('./tools/browser_tools');
 const applescriptTools = require('./tools/applescript_tools');
+const fileWatcher = require('./file_watcher');
 
 // Create readline interface for JSON-RPC communication
 const rl = readline.createInterface({
@@ -34,11 +35,13 @@ rl.on('error', (err) => {
 // Handle process signals
 process.on('SIGINT', () => {
   logger.info('Received SIGINT, shutting down gracefully');
+  fileWatcher.stopWatcher();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   logger.info('Received SIGTERM, shutting down gracefully');
+  fileWatcher.stopWatcher();
   process.exit(0);
 });
 
@@ -84,6 +87,9 @@ if (readonlyMode) {
 logger.info(`Starting server with workspace root: ${workspaceRoot}`);
 logger.info(`Allowed directories for filesystem operations: ${allowedDirectories.join(', ')}`);
 
+// Initialize file watcher for automatic task table updates
+fileWatcher.initializeWatcher(workspaceRoot);
+
 // Counter for generating unique request IDs
 let requestCounter = 1;
 
@@ -117,25 +123,31 @@ function sendError(id, code, message, data = {}) {
 function handleListTasks(requestId, params) {
   try {
     logger.debug(`Handling listTasks with params: ${JSON.stringify(params)}`);
-    
+
     // Always include format options in params
-    const options = { 
+    const options = {
       ...params
     };
-    
-    // Get the tasks data first
+
+    // Get the tasks data once
     const tasksData = core.readTasks(workspaceRoot);
-    
-    // Generate human-readable table
+
+    // Apply filtering logic directly here instead of calling core.listTasks
+    let filteredTasks = [...tasksData.tasks]; // Create a copy
+
+    // Apply status filter if specified
+    if (options && options.status) {
+      filteredTasks = filteredTasks.filter(task => task.status === options.status);
+    }
+
+    // Generate human-readable table with filtered tasks
     const tableRenderer = require('./tableRenderer');
-    const humanReadableTable = tableRenderer.generateTaskTable(tasksData, workspaceRoot);
-    
-    // For all formats, pass format to core.listTasks
-    const result = core.listTasks(workspaceRoot, options);
-    
-    // Always include human-readable table with the response
+    const humanReadableTable = tableRenderer.generateTaskTable({...tasksData, tasks: filteredTasks}, workspaceRoot);
+
+    // Return the result without calling core.listTasks (which would read tasks again)
     return {
-      ...result,
+      success: true,
+      tasks: filteredTasks,
       taskTable: humanReadableTable
     };
   } catch (error) {
@@ -226,7 +238,8 @@ rl.on('line', async (line) => {
                 type: 'object',
                 properties: {
                   projectName: { type: 'string', description: 'Optional name for the project.' },
-                  projectDescription: { type: 'string', description: 'Optional goal or description for the project.' }
+                  projectDescription: { type: 'string', description: 'Optional goal or description for the project.' },
+                  editor: { type: 'string', description: 'Optional editor type for generating specific rule files (e.g., cursor, claude).', enum: ['cursor', 'claude', 'cline', 'void'] }
                 }
               }
             },
@@ -236,9 +249,16 @@ rl.on('line', async (line) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  title: { type: 'string', description: 'The title of the task.', required: true },
+                  title: { type: 'string', description: 'The title of the task.' },
                   description: { type: 'string' },
-                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
+                  priority: {
+                    oneOf: [
+                      { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+                      { type: 'number', minimum: 1, maximum: 1000 }
+                    ],
+                    description: 'Priority as string (low/medium/high/critical) or number (1-1000)',
+                    default: 'medium'
+                  },
                   dependsOn: { type: 'string' },
                   relatedFiles: { type: 'string' },
                   tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
@@ -301,10 +321,16 @@ rl.on('line', async (line) => {
               inputSchema: {
                 type: 'object',
                 properties: {
-                  id: { type: 'string', description: 'The ID of the task to update.', required: true },
+                  id: { type: 'string', description: 'The ID of the task to update.' },
                   title: { type: 'string' },
                   description: { type: 'string' },
-                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+                  priority: {
+                    oneOf: [
+                      { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+                      { type: 'number', minimum: 1, maximum: 1000 }
+                    ],
+                    description: 'Priority as string (low/medium/high/critical) or number (1-1000)'
+                  },
                   dependsOn: { type: 'string' },
                   relatedFiles: { type: 'string' },
                   tests: { type: 'string', description: 'Optional comma-separated string of tests to verify completion.' }
@@ -402,6 +428,235 @@ rl.on('line', async (line) => {
                   random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
                 },
                 required: ['random_string']
+              }
+            },
+            // Priority management tools
+            {
+              name: 'recalculatePriorities',
+              description: 'Recalculate all task priorities using advanced algorithms including dependency boosts and distribution optimization.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  applyDependencyBoosts: { type: 'boolean', description: 'Apply dependency-based priority boosts', default: true },
+                  applyTimeDecay: { type: 'boolean', description: 'Apply time-based priority decay', default: false },
+                  optimizeDistribution: { type: 'boolean', description: 'Optimize priority distribution', default: true }
+                }
+              }
+            },
+            {
+              name: 'getPriorityStatistics',
+              description: 'Get priority statistics for all tasks including distribution and utilization.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'getDependencyAnalysis',
+              description: 'Get comprehensive dependency analysis including critical paths, blocking tasks, and circular dependencies.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'configureTimeDecay',
+              description: 'Configure time-based priority decay settings with multiple decay models.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean', description: 'Enable or disable time decay' },
+                  model: {
+                    type: 'string',
+                    enum: ['linear', 'exponential', 'logarithmic', 'sigmoid', 'adaptive'],
+                    description: 'Decay model to use'
+                  },
+                  rate: { type: 'number', minimum: 0.001, maximum: 0.2, description: 'Decay rate (0.001-0.2)' },
+                  threshold: { type: 'integer', minimum: 1, maximum: 365, description: 'Days before decay starts' },
+                  maxBoost: { type: 'integer', minimum: 0, maximum: 500, description: 'Maximum aging boost for critical tasks' },
+                  priorityWeight: { type: 'boolean', description: 'Enable priority-weighted decay rates' }
+                }
+              }
+            },
+            {
+              name: 'configureEffortWeighting',
+              description: 'Configure effort-weighted priority scoring based on task complexity, impact, and urgency.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean', description: 'Enable or disable effort weighting' },
+                  scoreWeight: { type: 'number', minimum: 0, maximum: 1, description: 'Weight of effort score in priority calculation' },
+                  complexityWeight: { type: 'number', minimum: 0, maximum: 1, description: 'Weight of complexity in effort calculation' },
+                  impactWeight: { type: 'number', minimum: 0, maximum: 1, description: 'Weight of impact in effort calculation' },
+                  urgencyWeight: { type: 'number', minimum: 0, maximum: 1, description: 'Weight of urgency in effort calculation' },
+                  decayRate: { type: 'number', minimum: 0, maximum: 0.1, description: 'Effort score decay rate over time' },
+                  boostThreshold: { type: 'number', minimum: 0, maximum: 1, description: 'Effort score threshold for priority boost' }
+                }
+              }
+            },
+            {
+              name: 'getAdvancedAlgorithmConfig',
+              description: 'Get current configuration for all advanced priority algorithms including time decay and effort weighting.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'initializeFileWatcher',
+              description: 'Initialize automatic file synchronization watcher for tasks.json changes.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  debounceDelay: { type: 'integer', minimum: 100, maximum: 5000, description: 'Debounce delay in milliseconds' },
+                  maxQueueSize: { type: 'integer', minimum: 1, maximum: 100, description: 'Maximum change queue size' },
+                  enableTaskFiles: { type: 'boolean', description: 'Enable individual task file generation' },
+                  enableTableSync: { type: 'boolean', description: 'Enable task table synchronization' },
+                  enablePriorityRecalc: { type: 'boolean', description: 'Enable automatic priority recalculation' }
+                }
+              }
+            },
+            {
+              name: 'stopFileWatcher',
+              description: 'Stop the automatic file synchronization watcher.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'getFileWatcherStatus',
+              description: 'Get current file watcher status, statistics, and configuration.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'forceSyncTaskFiles',
+              description: 'Force immediate synchronization of all task-related files.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'getPriorityTemplates',
+              description: 'Get all available priority templates for common task types.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
+                },
+                required: ['random_string']
+              }
+            },
+            {
+              name: 'suggestPriorityTemplate',
+              description: 'Suggest the best priority template for a task based on title and description.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Task title' },
+                  description: { type: 'string', description: 'Task description' }
+                },
+                required: ['title']
+              }
+            },
+            {
+              name: 'calculatePriorityFromTemplate',
+              description: 'Calculate priority for a task using a specific template.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  templateName: { type: 'string', description: 'Name of the template to use' },
+                  title: { type: 'string', description: 'Task title' },
+                  description: { type: 'string', description: 'Task description' },
+                  tags: { type: 'array', items: { type: 'string' }, description: 'Optional tags' }
+                },
+                required: ['templateName', 'title']
+              }
+            },
+            {
+              name: 'addTaskWithTemplate',
+              description: 'Add a new task using a priority template for automatic priority calculation.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Task title' },
+                  description: { type: 'string', description: 'Task description' },
+                  templateName: { type: 'string', description: 'Name of the template to use' },
+                  tags: { type: 'array', items: { type: 'string' }, description: 'Optional tags' },
+                  dependsOn: { type: 'array', items: { type: 'integer' }, description: 'Task IDs this task depends on' },
+                  relatedFiles: { type: 'array', items: { type: 'string' }, description: 'Related file paths' }
+                },
+                required: ['title', 'templateName']
+              }
+            },
+            {
+              name: 'bumpTaskPriority',
+              description: 'Increase task priority by a specified amount.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The ID of the task to bump' },
+                  amount: { type: 'number', description: 'Amount to increase priority by', default: 50, minimum: 1, maximum: 999 }
+                },
+                required: ['id']
+              }
+            },
+            {
+              name: 'deferTaskPriority',
+              description: 'Decrease task priority by a specified amount.',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The ID of the task to defer' },
+                  amount: { type: 'number', description: 'Amount to decrease priority by', default: 50, minimum: 1, maximum: 999 }
+                },
+                required: ['id']
+              }
+            },
+            {
+              name: 'prioritizeTask',
+              description: 'Set task to high priority (800-900 range).',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The ID of the task to prioritize' },
+                  priority: { type: 'number', description: 'Specific priority value (800-900)', default: 850, minimum: 800, maximum: 900 }
+                },
+                required: ['id']
+              }
+            },
+            {
+              name: 'deprioritizeTask',
+              description: 'Set task to low priority (100-400 range).',
+              inputSchema: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string', description: 'The ID of the task to deprioritize' },
+                  priority: { type: 'number', description: 'Specific priority value (100-400)', default: 300, minimum: 100, maximum: 400 }
+                },
+                required: ['id']
               }
             },
             // Filesystem tools
@@ -1000,11 +1255,11 @@ rl.on('line', async (line) => {
         
         // Extract the parameters we need
         const toolName = method === 'tools/call' ? params.name : params.tool; // Adjust based on MCP version
-        const argsParam = method === 'tools/call' 
+        const args = method === 'tools/call' 
           ? (params.arguments || params.parameters || {}) // Try both argument formats with fallback
           : (params.args || {});
         
-        logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(argsParam)}`);
+        logger.debug(`Invoking tool: ${toolName} with args: ${JSON.stringify(args)}`);
         
         try {
           // Handle the specific tool requests
@@ -1012,8 +1267,8 @@ rl.on('line', async (line) => {
           
           switch (toolName) {
             case 'setWorkspace':
-              if (argsParam && argsParam.workspacePath && fs.existsSync(argsParam.workspacePath)) {
-                workspaceRoot = argsParam.workspacePath;
+              if (args.workspacePath && fs.existsSync(args.workspacePath)) {
+                workspaceRoot = args.workspacePath;
                 // Update allowed directories when workspace changes
                 const index = allowedDirectories.indexOf(allowedDirectories[0]);
                 if (index !== -1) {
@@ -1023,9 +1278,13 @@ rl.on('line', async (line) => {
                 }
                 logger.info(`Workspace root set to: ${workspaceRoot}`);
                 logger.info(`Allowed directories updated: ${allowedDirectories.join(', ')}`);
+
+                // Reinitialize file watcher for the new workspace
+                fileWatcher.initializeWatcher(workspaceRoot);
+
                 responseData = { success: true, message: `Workspace set to ${workspaceRoot}` };
               } else {
-                const path = argsParam && argsParam.workspacePath ? argsParam.workspacePath : 'undefined';
+                const path = args.workspacePath ? args.workspacePath : 'undefined';
                 logger.error(`Invalid workspace path: ${path}`);
                 responseData = { success: false, message: `Invalid or non-existent workspace path: ${path}` };
               }
@@ -1033,43 +1292,44 @@ rl.on('line', async (line) => {
               
             case 'initProject':
               responseData = core.initProject(workspaceRoot, {
-                projectName: argsParam && argsParam.projectName || 'Untitled Project',
-                projectDescription: argsParam && argsParam.projectDescription || ''
+                projectName: args.projectName || 'Untitled Project',
+                projectDescription: args.projectDescription || '',
+                editor: args.editor
               });
               break;
               
             case 'addTask':
               // Check required parameters
-              if (!argsParam || !argsParam.title) {
+              if (!args || !args.title) {
                 logger.error('Missing required parameter: title for addTask');
                 sendError(id, -32602, 'Missing required parameter: title for addTask');
                 return;
               }
               
               responseData = core.addTask(workspaceRoot, {
-                title: argsParam.title,
-                description: argsParam.description || '',
-                priority: argsParam.priority || 'medium',
-                dependsOn: argsParam.dependsOn || '',
-                relatedFiles: argsParam.relatedFiles || '',
-                tests: argsParam.tests || ''
+                title: args.title,
+                description: args.description || '',
+                priority: args.priority || 'medium',
+                dependsOn: args.dependsOn || '',
+                relatedFiles: args.relatedFiles || '',
+                tests: args.tests || ''
               });
               break;
               
             case 'addSubtask':
               // Check required parameters
-              if (!argsParam || !argsParam.parentId || !argsParam.title) {
+              if (!args || !args.parentId || !args.title) {
                 logger.error('Missing required parameters for addSubtask: parentId and/or title');
                 sendError(id, -32602, 'Missing required parameters for addSubtask: parentId and/or title');
                 return;
               }
               
               responseData = core.addSubtask(workspaceRoot, 
-                argsParam.parentId, 
+                args.parentId, 
                 {
-                  title: argsParam.title,
-                  relatedFiles: argsParam.relatedFiles || '',
-                  tests: argsParam.tests || ''
+                  title: args.title,
+                  relatedFiles: args.relatedFiles || '',
+                  tests: args.tests || ''
                 }
               );
               break;
@@ -1081,41 +1341,101 @@ rl.on('line', async (line) => {
               
             case 'updateStatus':
               // Check required parameters
-              if (!argsParam || !argsParam.id || !argsParam.newStatus) {
+              if (!args || !args.id || !args.newStatus) {
                 logger.error('Missing required parameters for updateStatus: id and/or newStatus');
                 sendError(id, -32602, 'Missing required parameters for updateStatus: id and/or newStatus');
                 return;
               }
-              
-              // If the status is being set to "done" and relatedFiles are provided, update them first
-              if (argsParam.newStatus === 'done' && argsParam.relatedFiles) {
-                try {
-                  // Update the related files first
-                  const updateResult = core.updateTask(
-                    workspaceRoot, 
-                    argsParam.id, 
-                    { relatedFiles: argsParam.relatedFiles }
-                  );
-                  
-                  if (!updateResult.success) {
-                    logger.error(`Failed to update related files: ${updateResult.message}`);
-                    sendError(id, -32000, `Failed to update related files: ${updateResult.message}`);
-                    return;
-                  }
-                } catch (error) {
-                  logger.error(`Error updating related files: ${error.message}`);
-                  sendError(id, -32000, `Error updating related files: ${error.message}`);
-                  return;
+
+              try {
+                // Read tasks once and handle both relatedFiles update and status update
+                const tasksData = core.readTasks(workspaceRoot);
+                const { task, subtask, parentTask } = core.findTask(tasksData, args.id);
+                const item = task || subtask;
+
+                if (!item) {
+                  responseData = { success: false, message: `Task or subtask with ID ${args.id} not found.` };
+                  break;
                 }
+
+                // If relatedFiles are provided, update them directly
+                if (args.newStatus === 'done' && args.relatedFiles) {
+                  const parseCommaSeparated = (str) => (typeof str === 'string' ? str.split(',').map(s => s.trim()).filter(Boolean) : []);
+                  item.relatedFiles = parseCommaSeparated(args.relatedFiles);
+
+                  // Add activity log entry for related files update
+                  if (!item.activityLog) item.activityLog = [];
+                  item.activityLog.push({
+                    timestamp: new Date().toISOString(),
+                    type: 'log',
+                    message: 'Related files updated.'
+                  });
+                }
+
+                // Perform status validation logic directly here
+                if (['inprogress', 'testing'].includes(args.newStatus.toLowerCase())) {
+                  if (item.dependsOn && item.dependsOn.length > 0) {
+                    const dependenciesMet = item.dependsOn.every(depId => {
+                      const dependency = tasksData.tasks.find(t => t.id === depId);
+                      return dependency && dependency.status === 'done';
+                    });
+
+                    if (!dependenciesMet) {
+                      responseData = { success: false, message: `Cannot start task ${args.id}. It has unmet dependencies.` };
+                      break;
+                    }
+                  }
+                }
+
+                // Prevent marking a task as done if it has incomplete subtasks
+                if (args.newStatus.toLowerCase() === 'done' && item.subtasks && item.subtasks.some(s => s.status !== 'done')) {
+                  responseData = { success: false, message: `Cannot mark task ${args.id} as done. All its subtasks must be completed first.` };
+                  break;
+                }
+
+                // Update status directly
+                const oldStatus = item.status;
+                item.status = args.newStatus.toLowerCase();
+
+                const logMessage = args.message
+                  ? `Status changed from "${oldStatus}" to "${args.newStatus}". Message: ${args.message}`
+                  : `Status changed from "${oldStatus}" to "${args.newStatus}"`;
+
+                // Add activity log entry for status change
+                if (!item.activityLog) item.activityLog = [];
+                item.activityLog.push({
+                  timestamp: new Date().toISOString(),
+                  type: 'log',
+                  message: logMessage
+                });
+
+                // Update timestamps
+                item.updatedAt = new Date().toISOString();
+                if (parentTask) {
+                  parentTask.updatedAt = new Date().toISOString();
+                }
+
+                // Handle testing subtasks generation if needed
+                if (item && !item.id.toString().includes('.') && args.newStatus.toLowerCase() === 'testing') {
+                  const testingSubtasks = [
+                    { title: `Write unit and integration tests for '${item.title}'`, write: false },
+                    { title: `Ensure all tests are passing for '${item.title}'`, write: false }
+                  ];
+
+                  testingSubtasks.forEach(subtaskOptions => {
+                    core.addSubtask(workspaceRoot, item.id, subtaskOptions, tasksData);
+                  });
+                }
+
+                // Write tasks once with optimized options (status updates may need table updates)
+                core.writeTasks(workspaceRoot, tasksData, {
+                  recalculatePriorities: false,
+                  updateTable: true
+                });
+                responseData = { success: true, message: `Status of ${subtask ? 'subtask' : 'task'} ${args.id} updated to ${args.newStatus}.` };
+              } catch (error) {
+                responseData = { success: false, message: `Error updating status: ${error.message}` };
               }
-              
-              responseData = core.updateStatus(
-                workspaceRoot, 
-                argsParam.id, 
-                argsParam.newStatus, 
-                argsParam.message || '',
-                { skipValidation: argsParam.skipValidation }
-              );
               break;
               
             case 'getNextTask':
@@ -1123,19 +1443,19 @@ rl.on('line', async (line) => {
               break;
               
             case 'updateTask':
-              responseData = core.updateTask(workspaceRoot, argsParam.id, argsParam);
+              responseData = core.updateTask(workspaceRoot, args.id, args);
               break;
               
             case 'updateSubtask':
-              responseData = core.updateSubtask(workspaceRoot, argsParam.id, argsParam);
+              responseData = core.updateSubtask(workspaceRoot, args.id, args);
               break;
               
             case 'removeTask':
-              responseData = core.removeTask(workspaceRoot, argsParam.id);
+              responseData = core.removeTask(workspaceRoot, args.id);
               break;
               
             case 'getContext':
-              responseData = core.getContext(workspaceRoot, argsParam.id);
+              responseData = core.getContext(workspaceRoot, args.id);
               break;
               
             case 'generateTaskFiles':
@@ -1143,17 +1463,17 @@ rl.on('line', async (line) => {
               break;
               
             case 'parsePrd':
-              responseData = await core.parsePrd(workspaceRoot, argsParam && argsParam.filePath);
+              responseData = await core.parsePrd(workspaceRoot, args && args.filePath);
               break;
               
             case 'expandTask':
-              responseData = await core.expandTask(workspaceRoot, argsParam && argsParam.taskId);
+              responseData = await core.expandTask(workspaceRoot, args && args.taskId);
               break;
               
             case 'reviseTasks':
-              // Extract parameters from argsParam, not params
-              const fromTaskId = argsParam && argsParam.fromTaskId;
-              const prompt = argsParam && argsParam.prompt;
+              // Extract parameters from args, not params
+              const fromTaskId = args && args.fromTaskId;
+              const prompt = args && args.prompt;
               
               if (!fromTaskId || !prompt) {
                 logger.error('Missing required parameters for reviseTasks: fromTaskId and/or prompt');
@@ -1167,22 +1487,232 @@ rl.on('line', async (line) => {
             case 'generateTaskTable':
               responseData = core.generateHumanReadableTaskTable(workspaceRoot);
               break;
-              
+
+            // Priority management tools
+            case 'recalculatePriorities':
+              responseData = core.recalculatePriorities(workspaceRoot, {
+                applyDependencyBoosts: args.applyDependencyBoosts !== false,
+                applyTimeDecay: args.applyTimeDecay === true,
+                optimizeDistribution: args.optimizeDistribution !== false
+              });
+              break;
+
+            case 'getPriorityStatistics':
+              responseData = core.getPriorityStatistics(workspaceRoot);
+              break;
+
+            case 'getDependencyAnalysis':
+              responseData = core.getDependencyAnalysis(workspaceRoot);
+              break;
+
+            case 'configureTimeDecay':
+              responseData = core.configureTimeDecay(workspaceRoot, {
+                enabled: args.enabled,
+                model: args.model,
+                rate: args.rate,
+                threshold: args.threshold,
+                maxBoost: args.maxBoost,
+                priorityWeight: args.priorityWeight
+              });
+              break;
+
+            case 'configureEffortWeighting':
+              responseData = core.configureEffortWeighting(workspaceRoot, {
+                enabled: args.enabled,
+                scoreWeight: args.scoreWeight,
+                complexityWeight: args.complexityWeight,
+                impactWeight: args.impactWeight,
+                urgencyWeight: args.urgencyWeight,
+                decayRate: args.decayRate,
+                boostThreshold: args.boostThreshold
+              });
+              break;
+
+            case 'getAdvancedAlgorithmConfig':
+              responseData = core.getAdvancedAlgorithmConfig(workspaceRoot);
+              break;
+
+            case 'initializeFileWatcher':
+              responseData = core.initializeFileWatcher(workspaceRoot, {
+                debounceDelay: args.debounceDelay,
+                maxQueueSize: args.maxQueueSize,
+                enableTaskFiles: args.enableTaskFiles,
+                enableTableSync: args.enableTableSync,
+                enablePriorityRecalc: args.enablePriorityRecalc
+              });
+              break;
+
+            case 'stopFileWatcher':
+              responseData = core.stopFileWatcher(workspaceRoot);
+              break;
+
+            case 'getFileWatcherStatus':
+              responseData = core.getFileWatcherStatus(workspaceRoot);
+              break;
+
+            case 'forceSyncTaskFiles':
+              responseData = await core.forceSyncTaskFiles(workspaceRoot);
+              break;
+
+            case 'getPriorityTemplates':
+              responseData = core.getPriorityTemplates(workspaceRoot);
+              break;
+
+            case 'suggestPriorityTemplate':
+              responseData = core.suggestPriorityTemplate(workspaceRoot, args.title, args.description || '');
+              break;
+
+            case 'calculatePriorityFromTemplate':
+              responseData = core.calculatePriorityFromTemplate(
+                workspaceRoot,
+                args.templateName,
+                args.title,
+                args.description || '',
+                args.tags || []
+              );
+              break;
+
+            case 'addTaskWithTemplate':
+              responseData = core.addTaskWithTemplate(
+                workspaceRoot,
+                args.title,
+                args.description || '',
+                args.templateName,
+                args.tags || [],
+                {
+                  dependsOn: args.dependsOn || [],
+                  relatedFiles: args.relatedFiles || []
+                }
+              );
+              break;
+
+            case 'bumpTaskPriority':
+              try {
+                const amount = args.amount || 50;
+                const tasksData = core.readTasks(workspaceRoot);
+                const task = tasksData.tasks.find(t => t.id === parseInt(args.id));
+                if (!task) {
+                  responseData = { success: false, message: `Task with ID ${args.id} not found` };
+                  break;
+                }
+                const oldPriority = task.priority;
+                const newPriority = Math.min(1000, task.priority + amount);
+
+                // Update priority directly without calling core.updateTask (which would read tasks again)
+                task.priority = newPriority;
+                task.updatedAt = new Date().toISOString();
+
+                // Add smart activity log entry
+                if (!task.activityLog) task.activityLog = [];
+                const priorityDelta = Math.abs(newPriority - oldPriority);
+
+                // Use smart logging for priority changes (configurable threshold)
+                const minDelta = 10; // Could be made configurable
+                if (priorityDelta >= minDelta) { // Only log if change is significant enough
+                  task.activityLog.push({
+                    timestamp: new Date().toISOString(),
+                    type: 'log',
+                    message: `Priority bumped to ${newPriority} (+${amount})`
+                  });
+                }
+
+                // Write tasks once with optimized options (skip expensive operations for simple priority changes)
+                core.writeTasks(workspaceRoot, tasksData, {
+                  recalculatePriorities: false,
+                  skipTableUpdate: true
+                });
+                responseData = {
+                  success: true,
+                  message: `Task ${args.id} priority bumped from ${oldPriority} to ${newPriority}`
+                };
+              } catch (error) {
+                responseData = { success: false, message: `Error bumping priority: ${error.message}` };
+              }
+              break;
+
+            case 'deferTaskPriority':
+              try {
+                const amount = args.amount || 50;
+                const tasksData = core.readTasks(workspaceRoot);
+                const task = tasksData.tasks.find(t => t.id === parseInt(args.id));
+                if (!task) {
+                  responseData = { success: false, message: `Task with ID ${args.id} not found` };
+                  break;
+                }
+                const oldPriority = task.priority;
+                const newPriority = Math.max(1, task.priority - amount);
+
+                // Update priority directly without calling core.updateTask (which would read tasks again)
+                task.priority = newPriority;
+                task.updatedAt = new Date().toISOString();
+
+                // Add smart activity log entry
+                if (!task.activityLog) task.activityLog = [];
+                const priorityDelta = Math.abs(oldPriority - newPriority);
+
+                // Use smart logging for priority changes (configurable threshold)
+                const minDelta = 10; // Could be made configurable
+                if (priorityDelta >= minDelta) { // Only log if change is significant enough
+                  task.activityLog.push({
+                    timestamp: new Date().toISOString(),
+                    type: 'log',
+                    message: `Priority deferred to ${newPriority} (-${amount})`
+                  });
+                }
+
+                // Write tasks once with optimized options (skip expensive operations for simple priority changes)
+                core.writeTasks(workspaceRoot, tasksData, {
+                  recalculatePriorities: false,
+                  skipTableUpdate: true
+                });
+                responseData = {
+                  success: true,
+                  message: `Task ${args.id} priority deferred from ${oldPriority} to ${newPriority}`
+                };
+              } catch (error) {
+                responseData = { success: false, message: `Error deferring priority: ${error.message}` };
+              }
+              break;
+
+            case 'prioritizeTask':
+              try {
+                const priority = Math.max(800, Math.min(900, args.priority || 850));
+                responseData = core.updateTask(workspaceRoot, args.id, { priority });
+                if (responseData.success) {
+                  responseData.message = `Task ${args.id} prioritized to ${priority}`;
+                }
+              } catch (error) {
+                responseData = { success: false, message: `Error prioritizing task: ${error.message}` };
+              }
+              break;
+
+            case 'deprioritizeTask':
+              try {
+                const priority = Math.max(100, Math.min(400, args.priority || 300));
+                responseData = core.updateTask(workspaceRoot, args.id, { priority });
+                if (responseData.success) {
+                  responseData.message = `Task ${args.id} deprioritized to ${priority}`;
+                }
+              } catch (error) {
+                responseData = { success: false, message: `Error deprioritizing task: ${error.message}` };
+              }
+              break;
+
             // Filesystem tools
             case 'read_file':
               // Use enhanced read_file with URL support
-              if (argsParam.isUrl || (argsParam.path && (argsParam.path.startsWith('http://') || argsParam.path.startsWith('https://')))) {
-                responseData = await enhancedFsTools.readFileEnhanced(argsParam.path, allowedDirectories, {
+              if (args.isUrl || (args.path && (args.path.startsWith('http://') || args.path.startsWith('https://')))) {
+                responseData = await enhancedFsTools.readFileEnhanced(args.path, allowedDirectories, {
                   isUrl: true,
-                  timeout: argsParam.timeout
+                  timeout: args.timeout
                 });
               } else {
-                responseData = filesystemTools.readFile(argsParam.path, allowedDirectories);
+                responseData = filesystemTools.readFile(args.path, allowedDirectories);
               }
               break;
               
             case 'read_multiple_files':
-              responseData = filesystemTools.readMultipleFiles(argsParam.paths, allowedDirectories);
+              responseData = filesystemTools.readMultipleFiles(args.paths, allowedDirectories);
               break;
               
             case 'write_file':
@@ -1194,7 +1724,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.writeFile(argsParam.path, argsParam.content, allowedDirectories);
+              responseData = filesystemTools.writeFile(args.path, args.content, allowedDirectories);
               break;
               
             case 'copy_file':
@@ -1206,7 +1736,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.copyFile(argsParam.source, argsParam.destination, allowedDirectories);
+              responseData = filesystemTools.copyFile(args.source, args.destination, allowedDirectories);
               break;
               
             case 'move_file':
@@ -1218,7 +1748,7 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.moveFile(argsParam.source, argsParam.destination, allowedDirectories);
+              responseData = filesystemTools.moveFile(args.source, args.destination, allowedDirectories);
               break;
               
             case 'delete_file':
@@ -1230,11 +1760,11 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.deleteFile(argsParam.path, argsParam.recursive, allowedDirectories);
+              responseData = filesystemTools.deleteFile(args.path, args.recursive, allowedDirectories);
               break;
               
             case 'list_directory':
-              responseData = filesystemTools.listDirectory(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.listDirectory(args.path, allowedDirectories);
               break;
               
             case 'create_directory':
@@ -1246,24 +1776,24 @@ rl.on('line', async (line) => {
                 };
                 break;
               }
-              responseData = filesystemTools.createDirectory(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.createDirectory(args.path, allowedDirectories);
               break;
               
             case 'tree':
               responseData = filesystemTools.createDirectoryTree(
-                argsParam.path, 
-                argsParam.depth || 3, 
-                argsParam.follow_symlinks || false, 
+                args.path, 
+                args.depth || 3, 
+                args.follow_symlinks || false, 
                 allowedDirectories
               );
               break;
               
             case 'search_files':
-              responseData = filesystemTools.searchFiles(argsParam.path, argsParam.pattern, allowedDirectories);
+              responseData = filesystemTools.searchFiles(args.path, args.pattern, allowedDirectories);
               break;
               
             case 'get_file_info':
-              responseData = filesystemTools.getFileInfo(argsParam.path, allowedDirectories);
+              responseData = filesystemTools.getFileInfo(args.path, allowedDirectories);
               break;
               
             case 'list_allowed_directories':
@@ -1290,22 +1820,22 @@ rl.on('line', async (line) => {
               break;
               
             case 'set_config_value':
-              responseData = terminalTools.setConfigValue(argsParam.key, argsParam.value);
+              responseData = terminalTools.setConfigValue(args.key, args.value);
               break;
               
             case 'execute_command':
-              responseData = await terminalTools.executeCommand(argsParam.command, {
-                shell: argsParam.shell,
-                timeout_ms: argsParam.timeout_ms
+              responseData = await terminalTools.executeCommand(args.command, {
+                shell: args.shell,
+                timeout_ms: args.timeout_ms ? parseInt(args.timeout_ms, 10) : undefined
               });
               break;
               
             case 'read_output':
-              responseData = terminalTools.readOutput(argsParam.pid);
+              responseData = terminalTools.readOutput(args.pid);
               break;
               
             case 'force_terminate':
-              responseData = await terminalTools.forceTerminate(argsParam.pid);
+              responseData = await terminalTools.forceTerminate(args.pid);
               break;
               
             case 'list_sessions':
@@ -1317,29 +1847,29 @@ rl.on('line', async (line) => {
               break;
               
             case 'kill_process':
-              responseData = await terminalTools.killProcess(argsParam.pid);
+              responseData = await terminalTools.killProcess(args.pid);
               break;
               
             case 'search_code':
-              responseData = await searchTools.searchCode(argsParam.path, argsParam.pattern, {
-                ignoreCase: argsParam.ignoreCase,
-                filePattern: argsParam.filePattern,
-                contextLines: argsParam.contextLines,
-                includeHidden: argsParam.includeHidden,
-                maxResults: argsParam.maxResults,
-                timeoutMs: argsParam.timeoutMs
+              responseData = await searchTools.searchCode(args.path, args.pattern, {
+                ignoreCase: args.ignoreCase,
+                filePattern: args.filePattern,
+                contextLines: args.contextLines,
+                includeHidden: args.includeHidden,
+                maxResults: args.maxResults,
+                timeoutMs: args.timeoutMs
               });
               break;
               
             case 'edit_block':
-              responseData = editTools.editBlock(argsParam.file_path, argsParam.old_string, argsParam.new_string, {
-                expected_replacements: argsParam.expected_replacements
+              responseData = editTools.editBlock(args.file_path, args.old_string, args.new_string, {
+                expected_replacements: args.expected_replacements
               });
               break;
               
             // Playwright MCP Browser Tools cases
             case 'browser_navigate':
-              responseData = await browserTools.browserNavigate(argsParam.url);
+              responseData = await browserTools.browserNavigate(args.url);
               break;
               
             case 'browser_navigate_back':
@@ -1351,38 +1881,38 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_click':
-              responseData = await browserTools.browserClick(argsParam.element, argsParam.ref);
+              responseData = await browserTools.browserClick(args.element, args.ref);
               break;
               
             case 'browser_type':
-              responseData = await browserTools.browserType(argsParam.element, argsParam.ref, argsParam.text, {
-                submit: argsParam.submit,
-                slowly: argsParam.slowly
+              responseData = await browserTools.browserType(args.element, args.ref, args.text, {
+                submit: args.submit,
+                slowly: args.slowly
               });
               break;
               
             case 'browser_hover':
-              responseData = await browserTools.browserHover(argsParam.element, argsParam.ref);
+              responseData = await browserTools.browserHover(args.element, args.ref);
               break;
               
             case 'browser_drag':
-              responseData = await browserTools.browserDrag(argsParam.startElement, argsParam.startRef, argsParam.endElement, argsParam.endRef);
+              responseData = await browserTools.browserDrag(args.startElement, args.startRef, args.endElement, args.endRef);
               break;
               
             case 'browser_select_option':
-              responseData = await browserTools.browserSelectOption(argsParam.element, argsParam.ref, argsParam.values);
+              responseData = await browserTools.browserSelectOption(args.element, args.ref, args.values);
               break;
               
             case 'browser_press_key':
-              responseData = await browserTools.browserPressKey(argsParam.key);
+              responseData = await browserTools.browserPressKey(args.key);
               break;
               
             case 'browser_take_screenshot':
               responseData = await browserTools.browserTakeScreenshot({
-                element: argsParam.element,
-                ref: argsParam.ref,
-                filename: argsParam.filename,
-                raw: argsParam.raw
+                element: args.element,
+                ref: args.ref,
+                filename: args.filename,
+                raw: args.raw
               });
               break;
               
@@ -1392,7 +1922,7 @@ rl.on('line', async (line) => {
               
             case 'browser_pdf_save':
               responseData = await browserTools.browserPdfSave({
-                filename: argsParam.filename
+                filename: args.filename
               });
               break;
               
@@ -1401,27 +1931,27 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_file_upload':
-              responseData = await browserTools.browserFileUpload(argsParam.paths);
+              responseData = await browserTools.browserFileUpload(args.paths);
               break;
               
             case 'browser_wait':
-              responseData = await browserTools.browserWait(argsParam.time);
+              responseData = await browserTools.browserWait(args.time);
               break;
               
             case 'browser_wait_for':
               responseData = await browserTools.browserWaitFor({
-                text: argsParam.text,
-                textGone: argsParam.textGone,
-                time: argsParam.time
+                text: args.text,
+                textGone: args.textGone,
+                time: args.time
               });
               break;
               
             case 'browser_resize':
-              responseData = await browserTools.browserResize(argsParam.width, argsParam.height);
+              responseData = await browserTools.browserResize(args.width, args.height);
               break;
               
             case 'browser_handle_dialog':
-              responseData = await browserTools.browserHandleDialog(argsParam.accept, argsParam.promptText);
+              responseData = await browserTools.browserHandleDialog(args.accept, args.promptText);
               break;
               
             case 'browser_close':
@@ -1437,15 +1967,15 @@ rl.on('line', async (line) => {
               break;
               
             case 'browser_tab_new':
-              responseData = await browserTools.browserTabNew(argsParam.url);
+              responseData = await browserTools.browserTabNew(args.url);
               break;
               
             case 'browser_tab_select':
-              responseData = await browserTools.browserTabSelect(argsParam.index);
+              responseData = await browserTools.browserTabSelect(args.index);
               break;
               
             case 'browser_tab_close':
-              responseData = await browserTools.browserTabClose(argsParam.index);
+              responseData = await browserTools.browserTabClose(args.index);
               break;
               
             case 'browser_network_requests':
@@ -1455,8 +1985,8 @@ rl.on('line', async (line) => {
             // AppleScript Tool case
             case 'applescript_execute':
               responseData = await applescriptTools.executeAppleScript(
-                argsParam.code_snippet,
-                argsParam.timeout || 60
+                args.code_snippet,
+                args.timeout || 60
               );
               break;
               

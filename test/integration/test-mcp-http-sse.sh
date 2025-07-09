@@ -8,7 +8,7 @@
 # tool handling logic, which is common to all transport layers (HTTP, SSE, etc.).
 #
 # NOTE: This test script is designed to be resilient to pre-existing state
-# in the workspace (e.g., an existing tasks.tks.json file). Instead of asserting
+# in the workspace (e.g., an existing .acf/tasks.json file). Instead of asserting
 # exact state, it asserts state changes (e.g., task count increasing).
 
 set -e
@@ -106,13 +106,37 @@ send_request() {
 # Test: initProject
 test_init_project() {
     header "Testing 'initProject' tool"
+
+    # Create a dummy old rules file to test migration
+    local old_rules_dir="$TEST_WORKSPACE/.cursor/rules"
+    mkdir -p "$old_rules_dir"
+    local old_rules_file="$old_rules_dir/task_manager_workflow.mdc"
+    local old_content="OLD RULES CONTENT"
+    echo "$old_content" > "$old_rules_file"
+    log "Created dummy old rules file for migration test."
+
     ((REQUEST_COUNT++))
-    local request_body="{\"jsonrpc\":\"2.0\",\"id\":$REQUEST_COUNT,\"method\":\"tools/run\",\"params\":{\"tool\":\"initProject\",\"args\":{\"projectName\":\"Test Project\"}}}"
+    local request_body="{\"jsonrpc\":\"2.0\",\"id\":$REQUEST_COUNT,\"method\":\"tools/run\",\"params\":{\"tool\":\"initProject\",\"args\":{\"projectName\":\"Test Project\", \"editor\":\"cursor\"}}}"
     local response=$(send_request "$request_body" "$REQUEST_COUNT")
     if echo "$response" | grep -q '"success":true'; then
         success "initProject successful."
     else
         error "initProject failed. Response: $response"
+    fi
+
+    # Verify that the new rules file contains the old content
+    local new_rules_file="$TEST_WORKSPACE/.cursor/rules/acf_rules.md"
+    if [ -f "$new_rules_file" ] && grep -q "$old_content" "$new_rules_file"; then
+        success "Editor-specific rules file created and contains migrated content."
+    else
+        error "Editor-specific rules file was not created or does not contain migrated content."
+    fi
+
+    # Verify that the old rules file was deleted
+    if [ ! -f "$old_rules_file" ]; then
+        success "Old rules file was successfully deleted after migration."
+    else
+        error "Old rules file was not deleted after migration."
     fi
 }
 

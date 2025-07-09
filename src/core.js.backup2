@@ -6,116 +6,6 @@ const chalk = require('chalk'); // Import chalk (v4)
 const logger = require('./logger'); // Import our logger module
 const os = require('os'); // Import os module
 const tableRenderer = require('./tableRenderer'); // Import the tableRenderer module
-const PriorityEngine = require('./priority_engine'); // Import advanced priority engine
-const fileWatcher = require('./file_watcher'); // Import file watcher module
-const priorityTemplates = require('./priority_templates'); // Import priority templates
-
-// Simple task data cache to reduce file I/O
-const taskCache = new Map();
-const CACHE_TTL = 5000; // 5 seconds cache TTL
-
-// Derived data cache to eliminate redundant representations
-const derivedDataCache = new Map();
-const DERIVED_CACHE_TTL = 10000; // 10 seconds for derived data
-
-// Priority logging configuration
-const PRIORITY_LOGGING_CONFIG = {
-  enabled: true,
-  minSignificantDelta: 50, // Only log priority changes >= 50 points for automatic adjustments
-  minMcpDelta: 10, // Only log MCP priority changes >= 10 points
-  consolidateWindow: 60000, // 1 minute window for consolidating similar logs
-  maxMinorAdjustmentsBeforeSummary: 3 // Group minor adjustments into summary after this many
-};
-
-// Cache helper functions
-function getCacheKey(workspaceRoot) {
-  return path.resolve(workspaceRoot);
-}
-
-function getCachedTasks(workspaceRoot) {
-  const key = getCacheKey(workspaceRoot);
-  const cached = taskCache.get(key);
-
-  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
-    logger.debug('Using cached task data');
-    return JSON.parse(JSON.stringify(cached.data)); // Return deep copy
-  }
-
-  return null;
-}
-
-function setCachedTasks(workspaceRoot, data) {
-  const key = getCacheKey(workspaceRoot);
-  taskCache.set(key, {
-    data: JSON.parse(JSON.stringify(data)), // Store deep copy
-    timestamp: Date.now()
-  });
-  logger.debug('Cached task data');
-}
-
-function invalidateCache(workspaceRoot) {
-  const key = getCacheKey(workspaceRoot);
-  taskCache.delete(key);
-  // Also invalidate all derived data when task data changes
-  invalidateDerivedDataCache(workspaceRoot);
-  logger.debug('Invalidated task cache');
-}
-
-// Derived data cache helper functions
-function getDerivedCacheKey(workspaceRoot, type) {
-  return `${path.resolve(workspaceRoot)}:${type}`;
-}
-
-function getCachedDerivedData(workspaceRoot, type) {
-  const key = getDerivedCacheKey(workspaceRoot, type);
-  const cached = derivedDataCache.get(key);
-
-  if (cached && (Date.now() - cached.timestamp) < DERIVED_CACHE_TTL) {
-    logger.debug(`Using cached derived data: ${type}`);
-    return cached.data;
-  }
-
-  return null;
-}
-
-function setCachedDerivedData(workspaceRoot, type, data) {
-  const key = getDerivedCacheKey(workspaceRoot, type);
-  derivedDataCache.set(key, {
-    data: data,
-    timestamp: Date.now()
-  });
-  logger.debug(`Cached derived data: ${type}`);
-}
-
-function invalidateDerivedDataCache(workspaceRoot) {
-  // Remove all derived data for this workspace
-  const prefix = path.resolve(workspaceRoot) + ':';
-  for (const key of derivedDataCache.keys()) {
-    if (key.startsWith(prefix)) {
-      derivedDataCache.delete(key);
-    }
-  }
-  logger.debug('Invalidated derived data cache');
-}
-
-// Priority logging configuration functions
-function configurePriorityLogging(options = {}) {
-  if (options.enabled !== undefined) PRIORITY_LOGGING_CONFIG.enabled = options.enabled;
-  if (options.minSignificantDelta !== undefined) PRIORITY_LOGGING_CONFIG.minSignificantDelta = options.minSignificantDelta;
-  if (options.minMcpDelta !== undefined) PRIORITY_LOGGING_CONFIG.minMcpDelta = options.minMcpDelta;
-  if (options.consolidateWindow !== undefined) PRIORITY_LOGGING_CONFIG.consolidateWindow = options.consolidateWindow;
-  if (options.maxMinorAdjustmentsBeforeSummary !== undefined) PRIORITY_LOGGING_CONFIG.maxMinorAdjustmentsBeforeSummary = options.maxMinorAdjustmentsBeforeSummary;
-
-  logger.info(`Priority logging configured: ${JSON.stringify(PRIORITY_LOGGING_CONFIG)}`);
-  return { success: true, config: { ...PRIORITY_LOGGING_CONFIG } };
-}
-
-function getPriorityLoggingConfig() {
-  return { success: true, config: { ...PRIORITY_LOGGING_CONFIG } };
-}
-
-// Initialize global priority engine instance
-const priorityEngine = new PriorityEngine();
 
 // --- Priority System Configuration ---
 // Priority mapping for backward compatibility
@@ -237,19 +127,14 @@ function ensureUniquePriorities(tasksData) {
     if (newPriority !== task.priority) {
       const oldPriority = task.priority;
       task.priority = newPriority;
-
+      
       // Update priorityDisplay if it was numeric
       if (typeof task.priorityDisplay === 'number') {
         task.priorityDisplay = newPriority;
       }
-
-      // Add smart activity log entry for automatic priority adjustments
-      addActivityLog(task, `Priority automatically adjusted from ${oldPriority} to ${newPriority} to ensure uniqueness.`, 'log', {
-        isPriorityLog: true,
-        isManual: false,
-        priorityDelta: Math.abs(newPriority - oldPriority),
-        newPriority: newPriority
-      });
+      
+      // Add activity log entry
+      addActivityLog(task, `Priority automatically adjusted from ${oldPriority} to ${newPriority} to ensure uniqueness.`);
       adjustedTasks.push({ id: task.id, oldPriority, newPriority });
     }
 
@@ -307,99 +192,6 @@ function getNextAvailablePriority(tasksData, targetPriority, excludeTaskId = nul
   return targetPriority;
 }
 // --- End Priority Uniqueness System ---
-
-// --- Advanced Priority Management Functions ---
-/**
- * Recalculate priorities for all tasks using advanced algorithms
- * @param {string} workspaceRoot - The workspace root path
- * @param {Object} options - Recalculation options
- * @returns {Object} Result with success status and adjustments made
- */
-function recalculatePriorities(workspaceRoot, options = {}) {
-  try {
-    const tasksData = readTasks(workspaceRoot);
-    const adjustments = priorityEngine.recalculateAllPriorities(tasksData, options);
-
-    if (adjustments.length > 0) {
-      // Log adjustments to affected tasks
-      adjustments.forEach(adjustment => {
-        const task = tasksData.tasks.find(t => t.id === adjustment.taskId);
-        if (task) {
-          addActivityLog(task, adjustment.reason);
-        }
-      });
-
-      writeTasks(workspaceRoot, tasksData);
-    }
-
-    return {
-      success: true,
-      message: `Recalculated priorities for ${tasksData.tasks.length} tasks. Made ${adjustments.length} adjustments.`,
-      adjustments
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Error recalculating priorities: ${error.message}`
-    };
-  }
-}
-
-/**
- * Get priority statistics for the current task set
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Priority statistics
- */
-function getPriorityStatistics(workspaceRoot) {
-  try {
-    // Check cache first
-    const cached = getCachedDerivedData(workspaceRoot, 'priority-stats');
-    if (cached) {
-      return cached;
-    }
-
-    const tasksData = readTasks(workspaceRoot);
-    const stats = priorityEngine.getPriorityStatistics(tasksData.tasks);
-
-    const result = {
-      success: true,
-      statistics: stats
-    };
-
-    // Cache the result
-    setCachedDerivedData(workspaceRoot, 'priority-stats', result);
-
-    return result;
-  } catch (error) {
-    return {
-      success: false,
-      message: `Error getting priority statistics: ${error.message}`
-    };
-  }
-}
-
-/**
- * Get dependency analysis for the current task set
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Dependency analysis report
- */
-function getDependencyAnalysis(workspaceRoot) {
-  try {
-    const tasksData = readTasks(workspaceRoot);
-    const analysis = priorityEngine.getDependencyAnalysis(tasksData.tasks);
-
-    return {
-      success: true,
-      analysis: analysis
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Error getting dependency analysis: ${error.message}`
-    };
-  }
-}
-// --- End Advanced Priority Management Functions ---
 
 // --- Path Calculation Helper ---
 // Helper function to get paths based on the script's location
@@ -568,20 +360,12 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
 }
 
 // Function to read tasks from the file
-function readTasks(workspaceRoot, options = {}) { // Renamed argument, added options
-  // Check cache first unless bypassed
-  if (!options.bypassCache) {
-    const cached = getCachedTasks(workspaceRoot);
-    if (cached) {
-      return cached;
-    }
-  }
-
+function readTasks(workspaceRoot) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
   // Resolve the path to ensure it works with both relative and absolute paths
   const resolvedTasksFilePath = resolvePath(workspaceRoot, tasksFilePath);
   // logger.debug(`TASKS_FILE = ${resolvedTasksFilePath}`); // Use logger.debug instead
-
+  
   if (!fs.existsSync(resolvedTasksFilePath)) {
     // Instead of exiting, throw an error that can be caught
     throw new Error(`Tasks file not found: ${resolvedTasksFilePath}. Please run init command first.`);
@@ -616,12 +400,6 @@ function readTasks(workspaceRoot, options = {}) { // Renamed argument, added opt
             }
         });
     }
-
-    // Cache the result for future reads
-    if (!options.bypassCache) {
-      setCachedTasks(workspaceRoot, tasksData);
-    }
-
     return tasksData;
   } catch (error) {
     // Throw a more specific error for parsing/reading issues
@@ -649,152 +427,32 @@ function findTask(tasksData, id) {
 }
 
 // Function to write tasks to the file
-function writeTasks(workspaceRoot, data, options = {}) { // Renamed argument, added options
+function writeTasks(workspaceRoot, data) { // Renamed argument
   const { tasksFilePath } = getWorkspacePaths(workspaceRoot); // Pass argument
   // Resolve the path to ensure it works with both relative and absolute paths
   const resolvedTasksFilePath = resolvePath(workspaceRoot, tasksFilePath);
-
-  // Only apply expensive operations if explicitly requested or if it's a major change
-  const shouldRecalculatePriorities = options.recalculatePriorities !== false &&
-    (options.forceRecalculation || data.tasks.length > 10); // Skip for small task sets unless forced
-
-  const shouldUpdateTable = options.updateTable !== false &&
-    (options.forceTableUpdate || !options.skipTableUpdate);
-
-  // Apply advanced priority recalculation only when needed
-  if (shouldRecalculatePriorities) {
-    const priorityAdjustments = priorityEngine.recalculateAllPriorities(data, {
-      applyDependencyBoosts: true,
-      applyTimeDecay: false, // Disabled by default
-      optimizeDistribution: true
-    });
-
-    if (priorityAdjustments && priorityAdjustments.length > 0) {
-      logger.debug(`Applied ${priorityAdjustments.length} priority adjustments`);
-
-      // Smart logging for priority engine adjustments - only log significant changes
-      const significantAdjustments = priorityAdjustments.filter(adj =>
-        adj.type === 'manual' || Math.abs(adj.newPriority - adj.oldPriority) > 50
-      );
-
-      // Group minor adjustments into a single summary log
-      const minorAdjustments = priorityAdjustments.filter(adj =>
-        adj.type !== 'manual' && Math.abs(adj.newPriority - adj.oldPriority) <= 50
-      );
-
-      // Log significant adjustments individually
-      significantAdjustments.forEach(adjustment => {
-        const task = data.tasks.find(t => t.id === adjustment.taskId);
-        if (task) {
-          addActivityLog(task, adjustment.reason, 'log', {
-            isPriorityLog: true,
-            isManual: adjustment.type === 'manual',
-            priorityDelta: Math.abs(adjustment.newPriority - adjustment.oldPriority),
-            newPriority: adjustment.newPriority
-          });
-        }
-      });
-
-      // Add a single summary log for minor adjustments if there are many
-      if (minorAdjustments.length > 3) {
-        const affectedTaskIds = [...new Set(minorAdjustments.map(adj => adj.taskId))];
-        affectedTaskIds.forEach(taskId => {
-          const task = data.tasks.find(t => t.id === taskId);
-          if (task) {
-            const taskAdjustments = minorAdjustments.filter(adj => adj.taskId === taskId);
-            const latestAdjustment = taskAdjustments[taskAdjustments.length - 1];
-            addActivityLog(task, `Priority auto-tuned (${taskAdjustments.length} adjustments)`, 'log', {
-              isPriorityLog: true,
-              isManual: false,
-              priorityDelta: 25, // Treat as minor
-              newPriority: latestAdjustment.newPriority
-            });
-          }
-        });
-      } else {
-        // Log minor adjustments individually if there are few
-        minorAdjustments.forEach(adjustment => {
-          const task = data.tasks.find(t => t.id === adjustment.taskId);
-          if (task) {
-            addActivityLog(task, adjustment.reason, 'log', {
-              isPriorityLog: true,
-              isManual: false,
-              priorityDelta: Math.abs(adjustment.newPriority - adjustment.oldPriority),
-              newPriority: adjustment.newPriority
-            });
-          }
-        });
-      }
-    }
-  }
-
   try {
     fs.writeFileSync(resolvedTasksFilePath, JSON.stringify(data, null, 2));
-
-    // Invalidate cache since we've written new data
-    invalidateCache(workspaceRoot);
-
-    // Generate the human-readable task table only when needed
-    if (shouldUpdateTable) {
-      tableRenderer.writeTaskTable(data, workspaceRoot);
-      logger.info(`Tasks updated. View the auto-generated task board at tasks-table.md`);
-    } else {
-      logger.debug(`Tasks updated (table generation skipped for performance)`);
-    }
+    // Generate the human-readable task table whenever tasks are updated
+    tableRenderer.writeTaskTable(data, workspaceRoot);
+    logger.info(`Tasks updated. View the auto-generated task board at tasks-table.md`);
   } catch (error) {
     // Throw an error instead of exiting
     throw new Error(`Error writing tasks file ${resolvedTasksFilePath}: ${error.message}`);
   }
 }
 
-// Helper function to add a log entry with smart priority logging
-function addActivityLog(item, message, type = 'log', options = {}) {
+// Helper function to add a log entry
+function addActivityLog(item, message, type = 'log') {
     if (!item.activityLog) {
         item.activityLog = [];
     }
-
-    // Smart priority logging: avoid spam from automatic adjustments
-    if (options.isPriorityLog && PRIORITY_LOGGING_CONFIG.enabled) {
-        const minDelta = options.isManual ? 1 : PRIORITY_LOGGING_CONFIG.minSignificantDelta;
-
-        // Only log significant priority changes or manual changes
-        if (options.isManual || options.priorityDelta >= minDelta) {
-            // For automatic changes, use a condensed format
-            if (!options.isManual) {
-                // Check if we already have a recent priority log to consolidate
-                const recentPriorityLog = item.activityLog
-                    .slice(-3) // Check last 3 entries
-                    .find(log => log.message.includes('Priority') &&
-                          (Date.now() - new Date(log.timestamp).getTime()) < PRIORITY_LOGGING_CONFIG.consolidateWindow);
-
-                if (recentPriorityLog) {
-                    // Update the existing log instead of adding a new one
-                    recentPriorityLog.message = `Priority auto-adjusted (latest: ${options.newPriority})`;
-                    recentPriorityLog.timestamp = new Date().toISOString();
-                    item.updatedAt = new Date().toISOString();
-                    return;
-                }
-
-                // Use condensed format for automatic adjustments
-                message = `Priority auto-adjusted to ${options.newPriority}`;
-            }
-        } else {
-            // Skip logging minor automatic priority adjustments
-            item.updatedAt = new Date().toISOString();
-            return;
-        }
-    } else if (options.isPriorityLog && !PRIORITY_LOGGING_CONFIG.enabled) {
-        // Priority logging is disabled, just update timestamp
-        item.updatedAt = new Date().toISOString();
-        return;
-    }
-
     item.activityLog.push({
         timestamp: new Date().toISOString(),
         type: type,
         message: message
     });
-    item.updatedAt = new Date().toISOString();
+    item.updatedAt = new Date().toISOString(); // Also update timestamp when logging
 }
 
 // Function to add a new task
@@ -810,7 +468,7 @@ function addTask(workspaceRoot, options) { // Renamed argument
     title: options.title,
     description: options.description || '',
     status: 'todo',
-    priority: getNextAvailablePriority(tasksData, normalizePriority(options.priority || 'medium')),
+    priority: normalizePriority(options.priority || 'medium'),
     priorityDisplay: getDisplayPriority(options.priority || 'medium'), // Store original format for display
     dependsOn: options.dependsOn ? options.dependsOn.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : [],
     createdAt: new Date().toISOString(),
@@ -1070,15 +728,9 @@ function updateTask(workspaceRoot, id, options) {
   }
   if (options.priority !== undefined) {
     const oldPriority = task.priorityDisplay || task.priority;
-    const targetPriority = normalizePriority(options.priority);
-    task.priority = getNextAvailablePriority(tasksData, targetPriority, task.id);
+    task.priority = normalizePriority(options.priority);
     task.priorityDisplay = getDisplayPriority(options.priority);
-    addActivityLog(task, `Priority updated from ${oldPriority} to: ${task.priorityDisplay}`, 'log', {
-      isPriorityLog: true,
-      isManual: true,
-      priorityDelta: Math.abs(task.priority - (typeof oldPriority === 'number' ? oldPriority : normalizePriority(oldPriority))),
-      newPriority: task.priority
-    });
+    addActivityLog(task, `Priority updated from ${oldPriority} to: ${task.priorityDisplay}`);
     updated = true;
   }
   if (options.dependsOn !== undefined) {
@@ -1173,18 +825,10 @@ function removeTask(workspaceRoot, id) { // Renamed argument
 }
 
 // Function to generate individual Markdown files for each task
-function generateTaskFiles(workspaceRoot, options = {}) { // Renamed argument, added options
-  // Check cache first unless forced
-  if (!options.force) {
-    const cached = getCachedDerivedData(workspaceRoot, 'task-files');
-    if (cached) {
-      return cached;
-    }
-  }
-
+function generateTaskFiles(workspaceRoot) { // Renamed argument
   const tasksData = readTasks(workspaceRoot); // Pass argument
   const { taskFilesDir } = getWorkspacePaths(workspaceRoot); // Pass argument
-
+  
   // Create tasks directory if it doesn't exist
   try {
     const dirMsg = ensureDirExists(taskFilesDir);
@@ -1246,15 +890,8 @@ function generateTaskFiles(workspaceRoot, options = {}) { // Renamed argument, a
       fs.writeFileSync(filePath, content);
       filesCreated++;
     });
-
-    const result = { success: true, message: `Generated ${filesCreated} task files in the '${taskFilesDir}' directory.` };
-
-    // Cache the result
-    if (!options.force) {
-      setCachedDerivedData(workspaceRoot, 'task-files', result);
-    }
-
-    return result;
+    
+    return { success: true, message: `Generated ${filesCreated} task files in the '${taskFilesDir}' directory.` };
   } catch (error) {
     logger.error(`Error writing task file: ${error.message}`);
     throw new Error(`Failed to generate task files: ${error.message}`);
@@ -1785,354 +1422,25 @@ function getContext(workspaceRoot, id) {
 }
 
 // Function to generate a human-readable task table file
-function generateHumanReadableTaskTable(workspaceRoot, options = {}) {
+function generateHumanReadableTaskTable(workspaceRoot) {
   try {
-    // Check cache first unless forced
-    if (!options.force) {
-      const cached = getCachedDerivedData(workspaceRoot, 'task-table');
-      if (cached) {
-        return cached;
-      }
-    }
-
     const tasksData = readTasks(workspaceRoot);
     const tableRenderer = require('./tableRenderer');
     const success = tableRenderer.writeTaskTable(tasksData, workspaceRoot);
-
-    const result = success ?
-      { success: true, message: `Human-readable task table has been generated.` } :
-      { success: false, message: 'Failed to generate human-readable task table.' };
-
-    // Cache the result
-    if (!options.force && result.success) {
-      setCachedDerivedData(workspaceRoot, 'task-table', result);
+    
+    if (success) {
+      return { 
+        success: true, 
+        message: `Human-readable task table has been generated.` 
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Failed to generate human-readable task table.'
+      };
     }
-
-    return result;
   } catch (error) {
     throw new Error(`Error generating human-readable task table: ${error.message}`);
-  }
-}
-
-/**
- * Configure time decay settings
- * @param {string} workspaceRoot - The workspace root path
- * @param {Object} config - Time decay configuration
- * @returns {Object} Result with success status and current config
- */
-function configureTimeDecay(workspaceRoot, config) {
-  try {
-    priorityEngine.configureTimeDecay(config);
-
-    return {
-      success: true,
-      message: 'Time decay configuration updated',
-      config: priorityEngine.getTimeDecayConfig()
-    };
-  } catch (error) {
-    logger.error(`Error configuring time decay: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Configure effort weighting settings
- * @param {string} workspaceRoot - The workspace root path
- * @param {Object} config - Effort weighting configuration
- * @returns {Object} Result with success status and current config
- */
-function configureEffortWeighting(workspaceRoot, config) {
-  try {
-    priorityEngine.configureEffortWeighting(config);
-
-    return {
-      success: true,
-      message: 'Effort weighting configuration updated',
-      config: priorityEngine.getEffortWeightingConfig()
-    };
-  } catch (error) {
-    logger.error(`Error configuring effort weighting: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Get current advanced algorithm configuration
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Result with success status and configuration
- */
-function getAdvancedAlgorithmConfig(workspaceRoot) {
-  try {
-    return {
-      success: true,
-      config: {
-        timeDecay: priorityEngine.getTimeDecayConfig(),
-        effortWeighting: priorityEngine.getEffortWeightingConfig(),
-        availableModels: priorityEngine.getAvailableDecayModels()
-      }
-    };
-  } catch (error) {
-    logger.error(`Error getting algorithm configuration: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Initialize file watcher for automatic synchronization
- * @param {string} workspaceRoot - The workspace root path
- * @param {Object} options - Watcher configuration options
- * @returns {Object} Result with success status and watcher info
- */
-function initializeFileWatcher(workspaceRoot, options = {}) {
-  try {
-    const watcher = fileWatcher.initializeWatcher(workspaceRoot, options);
-
-    return {
-      success: true,
-      message: 'File watcher initialized successfully',
-      isActive: watcher.isActive(),
-      config: watcher.getConfig()
-    };
-  } catch (error) {
-    logger.error(`Error initializing file watcher: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Stop file watcher
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Result with success status
- */
-function stopFileWatcher(workspaceRoot) {
-  try {
-    fileWatcher.stopWatcher();
-
-    return {
-      success: true,
-      message: 'File watcher stopped successfully'
-    };
-  } catch (error) {
-    logger.error(`Error stopping file watcher: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Configure file watcher settings
- * @param {string} workspaceRoot - The workspace root path
- * @param {Object} options - Configuration options
- * @returns {Object} Result with success status and current config
- */
-function configureFileWatcher(workspaceRoot, options) {
-  try {
-    fileWatcher.configureWatcher(options);
-
-    const currentWatcher = fileWatcher.getWatcher();
-    return {
-      success: true,
-      message: 'File watcher configuration updated',
-      config: currentWatcher ? currentWatcher.getConfig() : null
-    };
-  } catch (error) {
-    logger.error(`Error configuring file watcher: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Get file watcher status and statistics
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Result with success status and watcher stats
- */
-function getFileWatcherStatus(workspaceRoot) {
-  try {
-    const stats = fileWatcher.getWatcherStats();
-
-    return {
-      success: true,
-      stats: stats || { message: 'No active file watcher' }
-    };
-  } catch (error) {
-    logger.error(`Error getting file watcher status: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Force synchronization of all task files
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Result with success status
- */
-async function forceSyncTaskFiles(workspaceRoot) {
-  try {
-    await fileWatcher.forceSyncAll();
-
-    return {
-      success: true,
-      message: 'Task files synchronized successfully'
-    };
-  } catch (error) {
-    logger.error(`Error forcing sync: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Get all available priority templates
- * @param {string} workspaceRoot - The workspace root path
- * @returns {Object} Result with success status and templates
- */
-function getPriorityTemplates(workspaceRoot) {
-  try {
-    const templates = priorityTemplates.getAllTemplates();
-
-    return {
-      success: true,
-      templates
-    };
-  } catch (error) {
-    logger.error(`Error getting priority templates: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Calculate priority using a template
- * @param {string} workspaceRoot - The workspace root path
- * @param {string} templateName - Template name
- * @param {string} title - Task title
- * @param {string} description - Task description
- * @param {Array} tags - Optional tags
- * @returns {Object} Result with calculated priority
- */
-function calculatePriorityFromTemplate(workspaceRoot, templateName, title, description, tags = []) {
-  try {
-    const result = priorityTemplates.calculatePriority(templateName, title, description, tags);
-
-    return result;
-  } catch (error) {
-    logger.error(`Error calculating priority from template: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Suggest template for a task
- * @param {string} workspaceRoot - The workspace root path
- * @param {string} title - Task title
- * @param {string} description - Task description
- * @returns {Object} Result with template suggestions
- */
-function suggestPriorityTemplate(workspaceRoot, title, description) {
-  try {
-    const result = priorityTemplates.suggestTemplate(title, description);
-
-    return result;
-  } catch (error) {
-    logger.error(`Error suggesting priority template: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Add task with template-based priority
- * @param {string} workspaceRoot - The workspace root path
- * @param {string} title - Task title
- * @param {string} description - Task description
- * @param {string} templateName - Template name
- * @param {Array} tags - Optional tags
- * @param {Object} options - Additional options
- * @returns {Object} Result with task creation status
- */
-function addTaskWithTemplate(workspaceRoot, title, description, templateName, tags = [], options = {}) {
-  try {
-    // Calculate priority using template
-    const priorityResult = priorityTemplates.calculatePriority(templateName, title, description, tags);
-
-    if (!priorityResult.success) {
-      return priorityResult;
-    }
-
-    // Create task with calculated priority
-    const taskOptions = {
-      ...options,
-      priority: priorityResult.priority,
-      templateUsed: templateName,
-      templateInfo: {
-        basePriority: priorityResult.basePriority,
-        appliedModifiers: priorityResult.appliedModifiers,
-        template: priorityResult.template
-      }
-    };
-
-    const result = addTask(workspaceRoot, title, description, taskOptions);
-
-    if (result.success) {
-      result.priorityCalculation = priorityResult;
-    }
-
-    return result;
-  } catch (error) {
-    logger.error(`Error adding task with template: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-}
-
-/**
- * Add custom priority template
- * @param {string} workspaceRoot - The workspace root path
- * @param {string} name - Template name
- * @param {Object} template - Template configuration
- * @returns {Object} Result with success status
- */
-function addCustomPriorityTemplate(workspaceRoot, name, template) {
-  try {
-    const result = priorityTemplates.addCustomTemplate(name, template);
-
-    return result;
-  } catch (error) {
-    logger.error(`Error adding custom priority template: ${error.message}`);
-    return {
-      success: false,
-      message: error.message
-    };
   }
 }
 
@@ -2159,50 +1467,9 @@ module.exports = {
   writeTasks,
   resolvePath,
   generateHumanReadableTaskTable,
-  findTask,
-  addActivityLog,
-
-  // Cache management exports
-  getCachedTasks,
-  setCachedTasks,
-  invalidateCache,
-  getCachedDerivedData,
-  setCachedDerivedData,
-  invalidateDerivedDataCache,
-
-  // Priority logging configuration exports
-  configurePriorityLogging,
-  getPriorityLoggingConfig,
   
   // Priority system exports
   normalizePriority,
   getDisplayPriority,
-  getPriorityString,
-  
-  // Priority uniqueness exports
-  ensureUniquePriorities,
-  getNextAvailablePriority,
-
-  // Advanced priority management exports
-  recalculatePriorities,
-  getPriorityStatistics,
-  getDependencyAnalysis,
-
-  // Advanced algorithm configuration exports
-  configureTimeDecay,
-  configureEffortWeighting,
-  getAdvancedAlgorithmConfig,
-
-  // File watcher exports
-  initializeFileWatcher,
-  stopFileWatcher,
-  configureFileWatcher,
-  getFileWatcherStatus,
-  forceSyncTaskFiles,
-
-  // Priority templates exports
-  getPriorityTemplates,
-  calculatePriorityFromTemplate,
-  suggestPriorityTemplate,
-  addTaskWithTemplate,
-  addCustomPriorityTemplate};
+  getPriorityString
+};

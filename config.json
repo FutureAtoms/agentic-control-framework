@@ -10,9 +10,7 @@
     ":(){:|:&};:"
   ],
   "commandTimeout": 10000,
-  "allowedDirectories": [
-    "/Users/abhilashchadhar/test_acf_workspace"
-  ],
+  "allowedDirectories": "[\"/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework\", \"/Users/abhilashchadhar/test_acf_workspace\", \"/tmp\"]",
   "fileReadLineLimit": 1000,
   "fileWriteLineLimit": 50,
   "telemetryEnabled": false,

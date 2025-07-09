@@ -72,8 +72,16 @@ function generateCliOutput(tasksData, tasks) {
   const totalTasks = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   const completedTasks = statusCounts.done;
   const completionPercentage = totalTasks > 0 ? Math.min(100, Math.round((completedTasks / totalTasks) * 100)) : 0;
-  
+
   output += chalk.bold(`Progress: ${completionPercentage}%\n\n`);
+
+  // Add priority distribution
+  const priorityDistribution = getPriorityDistribution(tasks);
+  output += chalk.bold("Priority Distribution:\n");
+  output += `${chalk.magenta('🚨 Critical (900+)')}: ${priorityDistribution.critical} | `;
+  output += `${chalk.red('🔴 High (700-899)')}: ${priorityDistribution.high} | `;
+  output += `${chalk.yellow('🟡 Medium (500-699)')}: ${priorityDistribution.medium} | `;
+  output += `${chalk.green('🟢 Low (<500)')}: ${priorityDistribution.low}\n\n`;
   
   // Sort tasks by ID
   const sortedTasks = [...tasks].sort((a, b) => a.id - b.id);
@@ -105,7 +113,7 @@ function generateCliOutput(tasksData, tasks) {
     tasksTable.push([
       chalk.cyan(`#${task.id}`),
       getColoredStatus(task.status),
-      getColoredPriority(task.priority),
+      chalk.white(task.priority), // Show simple numeric priority
       chalk.white(task.title),
       task.description ? chalk.gray(truncateText(task.description, 32)) : ''
     ]);
@@ -152,30 +160,32 @@ function generateMarkdownOutput(tasksData, tasks) {
   // Add summary section with counts
   const statusCounts = countTasksByStatus(tasks);
   
-  output += "## Summary\n\n";
-  
-  // Markdown status summary with emoji
-  output += `**✅ Done**: ${statusCounts.done} | `;
-  output += `**🔄 In Progress**: ${statusCounts.inprogress} | `;
-  output += `**🔬 Testing**: ${statusCounts.testing} | `;
-  output += `**⬜ Todo**: ${statusCounts.todo} | `;
-  output += `**❌ Blocked**: ${statusCounts.blocked} | `;
-  output += `**⚠️ Error**: ${statusCounts.error}\n\n`;
-  
-  // Progress bar
+  // Create compact summary with priority distribution in one quote box
   const totalTasks = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   const completedTasks = statusCounts.done;
   const completionPercentage = totalTasks > 0 ? Math.min(100, Math.round((completedTasks / totalTasks) * 100)) : 0;
-  
-  output += `**Progress**: ${completionPercentage}%\n`;
-  
-  // Create a visual progress bar for Markdown
+
+  // Create a visual progress bar
   const progressBarWidth = 20;
   const filledBars = Math.round((completionPercentage / 100) * progressBarWidth);
-  const emptyBars = progressBarWidth - filledBars;
-  
-  const progressBar = `[${'█'.repeat(Math.max(0, filledBars))}${' '.repeat(Math.max(0, emptyBars))}] ${completionPercentage}%`;
-  output += `\n${progressBar}\n\n`;
+  const progressBar = '█'.repeat(Math.max(0, filledBars)) + '░'.repeat(Math.max(0, progressBarWidth - filledBars));
+
+  // Get priority distribution
+  const priorityDistribution = getPriorityDistribution(tasks);
+
+  output += "> ## 📈 Project Summary\n";
+  output += "> \n";
+  output += `> **✅ Done**: ${statusCounts.done} | `;
+  output += `**🔄 In Progress**: ${statusCounts.inprogress} | `;
+  output += `**⬜ Todo**: ${statusCounts.todo} | `;
+  output += `**❌ Blocked**: ${statusCounts.blocked}\n`;
+  output += "> \n";
+  output += `> **Progress**: ${completionPercentage}% \`${progressBar}\` ${completedTasks}/${totalTasks} tasks\n`;
+  output += "> \n";
+  output += `> **Priorities**: 🚨 **Critical**: ${priorityDistribution.critical} | `;
+  output += `🔴 **High**: ${priorityDistribution.high} | `;
+  output += `🟡 **Medium**: ${priorityDistribution.medium} | `;
+  output += `🟢 **Low**: ${priorityDistribution.low}\n\n`;
   
   // Sort tasks by ID
   const sortedTasks = [...tasks].sort((a, b) => a.id - b.id);
@@ -187,9 +197,9 @@ function generateMarkdownOutput(tasksData, tasks) {
   output += "| ID | Status | Priority | Title | Description |\n";
   output += "|:--:|:------:|:--------:|:------|:------------|\n";
   
-  // Add tasks to Markdown table with enhanced formatting
+  // Add tasks to Markdown table with simple numeric priorities
   sortedTasks.forEach(task => {
-    output += `| #${task.id} | ${getStatusWithEmoji(task.status)} | ${getPriorityBadge(task.priority)} | **${task.title}** | ${task.description ? truncateText(task.description, 32) : ''} |\n`;
+    output += `| #${task.id} | ${getStatusWithEmoji(task.status)} | ${task.priority} | **${task.title}** | ${task.description ? truncateText(task.description, 32) : ''} |\n`;
   });
   
   output += '\n\n';
@@ -358,42 +368,236 @@ function getStatusSymbol(status) {
 }
 
 /**
- * Get a colorized priority badge
- * @param {string} priority - The task priority
- * @returns {string} Colorized priority
+ * Get a colorized priority badge with enhanced visual indicators
+ * @param {string|number} priority - The task priority
+ * @returns {string} Colorized priority with gradient and indicators
  */
 function getColoredPriority(priority) {
-  switch(priority.toLowerCase()) {
-    case 'critical':
-      return chalk.bgMagenta.white.bold(' CRITICAL ');
-    case 'high':
-      return chalk.bgRed.white(' HIGH ');
-    case 'medium':
-      return chalk.bgYellow.black(' MEDIUM ');
-    case 'low':
+  const numericPriority = typeof priority === 'number' ? priority : getPriorityNumericValue(priority);
+
+  // Create visual priority bar
+  const priorityBar = getPriorityBar(numericPriority);
+  const priorityLabel = getPriorityLabel(numericPriority);
+  const priorityColor = getPriorityColor(numericPriority);
+
+  return `${priorityBar} ${priorityColor(priorityLabel)}`;
+}
+
+/**
+ * Get numeric value for priority
+ * @param {string|number} priority - The task priority
+ * @returns {number} Numeric priority value
+ */
+function getPriorityNumericValue(priority) {
+  if (typeof priority === 'number') return priority;
+
+  const priorityStr = String(priority).toLowerCase();
+  switch(priorityStr) {
+    case 'critical': return 900;
+    case 'high': return 700;
+    case 'medium': return 500;
+    case 'low': return 300;
     default:
-      return chalk.bgGreen.black(' LOW ');
+      // Try to parse as number
+      const parsed = parseInt(priority, 10);
+      return isNaN(parsed) ? 500 : parsed;
   }
 }
 
 /**
- * Get a badge for priority
- * @param {string} priority - The task priority
- * @returns {string} A priority badge
+ * Get priority bar visualization
+ * @param {number} priority - Numeric priority (1-1000)
+ * @returns {string} Visual priority bar
+ */
+function getPriorityBar(priority) {
+  const normalizedPriority = Math.max(1, Math.min(1000, priority));
+  const barLength = 8;
+  const filledLength = Math.round((normalizedPriority / 1000) * barLength);
+
+  // Create gradient bar with different characters
+  let bar = '';
+  for (let i = 0; i < barLength; i++) {
+    if (i < filledLength) {
+      if (normalizedPriority >= 900) bar += '█'; // Critical - solid
+      else if (normalizedPriority >= 700) bar += '▉'; // High - almost solid
+      else if (normalizedPriority >= 500) bar += '▊'; // Medium - half
+      else bar += '▌'; // Low - quarter
+    } else {
+      bar += '░'; // Empty
+    }
+  }
+
+  // Color the bar based on priority level
+  if (normalizedPriority >= 900) return chalk.magenta(bar);
+  if (normalizedPriority >= 700) return chalk.red(bar);
+  if (normalizedPriority >= 500) return chalk.yellow(bar);
+  return chalk.green(bar);
+}
+
+/**
+ * Get priority label with numeric value
+ * @param {number} priority - Numeric priority
+ * @returns {string} Priority label
+ */
+function getPriorityLabel(priority) {
+  const category = getPriorityCategory(priority);
+  return `${category} (${priority})`;
+}
+
+/**
+ * Get priority category
+ * @param {number} priority - Numeric priority
+ * @returns {string} Priority category
+ */
+function getPriorityCategory(priority) {
+  if (priority >= 900) return 'CRITICAL';
+  if (priority >= 700) return 'HIGH';
+  if (priority >= 500) return 'MEDIUM';
+  return 'LOW';
+}
+
+/**
+ * Get priority color function
+ * @param {number} priority - Numeric priority
+ * @returns {Function} Chalk color function
+ */
+function getPriorityColor(priority) {
+  if (priority >= 900) return chalk.bgMagenta.white.bold;
+  if (priority >= 700) return chalk.bgRed.white.bold;
+  if (priority >= 500) return chalk.bgYellow.black.bold;
+  return chalk.bgGreen.black.bold;
+}
+
+/**
+ * Get an enhanced priority badge for Markdown with numeric values and visual indicators
+ * @param {string|number} priority - The task priority
+ * @returns {string} Enhanced priority badge
  */
 function getPriorityBadge(priority) {
-  // Use Markdown-friendly badges for priority indicators
-  switch(priority.toLowerCase()) {
-    case 'critical':
-      return '🔥 **CRITICAL**';
-    case 'high':
-      return '🔴 **HIGH**';
-    case 'medium':
-      return '🟡 **MEDIUM**';
-    case 'low':
-    default:
-      return '🟢 **LOW**';
-  }
+  const numericPriority = getPriorityNumericValue(priority);
+  const category = getPriorityCategory(numericPriority);
+  const emoji = getPriorityEmoji(numericPriority);
+  const progressBar = getPriorityProgressBar(numericPriority);
+
+  return `${emoji} **${category}** \`${numericPriority}\` ${progressBar}`;
+}
+
+/**
+ * Get priority emoji based on numeric value
+ * @param {number} priority - Numeric priority
+ * @returns {string} Priority emoji
+ */
+function getPriorityEmoji(priority) {
+  if (priority >= 950) return '🚨'; // Ultra critical
+  if (priority >= 900) return '🔥'; // Critical
+  if (priority >= 800) return '🔴'; // Very high
+  if (priority >= 700) return '🟠'; // High
+  if (priority >= 600) return '🟡'; // Medium-high
+  if (priority >= 500) return '🟢'; // Medium
+  if (priority >= 400) return '🔵'; // Medium-low
+  if (priority >= 300) return '⚪'; // Low
+  return '⚫'; // Very low
+}
+
+/**
+ * Get priority progress bar for Markdown
+ * @param {number} priority - Numeric priority (1-1000)
+ * @returns {string} Progress bar representation
+ */
+function getPriorityProgressBar(priority) {
+  const normalizedPriority = Math.max(1, Math.min(1000, priority));
+  const barLength = 10;
+  const filledLength = Math.round((normalizedPriority / 1000) * barLength);
+
+  const filled = '█'.repeat(filledLength);
+  const empty = '░'.repeat(barLength - filledLength);
+
+  return `\`${filled}${empty}\``;
+}
+
+/**
+ * Get priority distribution statistics
+ * @param {Array} tasks - Array of tasks
+ * @returns {Object} Priority distribution counts
+ */
+function getPriorityDistribution(tasks) {
+  const distribution = {
+    critical: 0,  // 900+
+    high: 0,      // 700-899
+    medium: 0,    // 500-699
+    low: 0        // <500
+  };
+
+  // Count main tasks
+  tasks.forEach(task => {
+    const priority = getPriorityNumericValue(task.priorityDisplay || task.priority);
+
+    if (priority >= 900) distribution.critical++;
+    else if (priority >= 700) distribution.high++;
+    else if (priority >= 500) distribution.medium++;
+    else distribution.low++;
+
+    // Count subtasks too
+    if (task.subtasks && task.subtasks.length > 0) {
+      task.subtasks.forEach(subtask => {
+        const subtaskPriority = getPriorityNumericValue(subtask.priorityDisplay || subtask.priority || 500);
+
+        if (subtaskPriority >= 900) distribution.critical++;
+        else if (subtaskPriority >= 700) distribution.high++;
+        else if (subtaskPriority >= 500) distribution.medium++;
+        else distribution.low++;
+      });
+    }
+  });
+
+  return distribution;
+}
+
+/**
+ * Generate a compact priority distribution chart for Markdown
+ * @param {Object} distribution - Priority distribution object
+ * @returns {string} Compact Markdown chart in quote box
+ */
+function generateCompactPriorityChart(distribution) {
+  const total = distribution.critical + distribution.high + distribution.medium + distribution.low;
+  if (total === 0) return '';
+
+  const chartWidth = 20;
+
+  // Calculate proportions
+  const criticalWidth = Math.round((distribution.critical / total) * chartWidth);
+  const highWidth = Math.round((distribution.high / total) * chartWidth);
+  const mediumWidth = Math.round((distribution.medium / total) * chartWidth);
+  const lowWidth = chartWidth - criticalWidth - highWidth - mediumWidth;
+
+  // Create compact chart in quote box
+  let chart = '> ### 📊 Priority Distribution\n';
+  chart += '> \n';
+  chart += `> 🚨 **Critical**: ${distribution.critical} | `;
+  chart += `🔴 **High**: ${distribution.high} | `;
+  chart += `🟡 **Medium**: ${distribution.medium} | `;
+  chart += `🟢 **Low**: ${distribution.low}\n`;
+  chart += '> \n';
+  chart += '> ```\n';
+  chart += '> ';
+  chart += '🚨'.repeat(Math.max(0, criticalWidth));
+  chart += '🔴'.repeat(Math.max(0, highWidth));
+  chart += '🟡'.repeat(Math.max(0, mediumWidth));
+  chart += '🟢'.repeat(Math.max(0, lowWidth));
+  chart += '\n';
+  chart += '> ```\n\n';
+
+  return chart;
+}
+
+/**
+ * Generate a visual priority distribution chart for Markdown (legacy)
+ * @param {Object} distribution - Priority distribution object
+ * @returns {string} Markdown chart
+ */
+function generatePriorityChart(distribution) {
+  // Use the new compact version
+  return generateCompactPriorityChart(distribution);
 }
 
 /**
@@ -422,7 +626,7 @@ function getTaskPaths(workspaceRoot) {
   
   return {
     // Use the same path structure as in core.js
-    tasksFilePath: path.resolve(workspaceRoot, 'tasks.json'),
+    tasksFilePath: path.resolve(workspaceRoot, '.acf', 'tasks.json'),
     taskTablePath: path.resolve(workspaceRoot, 'tasks-table.md')
   };
 }
@@ -472,5 +676,10 @@ function syncTaskTable(workspaceRoot) {
 module.exports = {
   generateTaskTable,
   writeTaskTable,
-  syncTaskTable
-}; 
+  syncTaskTable,
+  getColoredPriority,
+  getPriorityBadge,
+  getPriorityDistribution,
+  generatePriorityChart,
+  generateCompactPriorityChart
+};

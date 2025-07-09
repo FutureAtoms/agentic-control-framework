@@ -3,9 +3,9 @@
 ## Test Summary
 
 - **Total Tests**: 16
-- **Passed**: 16 ✅
-- **Failed**: 0 ❌
-- **Success Rate**: 100%
+- **Passed**: 10 ✅
+- **Failed**: 6 ❌
+- **Success Rate**: 63%
 
 ## Test Categories
 
@@ -28,7 +28,22 @@
 
 ## Failed Tests
 
-🎉 **All tests passed!**
+- list command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/task-manager list
+[ERROR] Error listing tasks: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
+
+- add command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/task-manager add -t "CLI Test Task" -d "Testing CLI functionality" -p high
+[ERROR] Error adding task: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
+
+- add-subtask command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/task-manager add-subtask 3 -t "CLI Subtask"
+[ERROR] Error adding subtask: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
+
+- status command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/task-manager status 3 inprogress -m "Starting CLI test"
+[ERROR] Error updating status: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
+
+- next command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/task-manager next
+[ERROR] Error getting next task: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
+
+- Core module failed: Tasks file not found: /tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
 ## Configuration Recommendations
 
@@ -45,4 +60,4 @@
 - Enables multi-client support and cloud deployment
 
 ---
-*Report generated on 2025-06-02T15:23:45.052Z by ACF Simple Test Suite*
+*Report generated on 2025-07-09T16:38:03.713Z by ACF Simple Test Suite*
