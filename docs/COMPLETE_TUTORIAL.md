@@ -1,5 +1,9 @@
 # Agentic Control Framework - Complete Project Structure Tutorial
 
+**Author:** Abhilash Chadhar (FutureAtoms)  
+**Last Updated:** January 2025
+
+
 ## Overview
 
 The Agentic Control Framework (ACF) is a comprehensive task management system with MCP (Model Control Protocol) integration, combining powerful CLI tools with browser automation, terminal control, and AI-powered features.
@@ -41,9 +45,9 @@ agentic-control-framework/
 
 This directory contains the main entry points for the framework:
 
-- **`task-manager`**: CLI tool for task management
+- **`acf`**: CLI tool for task management
   - Purpose: Command-line interface for creating, updating, and managing tasks
-  - Usage: `./bin/task-manager [command] [options]`
+  - Usage: `./bin/acf [command] [options]`
   
 - **`agentic-control-framework-mcp`**: MCP server wrapper (recommended)
   - Purpose: Launches the MCP server for Cursor IDE integration

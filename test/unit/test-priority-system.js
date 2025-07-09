@@ -271,7 +271,7 @@ class PrioritySystemTestRunner {
 
     // Test CLI Priority Commands
     async testCLIPriorityCommands() {
-        const taskManagerPath = path.join(this.acfRoot, 'bin', 'task-manager');
+        const taskManagerPath = path.join(this.acfRoot, 'bin', 'acf');
         
         try {
             // Test priority-stats command

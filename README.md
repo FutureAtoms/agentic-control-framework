@@ -2,6 +2,9 @@
 
 **A comprehensive toolkit for autonomous agent development with 83+ specialized tools**
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Repository:** [agentic-control-framework](https://github.com/FutureAtoms/agentic-control-framework)
+
 ![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-100%25%20Pass%20Rate-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202025--03--26-Compliant-blue)
 
 ## 🌟 Overview
@@ -96,7 +99,8 @@ Author: Abhilash Chadhar
 ```
 agentic-control-framework/
 ├── 📁 bin/                                    # CLI executables and entry points
-│   ├── 🔧 task-manager                       # Main CLI entry point for task management
+│   ├── 🔧 acf                               # Main CLI entry point for task management
+│   ├── 🔧 acf-mcp                           # Primary MCP server (alias for agentic-control-framework-mcp)
 │   ├── 🔧 task-manager-mcp                   # Legacy MCP server wrapper (deprecated)
 │   ├── 🔧 agentic-control-framework-mcp      # Primary MCP server for Cursor/Claude integration
 │   └── 🔧 task-cli.js                        # Alternative CLI interface with enhanced features
@@ -218,8 +222,9 @@ agentic-control-framework/
 ### Key Components Explained
 
 #### 🔧 Core Executables
-- **`task-manager`**: Main CLI entry point for task management
-- **`agentic-control-framework-mcp`**: Primary MCP server for Cursor/Claude integration  
+- **`acf`**: Main CLI entry point for task management
+- **`acf-mcp`**: Primary MCP server for Cursor/Claude integration (recommended)
+- **`agentic-control-framework-mcp`**: Primary MCP server for Cursor/Claude integration
 - **`task-cli.js`**: Alternative CLI interface with enhanced features
 
 #### 📊 Core Source Files
@@ -366,40 +371,40 @@ graph LR
 ```bash
 # Initialize project
 cd your-project
-./path/to/acf/bin/task-manager init -n "My Project" -d "Project description"
+./path/to/acf/bin/acf init -n "My Project" -d "Project description"
 
 # Add tasks
-./path/to/acf/bin/task-manager add -t "Implement feature" -d "Add new functionality" -p high
+./path/to/acf/bin/acf add -t "Implement feature" -d "Add new functionality" -p high
 
 # List tasks
-./path/to/acf/bin/task-manager list
+./path/to/acf/bin/acf list
 
 # Update task status
-./path/to/acf/bin/task-manager status 1 inprogress -m "Started working"
+./path/to/acf/bin/acf status 1 inprogress -m "Started working"
 
 # Add subtasks
-./path/to/acf/bin/task-manager add-subtask 1 -t "Write tests"
+./path/to/acf/bin/acf add-subtask 1 -t "Write tests"
 
 # Get next actionable task
-./path/to/acf/bin/task-manager next
+./path/to/acf/bin/acf next
 
 # Generate task files
-./path/to/acf/bin/task-manager generate
+./path/to/acf/bin/acf generate
 ```
 
 ### Advanced CLI Usage
 ```bash
 # Update task details
-./path/to/acf/bin/task-manager update 1 -p medium --related-files "src/main.js,test/main.test.js"
+./path/to/acf/bin/acf update 1 -p medium --related-files "src/main.js,test/main.test.js"
 
 # Get task context
-./path/to/acf/bin/task-manager get-context 1
+./path/to/acf/bin/acf get-context 1
 
 # Remove completed tasks
-./path/to/acf/bin/task-manager remove 1
+./path/to/acf/bin/acf remove 1
 
 # Generate markdown table
-./path/to/acf/bin/task-manager table
+./path/to/acf/bin/acf table
 ```
 
 ## 🎯 Numerical Priority System (1-1000)
@@ -477,37 +482,37 @@ graph TD
 ### Basic Priority Usage
 ```bash
 # Using numerical priorities (1-1000)
-./bin/task-manager add "Critical security fix" --priority 950
-./bin/task-manager add "Feature implementation" --priority 650
-./bin/task-manager add "Documentation update" --priority 200
+./bin/acf add "Critical security fix" --priority 950
+./bin/acf add "Feature implementation" --priority 650
+./bin/acf add "Documentation update" --priority 200
 
 # Using string priorities (backward compatible)
-./bin/task-manager add "Bug fix" --priority high
-./bin/task-manager add "Cleanup task" --priority low
+./bin/acf add "Bug fix" --priority high
+./bin/acf add "Cleanup task" --priority low
 ```
 
 ### Priority Manipulation Commands
 ```bash
 # Increase priority by amount
-./bin/task-manager bump 123 --amount 100
+./bin/acf bump 123 --amount 100
 
 # Decrease priority by amount
-./bin/task-manager defer 123 --amount 50
+./bin/acf defer 123 --amount 50
 
 # Set to high priority range (700-899)
-./bin/task-manager prioritize 123
+./bin/acf prioritize 123
 
 # Set to low priority range (1-399)
-./bin/task-manager deprioritize 123
+./bin/acf deprioritize 123
 
 # View priority statistics and distribution
-./bin/task-manager priority-stats
+./bin/acf priority-stats
 
 # Analyze dependencies and critical paths
-./bin/task-manager dependency-analysis
+./bin/acf dependency-analysis
 
 # Trigger intelligent priority recalculation
-./bin/task-manager recalculate-priorities
+./bin/acf recalculate-priorities
 ```
 
 ### Advanced Priority Features
@@ -520,7 +525,7 @@ graph TD
 ### Priority Display Formats
 ```bash
 # Clean table format (default)
-./bin/task-manager list --table
+./bin/acf list --table
 ┌─────┬────────────────────┬──────────┐
 │ ID  │ Title              │ Priority │
 ├─────┼────────────────────┼──────────┤
@@ -529,7 +534,7 @@ graph TD
 └─────┴────────────────────┴──────────┘
 
 # Human-readable with distribution stats
-./bin/task-manager list --human
+./bin/acf list --human
 📊 Priority Distribution:
 🚨 Critical (900+): 2 | 🔴 High (700-899): 5 | 🟡 Medium (500-699): 8 | 🟢 Low (<500): 3
 ```
@@ -544,16 +549,16 @@ For complete documentation, see:
 #!/bin/bash
 echo "📊 Daily Standup Report"
 echo "======================="
-./bin/task-manager list --status inprogress
+./bin/acf list --status inprogress
 echo ""
 echo "Next Priority Tasks:"
-./bin/task-manager next
+./bin/acf next
 
 # CI/CD Integration
 #!/bin/bash
 # In your CI pipeline
-./bin/task-manager add -t "Deploy v$VERSION" -d "Deploy to production" -p high
-./bin/task-manager status $TASK_ID done -m "Deployed successfully"
+./bin/acf add -t "Deploy v$VERSION" -d "Deploy to production" -p high
+./bin/acf status $TASK_ID done -m "Deployed successfully"
 ```
 
 ## 2. 🔗 Local MCP Mode (60% Working)
@@ -917,12 +922,12 @@ Server Management:
 ### 1. Automated Project Setup
 ```bash
 # CLI approach
-./bin/task-manager init -n "E-commerce App" -d "Build online store"
-./bin/task-manager add -t "Setup project structure" -p high
-./bin/task-manager add -t "Configure database" -p high
-./bin/task-manager add -t "Implement user auth" -p medium
-./bin/task-manager add -t "Add payment integration" -p medium
-./bin/task-manager add -t "Deploy to production" -p low
+./bin/acf init -n "E-commerce App" -d "Build online store"
+./bin/acf add -t "Setup project structure" -p high
+./bin/acf add -t "Configure database" -p high
+./bin/acf add -t "Implement user auth" -p medium
+./bin/acf add -t "Add payment integration" -p medium
+./bin/acf add -t "Deploy to production" -p low
 ```
 
 ### 2. Code Review Automation
@@ -939,16 +944,16 @@ Server Management:
 # In your GitHub Actions workflow
 - name: Update project tasks
   run: |
-    ./bin/task-manager add -t "Test release v${{ github.event.release.tag_name }}" -p high
-    ./bin/task-manager status $TASK_ID inprogress -m "Running tests for ${{ github.sha }}"
+    ./bin/acf add -t "Test release v${{ github.event.release.tag_name }}" -p high
+    ./bin/acf status $TASK_ID inprogress -m "Running tests for ${{ github.sha }}"
     
     # Run tests
     npm test
     
     if [ $? -eq 0 ]; then
-      ./bin/task-manager status $TASK_ID done -m "Tests passed"
+      ./bin/acf status $TASK_ID done -m "Tests passed"
     else
-      ./bin/task-manager status $TASK_ID error -m "Tests failed"
+      ./bin/acf status $TASK_ID error -m "Tests failed"
     fi
 ```
 
@@ -986,7 +991,7 @@ export WORKSPACE_ROOT="$(pwd)"
 export ALLOWED_DIRS="$(pwd):/tmp"
 
 # Test CLI mode
-./bin/task-manager list
+./bin/acf list
 
 # Test MCP mode
 node bin/agentic-control-framework-mcp
@@ -1000,7 +1005,7 @@ node bin/agentic-control-framework-mcp
 ls -la tasks.json
 
 # Verify permissions
-chmod +x bin/task-manager
+chmod +x bin/acf
 
 # Check Node.js version
 node --version  # Should be 18+

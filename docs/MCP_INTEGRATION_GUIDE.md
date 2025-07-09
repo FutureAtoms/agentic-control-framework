@@ -1,5 +1,9 @@
 # 🔗 MCP Integration Guide for Agentic Control Framework
 
+**Author:** Abhilash Chadhar (FutureAtoms)  
+**Last Updated:** January 2025
+
+
 ## 🎉 Production-Ready MCP Server (100% Test Coverage)
 
 The Agentic Control Framework provides a fully tested, production-ready MCP server with 83+ specialized tools. **All tests are passing with 100% success rate** and excellent performance metrics.
@@ -23,7 +27,7 @@ The Agentic Control Framework includes enhanced MCP server functionality with in
 ./bin/agentic-control-framework-mcp
 
 # Or using the legacy wrapper
-./bin/task-manager-mcp
+./bin/acf-mcp
 
 # Or directly running the MCP server with custom options
 node src/mcp_server.js --workspaceRoot /path/to/your/workspace

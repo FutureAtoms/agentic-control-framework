@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Wrapper script for the Agentic Control Framework MCP server
+ * Agentic Control Framework (ACF) - MCP Server Wrapper
+ *
+ * @author Abhilash Chadhar (FutureAtoms)
+ * @description Wrapper script for the ACF MCP server
+ * @version 0.1.1
+ *
  * This script handles launching the server and maintaining workspace paths between restarts
  */
 

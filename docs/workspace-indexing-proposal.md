@@ -1,5 +1,8 @@
 # Workspace Indexing Proposal for ACF
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 ## Summary
 
 Add intelligent workspace indexing to ACF that automatically analyzes projects and provides context to LLMs, dramatically improving their ability to understand and work with codebases.

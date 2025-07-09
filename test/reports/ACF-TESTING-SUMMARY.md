@@ -160,9 +160,9 @@ while (!serverReady && attempts < maxAttempts) {
 **Usage Pattern:**
 ```bash
 # All CLI commands work perfectly
-./bin/task-manager list
-./bin/task-manager add -t "Task" -d "Description"
-./bin/task-manager status 1 done
+./bin/acf list
+./bin/acf add -t "Task" -d "Description"
+./bin/acf status 1 done
 ```
 
 ### Local MCP Configuration ✅ 100% Working  

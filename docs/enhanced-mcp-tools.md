@@ -1,5 +1,8 @@
 # Enhanced MCP Tools Documentation
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 This document provides detailed information about the enhanced MCP tools integrated from Desktop Commander MCP and Playwright MCP.
 
 ## Desktop Commander MCP Tools

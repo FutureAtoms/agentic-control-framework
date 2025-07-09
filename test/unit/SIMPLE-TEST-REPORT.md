@@ -28,20 +28,20 @@
 
 ## Failed Tests
 
-- list command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager list
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager: No such file or directory
+- list command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf list
+/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
 
-- add command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager add -t "CLI Test Task" -d "Testing CLI functionality" -p high
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager: No such file or directory
+- add command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high
+/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
 
-- add-subtask command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager add-subtask 3 -t "CLI Subtask"
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager: No such file or directory
+- add-subtask command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf add-subtask 3 -t "CLI Subtask"
+/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
 
-- status command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager status 3 inprogress -m "Starting CLI test"
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager: No such file or directory
+- status command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf status 3 inprogress -m "Starting CLI test"
+/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
 
-- next command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager next
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/task-manager: No such file or directory
+- next command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf next
+/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
 
 - Core module failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/core'
 Require stack:

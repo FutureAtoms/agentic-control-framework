@@ -1,15 +1,19 @@
 # Agentic Control Framework - Testing Summary
 
+**Author:** Abhilash Chadhar (FutureAtoms)  
+**Last Updated:** January 2025
+
+
 ## Testing Performed
 
 ### 1. CLI Functionality Testing ✅
 
 **Test:** Basic CLI commands
 ```bash
-./bin/task-manager --help
-./bin/task-manager init --project-name "Test Project" --project-description "Testing ACF functionality"
-./bin/task-manager add -t "Test browser automation" -d "Test browser navigation and screenshot functionality" -p high
-./bin/task-manager list --human
+./bin/acf --help
+./bin/acf init --project-name "Test Project" --project-description "Testing ACF functionality"
+./bin/acf add -t "Test browser automation" -d "Test browser navigation and screenshot functionality" -p high
+./bin/acf list --human
 ```
 
 **Result:** All CLI commands working correctly

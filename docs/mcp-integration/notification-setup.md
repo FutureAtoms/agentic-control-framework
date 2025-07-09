@@ -1,5 +1,8 @@
 # Setting Up Upstream Update Notifications
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 This guide explains how to configure notifications for when upstream MCP repositories have updates.
 
 ## Available Notification Channels

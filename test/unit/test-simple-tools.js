@@ -147,7 +147,7 @@ class TestRunner {
             // Test list tasks
             this.startTest('CLI: List tasks');
             try {
-                const output = execSync(`${this.acfRoot}/bin/task-manager list`, { encoding: 'utf8' });
+                const output = execSync(`${this.acfRoot}/bin/acf list`, { encoding: 'utf8' });
                 if (output.includes('Test Task')) {
                     this.passTest();
                 } else {
@@ -160,8 +160,8 @@ class TestRunner {
             // Test add task
             this.startTest('CLI: Add new task');
             try {
-                execSync(`${this.acfRoot}/bin/task-manager add -t "CLI Test Task" -d "Testing CLI functionality" -p high`, { encoding: 'utf8' });
-                const output = execSync(`${this.acfRoot}/bin/task-manager list`, { encoding: 'utf8' });
+                execSync(`${this.acfRoot}/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high`, { encoding: 'utf8' });
+                const output = execSync(`${this.acfRoot}/bin/acf list`, { encoding: 'utf8' });
                 if (output.includes('CLI Test Task')) {
                     this.passTest();
                 } else {
@@ -174,8 +174,8 @@ class TestRunner {
             // Test add subtask
             this.startTest('CLI: Add subtask');
             try {
-                execSync(`${this.acfRoot}/bin/task-manager add-subtask 3 -t "CLI Subtask"`, { encoding: 'utf8' });
-                const output = execSync(`${this.acfRoot}/bin/task-manager get-context 3`, { encoding: 'utf8' });
+                execSync(`${this.acfRoot}/bin/acf add-subtask 3 -t "CLI Subtask"`, { encoding: 'utf8' });
+                const output = execSync(`${this.acfRoot}/bin/acf get-context 3`, { encoding: 'utf8' });
                 if (output.includes('CLI Subtask')) {
                     this.passTest();
                 } else {
@@ -188,8 +188,8 @@ class TestRunner {
             // Test status update
             this.startTest('CLI: Update task status');
             try {
-                execSync(`${this.acfRoot}/bin/task-manager status 3 inprogress -m "Starting CLI test"`, { encoding: 'utf8' });
-                const output = execSync(`${this.acfRoot}/bin/task-manager list`, { encoding: 'utf8' });
+                execSync(`${this.acfRoot}/bin/acf status 3 inprogress -m "Starting CLI test"`, { encoding: 'utf8' });
+                const output = execSync(`${this.acfRoot}/bin/acf list`, { encoding: 'utf8' });
                 if (output.includes('inprogress')) {
                     this.passTest();
                 } else {
@@ -202,7 +202,7 @@ class TestRunner {
             // Test next task
             this.startTest('CLI: Get next task');
             try {
-                const output = execSync(`${this.acfRoot}/bin/task-manager next`, { encoding: 'utf8' });
+                const output = execSync(`${this.acfRoot}/bin/acf next`, { encoding: 'utf8' });
                 if (output.includes('Next actionable task') || output.includes('ID:')) {
                     this.passTest();
                 } else {

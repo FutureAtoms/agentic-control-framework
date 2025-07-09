@@ -1,5 +1,9 @@
 # Agentic Control Framework Tutorial
 
+**Author:** Abhilash Chadhar (FutureAtoms)  
+**Last Updated:** January 2025
+
+
 ## 📋 Introduction
 
 The Agentic Control Framework (ACF) is a powerful AI-driven task management system that helps you organize, track, and complete project tasks efficiently. It integrates with the Cursor IDE through the Model Control Protocol (MCP) and offers both a command-line interface and natural language interaction for managing your tasks.
@@ -72,7 +76,7 @@ For manual configuration, follow these steps:
 
 1. Make the wrapper scripts executable:
    ```bash
-   chmod +x bin/task-manager-mcp
+   chmod +x bin/agentic-control-framework-mcp
    chmod +x bin/agentic-control-framework-mcp
    ```
 
@@ -112,7 +116,7 @@ Before you can start creating tasks, you need to initialize a project:
 
 **CLI Method:**
 ```bash
-./bin/task-manager init --projectName "My Project" --projectDescription "Description of my project"
+./bin/acf init --projectName "My Project" --projectDescription "Description of my project"
 ```
 
 **Cursor IDE Method:**
@@ -127,7 +131,7 @@ This creates a `tasks.json` file in your project root that will store all your t
 
 **CLI Method:**
 ```bash
-./bin/task-manager add -t "Implement login feature" -d "Create user authentication system with email and password" -p high
+./bin/acf add -t "Implement login feature" -d "Create user authentication system with email and password" -p high
 ```
 
 **Cursor IDE Method:**
@@ -140,10 +144,10 @@ This creates a `tasks.json` file in your project root that will store all your t
 **CLI Method:**
 ```bash
 # List all tasks
-./bin/task-manager list
+./bin/acf list
 
 # List tasks with specific status
-./bin/task-manager list -s todo
+./bin/acf list -s todo
 ```
 
 **Cursor IDE Method:**
@@ -167,7 +171,7 @@ The `next` command will suggest the next task to work on based on status, depend
 
 **CLI Method:**
 ```bash
-./bin/task-manager next
+./bin/acf next
 ```
 
 **Cursor IDE Method:**
@@ -179,7 +183,7 @@ The `next` command will suggest the next task to work on based on status, depend
 
 **CLI Method:**
 ```bash
-./bin/task-manager remove 1
+./bin/acf remove 1
 ```
 
 **Cursor IDE Method:**
@@ -195,7 +199,7 @@ Subtasks help you break down complex tasks into smaller, manageable pieces.
 
 **CLI Method:**
 ```bash
-./bin/task-manager add-subtask 1 -t "Design login form"
+./bin/acf add-subtask 1 -t "Design login form"
 ```
 
 **Cursor IDE Method:**
@@ -219,7 +223,7 @@ To see the detailed subtasks, use the `get-context` command:
 
 **CLI Method:**
 ```bash
-./bin/task-manager get-context 1
+./bin/acf get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -231,8 +235,8 @@ To see the detailed subtasks, use the `get-context` command:
 
 **CLI Method:**
 ```bash
-./bin/task-manager status 1.1 inprogress -m "Starting implementation"
-./bin/task-manager status 1.1 done -m "Completed implementation"
+./bin/acf status 1.1 inprogress -m "Starting implementation"
+./bin/acf status 1.1 done -m "Completed implementation"
 ```
 
 **Cursor IDE Method:**
@@ -249,7 +253,7 @@ Dependencies ensure tasks are completed in the proper order. A task will only be
 
 **CLI Method:**
 ```bash
-./bin/task-manager add -t "Implement registration" -d "Create user registration flow" --depends-on "1"
+./bin/acf add -t "Implement registration" -d "Create user registration flow" --depends-on "1"
 ```
 
 **Cursor IDE Method:**
@@ -263,7 +267,7 @@ Tasks can have one of three priority levels: `high`, `medium`, or `low`. The `ne
 
 **CLI Method:**
 ```bash
-./bin/task-manager add -t "Fix security vulnerability" -p high
+./bin/acf add -t "Fix security vulnerability" -p high
 ```
 
 **Cursor IDE Method:**
@@ -284,7 +288,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./bin/task-manager status 1 inprogress -m "Starting work on login feature"
+./bin/acf status 1 inprogress -m "Starting work on login feature"
 ```
 
 **Cursor IDE Method:**
@@ -296,7 +300,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./bin/task-manager status 1 error -m "Login API endpoint returns 500 error"
+./bin/acf status 1 error -m "Login API endpoint returns 500 error"
 ```
 
 **Cursor IDE Method:**
@@ -308,7 +312,7 @@ Tasks can have the following statuses:
 
 **CLI Method:**
 ```bash
-./bin/task-manager status 2 blocked -m "Blocked by pending API documentation"
+./bin/acf status 2 blocked -m "Blocked by pending API documentation"
 ```
 
 **Cursor IDE Method:**
@@ -324,7 +328,7 @@ You can associate specific files in your codebase with tasks to make it easier t
 
 **CLI Method:**
 ```bash
-./bin/task-manager add -t "Refactor authentication" --related-files "src/auth/login.js,src/auth/register.js"
+./bin/acf add -t "Refactor authentication" --related-files "src/auth/login.js,src/auth/register.js"
 ```
 
 **Cursor IDE Method:**
@@ -336,7 +340,7 @@ You can associate specific files in your codebase with tasks to make it easier t
 
 **CLI Method:**
 ```bash
-./bin/task-manager update 3 --related-files "src/auth/login.js,src/auth/register.js,src/auth/reset-password.js"
+./bin/acf update 3 --related-files "src/auth/login.js,src/auth/register.js,src/auth/reset-password.js"
 ```
 
 **Cursor IDE Method:**
@@ -352,7 +356,7 @@ Activity logs help you track the history of a task, including status changes and
 
 **CLI Method:**
 ```bash
-./bin/task-manager update 1 -m "Discovered a potential security issue in the login form"
+./bin/acf update 1 -m "Discovered a potential security issue in the login form"
 ```
 
 **Cursor IDE Method:**
@@ -366,7 +370,7 @@ Activity logs are included when you view task context:
 
 **CLI Method:**
 ```bash
-./bin/task-manager get-context 1
+./bin/acf get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -436,7 +440,7 @@ The `get-context` command provides detailed information about a task, including 
 
 **CLI Method:**
 ```bash
-./bin/task-manager get-context 1
+./bin/acf get-context 1
 ```
 
 **Cursor IDE Method:**
@@ -461,7 +465,7 @@ You can automatically generate tasks from a Product Requirements Document (PRD):
 
 **CLI Method:**
 ```bash
-./bin/task-manager parse-prd --filePath "docs/requirements.md"
+./bin/acf parse-prd --filePath "docs/requirements.md"
 ```
 
 **Cursor IDE Method:**
@@ -490,7 +494,7 @@ The `expand` command uses AI to automatically break down a complex task into sub
 
 **CLI Method:**
 ```bash
-./bin/task-manager expand-task 1
+./bin/acf expand-task 1
 ```
 
 **Cursor IDE Method:**
@@ -516,7 +520,7 @@ The `revise` command uses AI to update tasks based on changing requirements:
 
 **CLI Method:**
 ```bash
-./bin/task-manager revise-tasks 3 -p "Change authentication from OAuth to JWT"
+./bin/acf revise-tasks 3 -p "Change authentication from OAuth to JWT"
 ```
 
 **Cursor IDE Method:**
@@ -566,29 +570,29 @@ The MCP integration supports flexible natural language commands:
 
 ```bash
 # Initialize project
-./bin/task-manager init --projectName "E-Commerce App" --projectDescription "A modern e-commerce application with user authentication, product listings, and checkout"
+./bin/acf init --projectName "E-Commerce App" --projectDescription "A modern e-commerce application with user authentication, product listings, and checkout"
 
 # Add main tasks
-./bin/task-manager add -t "User Authentication" -p high
-./bin/task-manager add -t "Product Catalog" -p high --dependsOn "1"
-./bin/task-manager add -t "Shopping Cart" -p medium --dependsOn "2"
-./bin/task-manager add -t "Checkout Process" -p medium --dependsOn "3"
-./bin/task-manager add -t "Admin Dashboard" -p low --dependsOn "1,2,3,4"
+./bin/acf add -t "User Authentication" -p high
+./bin/acf add -t "Product Catalog" -p high --dependsOn "1"
+./bin/acf add -t "Shopping Cart" -p medium --dependsOn "2"
+./bin/acf add -t "Checkout Process" -p medium --dependsOn "3"
+./bin/acf add -t "Admin Dashboard" -p low --dependsOn "1,2,3,4"
 
 # Expand first task using AI
-./bin/task-manager expand-task 1
+./bin/acf expand-task 1
 
 # Start working on first subtask
-./bin/task-manager status 1.1 inprogress -m "Setting up authentication routes"
+./bin/acf status 1.1 inprogress -m "Setting up authentication routes"
 
 # Add file associations
-./bin/task-manager update 1 --related-files "src/auth/index.js,src/auth/routes.js,src/auth/controllers.js"
+./bin/acf update 1 --related-files "src/auth/index.js,src/auth/routes.js,src/auth/controllers.js"
 
 # Mark subtask as done
-./bin/task-manager status 1.1 done -m "Authentication routes complete"
+./bin/acf status 1.1 done -m "Authentication routes complete"
 
 # Generate documentation
-./bin/task-manager generate-files
+./bin/acf generate-files
 ```
 
 ### Example 2: Refactoring Project with PRD
@@ -610,17 +614,17 @@ We need to refactor our codebase to improve performance and maintainability.
 EOL
 
 # Initialize project
-./bin/task-manager init --projectName "Code Refactoring" --projectDescription "Refactoring project to improve performance and maintainability"
+./bin/acf init --projectName "Code Refactoring" --projectDescription "Refactoring project to improve performance and maintainability"
 
 # Parse PRD to generate tasks
-./bin/task-manager parse-prd --filePath "dummy_prd.md"
+./bin/acf parse-prd --filePath "dummy_prd.md"
 
 # Expand the first task
-./bin/task-manager expand-task 1
+./bin/acf expand-task 1
 
 # Start working and track progress
-./bin/task-manager status 1 inprogress -m "Starting performance analysis"
-./bin/task-manager status 1.1 inprogress -m "Profiling render cycles"
+./bin/acf status 1 inprogress -m "Starting performance analysis"
+./bin/acf status 1.1 inprogress -m "Profiling render cycles"
 ```
 
 ## 💡 Tips and Best Practices
@@ -666,7 +670,7 @@ EOL
 
 | Error Message | Possible Solution |
 |---------------|-------------------|
-| `Tasks file not found: tasks.json` | Run `task-manager init` to create the tasks file |
+| `Tasks file not found: tasks.json` | Run `acf init` to create the tasks file |
 | `Error reading or parsing tasks file` | Check if the tasks.json file is valid JSON |
 | `Task with ID X not found` | Verify the task ID exists in your tasks list |
 | `GEMINI_API_KEY environment variable not set` | Set the environment variable as described in the AI Features section |

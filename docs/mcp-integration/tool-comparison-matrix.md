@@ -1,5 +1,8 @@
 # MCP Tools Comparison Matrix
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 ## Current ACF Tools (27 tools)
 
 ### Task Management Tools

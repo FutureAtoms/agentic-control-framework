@@ -93,7 +93,8 @@ setup_test_workspace() {
     cd "$TEST_WORKSPACE"
     
     # Initialize a test project
-    cat > tasks.json << 'EOF'
+    mkdir -p .acf
+    cat > .acf/tasks.json << 'EOF'
 {
   "projectName": "ACF Test Project",
   "projectDescription": "Comprehensive testing of all ACF tools",
@@ -149,15 +150,15 @@ test_cli_mode() {
     
     # Test init (already done in setup, but test validation)
     start_test "CLI: Project initialization check"
-    if [ -f "tasks.json" ] && grep -q "ACF Test Project" tasks.json; then
+    if [ -f ".acf/tasks.json" ] && grep -q "ACF Test Project" .acf/tasks.json; then
         pass_test
     else
-        fail_test "tasks.json not found or invalid"
+        fail_test ".acf/tasks.json not found or invalid"
     fi
     
     # Test list tasks
     start_test "CLI: List tasks"
-    if "$ACF_ROOT/bin/task-manager" list > /tmp/acf_test_list.txt 2>&1; then
+    if "$ACF_ROOT/bin/acf" list > /tmp/acf_test_list.txt 2>&1; then
         if grep -q "Test Task" /tmp/acf_test_list.txt; then
             pass_test
         else
@@ -169,8 +170,8 @@ test_cli_mode() {
     
     # Test add task
     start_test "CLI: Add new task"
-    if "$ACF_ROOT/bin/task-manager" add -t "CLI Test Task" -d "Testing CLI functionality" -p high > /tmp/acf_test_add.txt 2>&1; then
-        if "$ACF_ROOT/bin/task-manager" list | grep -q "CLI Test Task"; then
+    if "$ACF_ROOT/bin/acf" add -t "CLI Test Task" -d "Testing CLI functionality" -p high > /tmp/acf_test_add.txt 2>&1; then
+        if "$ACF_ROOT/bin/acf" list | grep -q "CLI Test Task"; then
             pass_test
         else
             fail_test "Task not added correctly"
@@ -181,8 +182,8 @@ test_cli_mode() {
     
     # Test add subtask
     start_test "CLI: Add subtask"
-    if "$ACF_ROOT/bin/task-manager" add-subtask 3 -t "CLI Subtask" > /tmp/acf_test_subtask.txt 2>&1; then
-        if "$ACF_ROOT/bin/task-manager" get-context 3 | grep -q "CLI Subtask"; then
+    if "$ACF_ROOT/bin/acf" add-subtask 3 -t "CLI Subtask" > /tmp/acf_test_subtask.txt 2>&1; then
+        if "$ACF_ROOT/bin/acf" context 3 | grep -q "CLI Subtask"; then
             pass_test
         else
             fail_test "Subtask not added correctly"
@@ -193,8 +194,8 @@ test_cli_mode() {
     
     # Test status update
     start_test "CLI: Update task status"
-    if "$ACF_ROOT/bin/task-manager" status 3 inprogress -m "Starting CLI test" > /tmp/acf_test_status.txt 2>&1; then
-        if "$ACF_ROOT/bin/task-manager" list | grep -q "inprogress"; then
+    if "$ACF_ROOT/bin/acf" status 3 inprogress -m "Starting CLI test" > /tmp/acf_test_status.txt 2>&1; then
+        if "$ACF_ROOT/bin/acf" list | grep -q "inprogress"; then
             pass_test
         else
             fail_test "Status not updated correctly"
@@ -205,7 +206,7 @@ test_cli_mode() {
     
     # Test next task
     start_test "CLI: Get next task"
-    if "$ACF_ROOT/bin/task-manager" next > /tmp/acf_test_next.txt 2>&1; then
+    if "$ACF_ROOT/bin/acf" next > /tmp/acf_test_next.txt 2>&1; then
         if grep -q "Next actionable task" /tmp/acf_test_next.txt || grep -q "ID:" /tmp/acf_test_next.txt; then
             pass_test
         else
@@ -217,7 +218,7 @@ test_cli_mode() {
     
     # Test update task (simplified test)
     start_test "CLI: Update task details"
-    if "$ACF_ROOT/bin/task-manager" update 3 -p medium -m "Updated via CLI" > /tmp/acf_test_update.txt 2>&1; then
+    if "$ACF_ROOT/bin/acf" update 3 -p medium -m "Updated via CLI" > /tmp/acf_test_update.txt 2>&1; then
         pass_test
     else
         fail_test "update command failed"
@@ -225,7 +226,7 @@ test_cli_mode() {
     
     # Test get context
     start_test "CLI: Get task context"
-    if "$ACF_ROOT/bin/task-manager" get-context 3 > /tmp/acf_test_context.txt 2>&1; then
+    if "$ACF_ROOT/bin/acf" context 3 > /tmp/acf_test_context.txt 2>&1; then
         if grep -q "CLI Test Task" /tmp/acf_test_context.txt; then
             pass_test
         else
@@ -237,7 +238,7 @@ test_cli_mode() {
     
     # Test generate files
     start_test "CLI: Generate task files"
-    if "$ACF_ROOT/bin/task-manager" generate > /tmp/acf_test_generate.txt 2>&1; then
+    if "$ACF_ROOT/bin/acf" generate-files > /tmp/acf_test_generate.txt 2>&1; then
         if [ -d "tasks" ] && ls tasks/*.md >/dev/null 2>&1; then
             pass_test
         else
@@ -249,8 +250,8 @@ test_cli_mode() {
     
     # Test remove task
     start_test "CLI: Remove task"
-    if "$ACF_ROOT/bin/task-manager" remove 3 > /tmp/acf_test_remove.txt 2>&1; then
-        if ! "$ACF_ROOT/bin/task-manager" list | grep -q "CLI Test Task"; then
+    if "$ACF_ROOT/bin/acf" remove 3 > /tmp/acf_test_remove.txt 2>&1; then
+        if ! "$ACF_ROOT/bin/acf" list | grep -q "CLI Test Task"; then
             pass_test
         else
             fail_test "Task not removed correctly"
@@ -751,8 +752,7 @@ main() {
     echo "========================================"
     echo ""
     
-    # Validate environment
-    ACF_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # Validate environment (ACF_ROOT already set at top of script)
     export ACF_ROOT
     
     log "ACF Root: $ACF_ROOT"
