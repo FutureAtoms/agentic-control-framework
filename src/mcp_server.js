@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
-// Agentic Control Framework MCP server implementation
-// This server provides a JSON-RPC interface for Cursor to communicate with ACF
+/**
+ * Agentic Control Framework (ACF) - MCP Server
+ *
+ * @author Abhilash Chadhar (FutureAtoms)
+ * @description MCP server with 83+ tools for autonomous agent development
+ * @version 0.1.1
+ *
+ * This server provides a JSON-RPC interface for Cursor/Claude to communicate with ACF
+ */
 const readline = require('readline');
 const path = require('path');
 const fs = require('fs');

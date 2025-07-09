@@ -1,5 +1,8 @@
 # Agentic Control Framework (ACF) Tutorial
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 This comprehensive guide will help you use the Agentic Control Framework (ACF), an AI-powered task management system designed to support automated, agentic workflows within your codebase.
 
 **Goal:** Manage a project's tasks programmatically, allowing an AI agent (or user) to track progress, understand context, report status (including errors), and associate tasks with relevant code files.
@@ -28,7 +31,7 @@ npm install
 ### 3. Make Scripts Executable
 
 ```bash
-chmod +x bin/task-manager bin/task-manager-mcp
+chmod +x bin/acf bin/agentic-control-framework-mcp
 ```
 
 ### 4. Set Up Gemini API Key (for AI Features)
@@ -61,13 +64,13 @@ Execute commands from your workspace root directory using:
 
 ```bash
 # If installed globally or added to PATH
-task-manager <command> [options]
+acf <command> [options]
 
 # Using node to execute directly
-node path/to/agentic-control-framework/bin/task-manager <command> [options]
+node path/to/agentic-control-framewor./bin/acf <command> [options]
 
 # From within the project directory
-./bin/task-manager <command> [options]
+./bin/acf <command> [options]
 ```
 
 ### Command Reference & Examples
@@ -78,7 +81,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Usage:**
 ```bash
-./bin/task-manager init --project-name "My Project" --project-description "A sample project to learn ACF"
+./bin/acf init --project-name "My Project" --project-description "A sample project to learn ACF"
 ```
 
 **Options:** None (Interactive Prompts)
@@ -109,13 +112,13 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Examples:**
 ```bash
 # Add a basic task
-./bin/task-manager add -t "Create user interface"
+./bin/acf add -t "Create user interface"
 
 # Add a task with priority and description
-./bin/task-manager add -t "Implement user authentication" -d "Set up login/signup flows" -p high
+./bin/acf add -t "Implement user authentication" -d "Set up login/signup flows" -p high
 
 # Add a task with dependency and related files
-./bin/task-manager add -t "Implement API Endpoint" -d "Create POST /users endpoint" -p high --related-files "routes/users.js,controllers/userController.js" --depends-on "1,2"
+./bin/acf add -t "Implement API Endpoint" -d "Create POST /users endpoint" -p high --related-files "routes/users.js,controllers/userController.js" --depends-on "1,2"
 ```
 
 #### 3. `list`
@@ -128,12 +131,12 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Examples:**
 ```bash
 # List all tasks
-./bin/task-manager list
+./bin/acf list
 
 # List tasks with a specific status
-./bin/task-manager list -s todo
-./bin/task-manager list -s inprogress
-./bin/task-manager list -s done
+./bin/acf list -s todo
+./bin/acf list -s inprogress
+./bin/acf list -s done
 ```
 
 #### 4. `add-subtask`
@@ -148,9 +151,9 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Example:**
 ```bash
 # Add a subtask to task #2
-./bin/task-manager add-subtask 2 -t "Design login form"
-./bin/task-manager add-subtask 2 -t "Implement authentication API"
-./bin/task-manager add-subtask 2 -t "Connect frontend to API"
+./bin/acf add-subtask 2 -t "Design login form"
+./bin/acf add-subtask 2 -t "Implement authentication API"
+./bin/acf add-subtask 2 -t "Connect frontend to API"
 ```
 
 #### 5. `status`
@@ -165,16 +168,16 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Examples:**
 ```bash
 # Start working on a task
-./bin/task-manager status 2.1 inprogress -m "Starting work on login form design"
+./bin/acf status 2.1 inprogress -m "Starting work on login form design"
 
 # Mark a task as complete
-./bin/task-manager status 2.1 done -m "Completed login form design"
+./bin/acf status 2.1 done -m "Completed login form design"
 
 # Mark a task as blocked
-./bin/task-manager status 2.2 blocked -m "Waiting for API documentation"
+./bin/acf status 2.2 blocked -m "Waiting for API documentation"
 
 # Report an error
-./bin/task-manager status 11 error -m "Controller method throws 500 internal server error on testing."
+./bin/acf status 11 error -m "Controller method throws 500 internal server error on testing."
 ```
 
 #### 6. `next`
@@ -183,7 +186,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager next
+./bin/acf next
 ```
 
 #### 7. `update`
@@ -202,10 +205,10 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Examples:**
 ```bash
 # Update task priority and related files
-./bin/task-manager update 10 -p medium --related-files "src/core.js" -m "Reducing priority after initial assessment."
+./bin/acf update 10 -p medium --related-files "src/core.js" -m "Reducing priority after initial assessment."
 
 # Update subtask title
-./bin/task-manager update 11.1 -t "Define & Test request validation schema"
+./bin/acf update 11.1 -t "Define & Test request validation schema"
 ```
 
 #### 8. `remove` (Alias: `rm`)
@@ -217,10 +220,10 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 **Examples:**
 ```bash
 # Remove a subtask
-./bin/task-manager remove 11.1
+./bin/acf remove 11.1
 
 # Remove a task
-./bin/task-manager rm 9
+./bin/acf rm 9
 ```
 
 #### 9. `get-context`
@@ -229,7 +232,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager get-context 2
+./bin/acf get-context 2
 ```
 
 #### 10. `generate`
@@ -238,7 +241,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager generate
+./bin/acf generate
 ```
 
 ### AI-Powered Features
@@ -249,7 +252,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager parse-prd path/to/your/prd.md
+./bin/acf parse-prd path/to/your/prd.md
 ```
 
 #### Expanding Tasks
@@ -258,7 +261,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager expand 1
+./bin/acf expand 1
 ```
 
 #### Revising Tasks
@@ -267,7 +270,7 @@ node path/to/agentic-control-framework/bin/task-manager <command> [options]
 
 **Example:**
 ```bash
-./bin/task-manager revise --from-task-id 3 --prompt "Change the authentication from OAuth to JWT"
+./bin/acf revise --from-task-id 3 --prompt "Change the authentication from OAuth to JWT"
 ```
 
 ---
@@ -282,7 +285,7 @@ This tutorial explains how an agent (or user via an AI assistant like Cursor) in
    ```bash
    chmod +x bin/agentic-control-framework-mcp
    # Legacy script is also supported
-   chmod +x bin/task-manager-mcp
+   chmod +x bin/agentic-control-framework-mcp
    ```
 
 2. **Add the wrapper to your PATH:**
@@ -430,22 +433,22 @@ Here's a complete example workflow using the Agentic Control Framework:
 ### 1. Initialize Project
 
 ```bash
-./bin/task-manager init --project-name "E-Commerce App" --project-description "A modern e-commerce application with user authentication, product listings, and checkout"
+./bin/acf init --project-name "E-Commerce App" --project-description "A modern e-commerce application with user authentication, product listings, and checkout"
 ```
 
 ### 2. Add High-Level Tasks
 
 ```bash
-./bin/task-manager add -t "User Authentication" -p high
-./bin/task-manager add -t "Product Catalog" -p high --dependsOn "1"
-./bin/task-manager add -t "Shopping Cart" -p medium --dependsOn "2"
-./bin/task-manager add -t "Checkout Process" -p medium --dependsOn "3"
+./bin/acf add -t "User Authentication" -p high
+./bin/acf add -t "Product Catalog" -p high --dependsOn "1"
+./bin/acf add -t "Shopping Cart" -p medium --dependsOn "2"
+./bin/acf add -t "Checkout Process" -p medium --dependsOn "3"
 ```
 
 ### 3. Use AI to Expand Tasks
 
 ```bash
-./bin/task-manager expand 1
+./bin/acf expand 1
 ```
 
 This might generate subtasks like:
@@ -458,25 +461,25 @@ This might generate subtasks like:
 
 ```bash
 # Get the next task
-./bin/task-manager next
+./bin/acf next
 
 # Mark as in progress
-./bin/task-manager status 1.1 inprogress -m "Working on auth routes"
+./bin/acf status 1.1 inprogress -m "Working on auth routes"
 
 # Complete task
-./bin/task-manager status 1.1 done -m "Completed auth routes implementation"
+./bin/acf status 1.1 done -m "Completed auth routes implementation"
 ```
 
 ### 5. Generate Documentation
 
 ```bash
-./bin/task-manager generate
+./bin/acf generate
 ```
 
 ### 6. Revise Plan Based on Changes
 
 ```bash
-./bin/task-manager revise --from-task-id 3 --prompt "Change shopping cart to use local storage instead of database"
+./bin/acf revise --from-task-id 3 --prompt "Change shopping cart to use local storage instead of database"
 ```
 
 ---
@@ -487,14 +490,14 @@ This might generate subtasks like:
 
 - **Task file not found**: Ensure `tasks.json` exists in your workspace root or initialize a new project.
 - **API key errors**: Check that your `GEMINI_API_KEY` is set correctly for AI-powered features.
-- **File permission issues**: Ensure scripts are executable with `chmod +x bin/task-manager bin/agentic-control-framework-mcp`.
+- **File permission issues**: Ensure scripts are executable with `chmod +x bin/acf bin/agentic-control-framework-mcp`.
 - **Status command error**: If you encounter "Cannot access 'taskOptions' before initialization" error with the status command, use the update command instead:
   ```bash
   # Instead of:
-  ./bin/task-manager status 1 inprogress -m "Starting work"
+  ./bin/acf status 1 inprogress -m "Starting work"
   
   # Use:
-  ./bin/task-manager update 1 --status inprogress -m "Starting work"
+  ./bin/acf update 1 --status inprogress -m "Starting work"
   ```
 - **MCP connection issues**: Make sure your MCP server is properly configured in Cursor and the path to the script is correct.
 
@@ -530,5 +533,5 @@ If you're having trouble with the MCP server in Cursor:
 Run any command with `--help` to see usage information:
 
 ```bash
-./bin/task-manager --help
+./bin/acf --help
 ``` 

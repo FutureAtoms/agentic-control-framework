@@ -39,27 +39,27 @@ Comprehensive testing of all ACF functionality across CLI, local MCP, and remote
 **Command Line Interface**: All core CLI commands tested successfully
 
 #### ✅ Project Initialization
-- `task-manager init`: ✅ Project initialized successfully
+- `acf init`: ✅ Project initialized successfully
 - Workspace setup: ✅ `.acf/` directory created
 - Task database: ✅ `tasks.json` created and functional
 
 #### ✅ Task Management
-- `task-manager add`: ✅ Tasks created with priorities
+- `acf add`: ✅ Tasks created with priorities
   - "Setup Express Server" (high priority)
   - "Create Database Schema" (medium priority)
-- `task-manager add-subtask`: ✅ Subtasks created successfully
+- `acf add-subtask`: ✅ Subtasks created successfully
   - "Install Express dependencies" under task #2
-- `task-manager list`: ✅ Beautiful formatted task table displayed
-- `task-manager next`: ✅ Next actionable task identified
-- `task-manager status`: ✅ Status updates working with messages
+- `acf list`: ✅ Beautiful formatted task table displayed
+- `acf next`: ✅ Next actionable task identified
+- `acf status`: ✅ Status updates working with messages
 
 #### ✅ Advanced Features
-- `task-manager list-templates`: ✅ Priority templates available
-- `task-manager add-with-template`: ✅ Template-based task creation
-- `task-manager priority-stats`: ✅ Priority statistics generated
+- `acf list-templates`: ✅ Priority templates available
+- `acf add-with-template`: ✅ Template-based task creation
+- `acf priority-stats`: ✅ Priority statistics generated
 
 #### ⚠️ Minor Issues
-- `task-manager generate-files`: Minor path issue (non-critical)
+- `acf generate-files`: Minor path issue (non-critical)
 
 ### 2. Local MCP Mode Testing ✅ PASSED
 

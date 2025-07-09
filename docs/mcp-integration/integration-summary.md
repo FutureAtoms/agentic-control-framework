@@ -1,5 +1,8 @@
 # ACF MCP Integration Summary
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 ## Overview
 
 Successfully integrated 39 new tools from Desktop Commander MCP and Playwright MCP into the Agentic Control Framework, transforming it into a truly agentic system with comprehensive terminal control, browser automation, and enhanced file operations.

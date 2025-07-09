@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+/**
+ * Agentic Control Framework (ACF) - Main CLI Entry Point
+ *
+ * @author Abhilash Chadhar (FutureAtoms)
+ * @description Main CLI entry point for task management
+ * @version 0.1.1
+ */
+try {
+  require("./task-cli.js");
+} catch (error) {
+  console.error(`[FATAL] Failed to start ACF CLI: ${error.message}`);
+  console.error(error.stack);
+  process.exit(1);
+}

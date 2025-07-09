@@ -1,5 +1,8 @@
 # ACF Architecture Documentation
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 ## System Overview
 
 The Agentic Control Framework (ACF) is designed as a modular, scalable system that provides autonomous agent capabilities through multiple interfaces and deployment modes.

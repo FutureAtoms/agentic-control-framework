@@ -1,3 +1,11 @@
+/**
+ * Agentic Control Framework (ACF) - CLI Module
+ *
+ * @author Abhilash Chadhar (FutureAtoms)
+ * @description CLI command definitions and argument parsing for ACF
+ * @version 0.1.1
+ */
+
 const { Command } = require('commander');
 const core = require('./core');
 const logger = require('./logger'); // Import our logger

@@ -1,3 +1,11 @@
+/**
+ * Agentic Control Framework (ACF) - Core Module
+ *
+ * @author Abhilash Chadhar (FutureAtoms)
+ * @description Core task management logic and data structures for ACF
+ * @version 0.1.1
+ */
+
 const fs = require('fs');
 const path = require('path');
 const prdParser = require('./prd_parser'); // Import the PRD parser
@@ -503,7 +511,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
   if (dirMsg) messages.push(dirMsg);
 
   if (!fs.existsSync(cursorRulesFile)) {
-    const placeholderContent = `# Cursor AI Workflow Rules for Agentic Control Framework\n\n# (Define rules here to tell Cursor how to use task-manager commands)\n\n# Example:\n# To list tasks, use the command: task-manager list\n# To get the next task: task-manager next\n`;
+    const placeholderContent = `# Cursor AI Workflow Rules for Agentic Control Framework\n\n# (Define rules here to tell Cursor how to use acf commands)\n\n# Example:\n# To list tasks, use the command: acf list\n# To get the next task: acf next\n`;
     try {
       fs.writeFileSync(cursorRulesFile, placeholderContent);
       messages.push(`Created placeholder Cursor rules file: ${cursorRulesFile}`);
@@ -540,7 +548,7 @@ function initProject(workspaceRoot, options = {}) { // Renamed argument
               }
 
               // 2. Add the new placeholder content
-              finalContent += `# Agentic Control Framework Rules for ${editor}\n\nThis file defines workflow rules and automations for the ACF.\n\n## Example Rules\n\n- **On test pass**: Automatically run 'task-manager next' to proceed to the next task.\n- **On task completion**: Prompt user for a commit message.\n`;
+              finalContent += `# Agentic Control Framework Rules for ${editor}\n\nThis file defines workflow rules and automations for the ACF.\n\n## Example Rules\n\n- **On test pass**: Automatically run 'acf next' to proceed to the next task.\n- **On task completion**: Prompt user for a commit message.\n`;
 
               try {
                   fs.writeFileSync(editorRulesFile, finalContent);

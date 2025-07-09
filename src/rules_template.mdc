@@ -13,12 +13,12 @@ This document outlines the rules and workflow for using the Agentic Control Fram
 ### 1. Getting Started
 
 -   To see the list of tasks, use \`list\` or \`ls\`.
-    -   Example: \`task-manager list\`
+    -   Example: \`acf list\`
 -   To get the next highest-priority task, use \`next\`.
-    -   Example: \`task-manager next\`
+    -   Example: \`acf next\`
 -   To see the full details of a task, including its description, files, and tests, use \`context\`.
-    -   Example: \`task-manager context 3\`
-    -   Example: \`task-manager context 3.1\`
+    -   Example: \`acf context 3\`
+    -   Example: \`acf context 3.1\`
 
 ### 2. Creating Tasks
 
@@ -28,7 +28,7 @@ This document outlines the rules and workflow for using the Agentic Control Fram
     -   A bad test is vague and unhelpful (e.g., "See if it works").
 -   Example:
     \`\`\`
-    task-manager add -t "Implement user authentication endpoint" --description "Create the POST /login endpoint that accepts email and password." --tests "Run automated tests in \`auth.test.js\`. Send a POST request to /login with valid credentials and expect a 200 response. Send a request with invalid credentials and expect a 401 response."
+    acf add -t "Implement user authentication endpoint" --description "Create the POST /login endpoint that accepts email and password." --tests "Run automated tests in \`auth.test.js\`. Send a POST request to /login with valid credentials and expect a 200 response. Send a request with invalid credentials and expect a 401 response."
     \`\`\`
 
 ### 3. Completing a Task
@@ -47,18 +47,18 @@ Your command **must** include the following:
 Always use the \`status\` command in the following format:
 
 \`\`\`
-task-manager status <id> done --related-files "<file1>,<file2>,..." -m "<Your summary of work>"
+acf status <id> done --related-files "<file1>,<file2>,..." -m "<Your summary of work>"
 \`\`\`
 
 #### **Examples:**
 
 -   **Good Example (Correct):**
     \`\`\`
-    task-manager status 4.2 done --related-files "src/api/auth.js,src/routes/auth.js,test/auth.test.js" -m "Implemented the POST /login endpoint and added corresponding unit tests."
+    acf status 4.2 done --related-files "src/api/auth.js,src/routes/auth.js,test/auth.test.js" -m "Implemented the POST /login endpoint and added corresponding unit tests."
     \`\`\`
 -   **Bad Example (Incorrect - Missing Files and Message):**
     \`\`\`
-    task-manager status 4.2 done
+    acf status 4.2 done
     \`\`\`
 
 If you try to mark a task as "done" without providing the \`relatedFiles\`, the command will fail. This is intentional.
@@ -69,7 +69,7 @@ If you try to mark a task as "done" without providing the \`relatedFiles\`, the 
 -   When adding new files or tests, they will be merged with the existing ones.
 -   Example:
     \`\`\`
-    task-manager update 5 --tests "Add a new test case for edge case X in \`edge.test.js\`"
+    acf update 5 --tests "Add a new test case for edge case X in \`edge.test.js\`"
     \`\`\`
 
 By following these rules, you ensure that the project's progress is tracked accurately and that every piece of work is verifiable.

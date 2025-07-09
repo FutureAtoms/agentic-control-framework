@@ -4,9 +4,9 @@
   "description": "CLI and MCP task manager with AI-based PRD parsing",
   "main": "src/core.js",
   "bin": {
-    "acf": "./bin/task-manager",
+    "acf": "./bin/acf",
     "acf-mcp": "./bin/agentic-control-framework-mcp",
-    "task-manager": "./bin/task-manager",
+    "task-manager": "./bin/acf",
     "task-manager-mcp": "./bin/task-manager-mcp",
     "agentic-control-framework-mcp": "./bin/agentic-control-framework-mcp"
   },
@@ -34,7 +34,11 @@
     "stripe",
     "auth"
   ],
-  "author": "Abhilash Chadhar",
+  "author": "Abhilash Chadhar (FutureAtoms)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FutureAtoms/agentic-control-framework.git"
+  },
   "license": "ISC",
   "dependencies": {
     "@vscode/ripgrep": "^1.15.9",

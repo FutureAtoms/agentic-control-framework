@@ -1,5 +1,8 @@
 # 🎯 Numerical Priority System Documentation
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Last Updated:** January 2025
+
 ## Overview
 
 The Agentic Control Framework (ACF) features a sophisticated numerical priority system that replaces the traditional 4-level string priorities (low/medium/high/critical) with a flexible 1-1000 numerical scale. This system provides fine-grained priority control, automatic dependency management, and intelligent priority recalculation.
@@ -25,8 +28,8 @@ The system automatically maps string priorities to numeric ranges for backward c
 Every task automatically receives a unique priority value to ensure proper ordering:
 ```bash
 # Even if you try to set the same priority, the system adjusts automatically
-./bin/task-manager add "Task A" --priority 500
-./bin/task-manager add "Task B" --priority 500  # Becomes 501 automatically
+./bin/acf add "Task A" --priority 500
+./bin/acf add "Task B" --priority 500  # Becomes 501 automatically
 ```
 
 ### 2. Dependency-Based Priority Inheritance
@@ -47,43 +50,43 @@ The system continuously optimizes priorities based on:
 ### Basic Priority Assignment
 ```bash
 # Using numeric priorities (1-1000)
-./bin/task-manager add "Fix critical bug" --priority 950
-./bin/task-manager add "Update documentation" --priority 200
-./bin/task-manager add "Implement feature X" --priority 650
+./bin/acf add "Fix critical bug" --priority 950
+./bin/acf add "Update documentation" --priority 200
+./bin/acf add "Implement feature X" --priority 650
 
 # Using string priorities (backward compatible)
-./bin/task-manager add "Low priority task" --priority low
-./bin/task-manager add "High priority task" --priority high
+./bin/acf add "Low priority task" --priority low
+./bin/acf add "High priority task" --priority high
 ```
 
 ### Priority Manipulation Commands
 ```bash
 # Increase priority by amount
-./bin/task-manager bump 123 --amount 100
+./bin/acf bump 123 --amount 100
 
 # Decrease priority by amount  
-./bin/task-manager defer 123 --amount 50
+./bin/acf defer 123 --amount 50
 
 # Set to high priority range
-./bin/task-manager prioritize 123
+./bin/acf prioritize 123
 
 # Set to low priority range
-./bin/task-manager deprioritize 123
+./bin/acf deprioritize 123
 
 # Update priority directly
-./bin/task-manager update 123 --priority 750
+./bin/acf update 123 --priority 750
 ```
 
 ### Priority Analysis
 ```bash
 # View priority statistics
-./bin/task-manager priority-stats
+./bin/acf priority-stats
 
 # Analyze dependencies and critical paths
-./bin/task-manager dependency-analysis
+./bin/acf dependency-analysis
 
 # Trigger manual recalculation
-./bin/task-manager recalculate-priorities
+./bin/acf recalculate-priorities
 ```
 
 ## 📈 Advanced Features
@@ -172,7 +175,7 @@ Configure priority behavior in `.acf/config.json`:
 ### Recalculation Options
 ```bash
 # Manual recalculation with options
-./bin/task-manager recalculate-priorities \
+./bin/acf recalculate-priorities \
   --apply-dependency-boosts \
   --apply-time-decay \
   --optimize-distribution \
@@ -191,13 +194,13 @@ The system provides seamless backward compatibility:
 ### Migration Commands
 ```bash
 # Check current priority distribution
-./bin/task-manager priority-stats
+./bin/acf priority-stats
 
 # Convert all string priorities to numeric (optional)
-./bin/task-manager recalculate-priorities --normalize-all
+./bin/acf recalculate-priorities --normalize-all
 
 # Verify migration results
-./bin/task-manager list --format table
+./bin/acf list --format table
 ```
 
 ## 📊 Performance and Scalability
@@ -281,43 +284,43 @@ node test/unit/test-priority-system.js
 ### Software Development Team
 ```bash
 # Sprint planning with precise priorities
-./bin/task-manager add "Security audit" --priority 950
-./bin/task-manager add "User authentication" --priority 800
-./bin/task-manager add "Database optimization" --priority 750
-./bin/task-manager add "UI improvements" --priority 400
-./bin/task-manager add "Code documentation" --priority 200
+./bin/acf add "Security audit" --priority 950
+./bin/acf add "User authentication" --priority 800
+./bin/acf add "Database optimization" --priority 750
+./bin/acf add "UI improvements" --priority 400
+./bin/acf add "Code documentation" --priority 200
 
 # Create dependencies
-./bin/task-manager update 2 --depends-on 1  # Auth depends on security audit
-./bin/task-manager update 3 --depends-on 2  # DB optimization depends on auth
+./bin/acf update 2 --depends-on 1  # Auth depends on security audit
+./bin/acf update 3 --depends-on 2  # DB optimization depends on auth
 
 # System automatically boosts priorities based on dependencies
-./bin/task-manager dependency-analysis
+./bin/acf dependency-analysis
 ```
 
 ### Bug Triage Workflow
 ```bash
 # Precise bug prioritization
-./bin/task-manager add "Data corruption bug" --priority 990
-./bin/task-manager add "Performance regression" --priority 850
-./bin/task-manager add "UI alignment issue" --priority 300
-./bin/task-manager add "Typo in error message" --priority 100
+./bin/acf add "Data corruption bug" --priority 990
+./bin/acf add "Performance regression" --priority 850
+./bin/acf add "UI alignment issue" --priority 300
+./bin/acf add "Typo in error message" --priority 100
 
 # Adjust priorities based on impact
-./bin/task-manager bump 3 --amount 150  # UI issue affects many users
-./bin/task-manager defer 4 --amount 50  # Typo is very minor
+./bin/acf bump 3 --amount 150  # UI issue affects many users
+./bin/acf defer 4 --amount 50  # Typo is very minor
 ```
 
 ### Release Management
 ```bash
 # Release preparation with automatic priority management
-./bin/task-manager add "Code freeze" --priority 900
-./bin/task-manager add "Final testing" --priority 850 --depends-on 1
-./bin/task-manager add "Documentation update" --priority 700 --depends-on 2
-./bin/task-manager add "Release deployment" --priority 950 --depends-on 3
+./bin/acf add "Code freeze" --priority 900
+./bin/acf add "Final testing" --priority 850 --depends-on 1
+./bin/acf add "Documentation update" --priority 700 --depends-on 2
+./bin/acf add "Release deployment" --priority 950 --depends-on 3
 
 # System automatically optimizes the release pipeline priorities
-./bin/task-manager recalculate-priorities --apply-dependency-boosts
+./bin/acf recalculate-priorities --apply-dependency-boosts
 ```
 
 ## 🔧 Integration Examples
@@ -328,17 +331,17 @@ node test/unit/test-priority-system.js
 # In your CI/CD pipeline
 
 # Create deployment task with high priority
-TASK_ID=$(./bin/task-manager add "Deploy v$VERSION" --priority 900 --format json | jq -r '.taskId')
+TASK_ID=$(./bin/acf add "Deploy v$VERSION" --priority 900 --format json | jq -r '.taskId')
 
 # Update priority based on branch
 if [[ "$BRANCH" == "main" ]]; then
-  ./bin/task-manager bump $TASK_ID --amount 50  # Production deployment
+  ./bin/acf bump $TASK_ID --amount 50  # Production deployment
 elif [[ "$BRANCH" == "staging" ]]; then
-  ./bin/task-manager defer $TASK_ID --amount 100  # Staging deployment
+  ./bin/acf defer $TASK_ID --amount 100  # Staging deployment
 fi
 
 # Mark as complete after successful deployment
-./bin/task-manager status $TASK_ID done --message "Deployed successfully to $ENVIRONMENT"
+./bin/acf status $TASK_ID done --message "Deployed successfully to $ENVIRONMENT"
 ```
 
 ### Automated Priority Adjustment
@@ -349,16 +352,16 @@ fi
 echo "🔄 Running daily priority maintenance..."
 
 # Recalculate priorities with all optimizations
-./bin/task-manager recalculate-priorities \
+./bin/acf recalculate-priorities \
   --apply-dependency-boosts \
   --optimize-distribution \
   --enforce-uniqueness
 
 # Show priority statistics
-./bin/task-manager priority-stats
+./bin/acf priority-stats
 
 # Identify high-priority tasks without progress
-./bin/task-manager list --status todo --priority-min 800 --format table
+./bin/acf list --status todo --priority-min 800 --format table
 
 echo "✅ Priority maintenance complete"
 ```
@@ -373,19 +376,19 @@ echo "=================================="
 
 echo ""
 echo "🔥 Critical Tasks (900+):"
-./bin/task-manager list --priority-min 900 --status todo,inprogress --format table
+./bin/acf list --priority-min 900 --status todo,inprogress --format table
 
 echo ""
 echo "⚡ High Priority In Progress:"
-./bin/task-manager list --priority-min 700 --status inprogress --format table
+./bin/acf list --priority-min 700 --status inprogress --format table
 
 echo ""
 echo "📈 Priority Distribution:"
-./bin/task-manager priority-stats
+./bin/acf priority-stats
 
 echo ""
 echo "🔗 Dependency Analysis:"
-./bin/task-manager dependency-analysis
+./bin/acf dependency-analysis
 ```
 
 ---

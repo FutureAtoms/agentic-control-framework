@@ -8,8 +8,8 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Project directory: $PROJECT_DIR"
 
 # Make scripts executable
-chmod +x "$PROJECT_DIR/bin/task-manager"
-chmod +x "$PROJECT_DIR/bin/task-manager-mcp"
+chmod +x "$PROJECT_DIR/bin/acf"
+chmod +x "$PROJECT_DIR/bin/agentic-control-framework-mcp"
 chmod +x "$PROJECT_DIR/bin/agentic-control-framework-mcp"
 
 # Create configuration files with proper paths

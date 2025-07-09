@@ -1,5 +1,9 @@
 # ACF Deployment Guide
 
+**Author:** Abhilash Chadhar (FutureAtoms)  
+**Last Updated:** January 2025
+
+
 ## Deployment Options Overview
 
 ```mermaid
@@ -67,9 +71,9 @@ npm install
 chmod +x bin/*
 
 # Test CLI mode
-./bin/task-manager init -n "Test Project"
-./bin/task-manager add -t "Test task" -p high
-./bin/task-manager list
+./bin/acf init -n "Test Project"
+./bin/acf add -t "Test task" -p high
+./bin/acf list
 ```
 
 ### Local MCP Setup
