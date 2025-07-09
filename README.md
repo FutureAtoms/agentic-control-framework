@@ -92,7 +92,192 @@ graph TB
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
 - 📋 **MCP 2025-03-26 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
 
-Author: Abhilash Chadhar
+## 🔧 All Available Tools
+
+### Tool Categories Overview
+
+```mermaid
+mindmap
+  root((ACF Tools<br/>83 Total))
+    Core ACF
+      Task Management
+        listTasks
+        addTask
+        updateStatus
+        getNextTask
+      Priority System
+        recalculatePriorities
+        getPriorityStatistics
+        bumpTaskPriority
+        prioritizeTask
+      File Watching
+        initializeFileWatcher
+        stopFileWatcher
+        forceSyncTaskFiles
+      Templates
+        getPriorityTemplates
+        addTaskWithTemplate
+    File Operations
+      Basic Operations
+        read_file
+        write_file
+        copy_file
+        delete_file
+      Directory Ops
+        list_directory
+        create_directory
+        tree
+        search_files
+    Terminal
+      Command Execution
+        execute_command
+        read_output
+        force_terminate
+      Process Management
+        list_processes
+        kill_process
+    Browser Automation
+      Navigation
+        browser_navigate
+        browser_navigate_back
+        browser_close
+      Interaction
+        browser_click
+        browser_type
+        browser_hover
+        browser_drag
+      Capture
+        browser_take_screenshot
+        browser_pdf_save
+        browser_snapshot
+      Tab Management
+        browser_tab_list
+        browser_tab_new
+        browser_tab_close
+    Search & Edit
+      search_code
+      edit_block
+    System Integration
+      AppleScript
+        applescript_execute
+      Configuration
+        get_config
+        set_config_value
+```
+
+### Core ACF Tools (33 tools) ✅
+```
+Task Management:
+- listTasks: List all tasks with filtering
+- addTask: Create new tasks with priority/dependencies
+- addSubtask: Add subtasks to existing tasks
+- updateStatus: Change task status (todo/inprogress/done/blocked/error)
+- updateTask: Modify task details
+- removeTask: Delete tasks or subtasks
+- getNextTask: Get next actionable task based on priority/dependencies
+- getContext: Get detailed task information
+- generateTaskFiles: Create individual markdown files for tasks
+- generateTaskTable: Create readable task status table
+- parsePrd: Parse Product Requirements Documents
+- expandTask: AI-powered task breakdown
+- reviseTasks: AI-powered task revision
+- setWorkspace: Configure workspace directory
+- initProject: Initialize new ACF project
+
+Priority Management (Numerical 1-1000 System):
+- recalculatePriorities: Intelligent priority recalculation with dependency analysis
+- getPriorityStatistics: Comprehensive priority distribution and statistics
+- getDependencyAnalysis: Critical path analysis and blocking task detection
+- bumpTaskPriority: Increase task priority by specified amount
+- deferTaskPriority: Decrease task priority by specified amount
+- prioritizeTask: Set task to high priority range (700-899)
+- deprioritizeTask: Set task to low priority range (1-399)
+```
+
+### Filesystem Tools (13 tools) ⚠️
+```
+File Operations:
+- read_file: Read file contents with type detection
+- read_multiple_files: Read multiple files at once
+- write_file: Write/create files
+- copy_file: Copy files and directories
+- move_file: Move/rename files
+- delete_file: Delete files/directories
+- get_file_info: File metadata and statistics
+
+Directory Operations:
+- list_directory: Detailed directory listing
+- create_directory: Create directories
+- tree: Hierarchical directory structure
+- search_files: Find files by pattern
+- list_allowed_directories: Show accessible paths
+- get_filesystem_status: Show security status
+```
+
+### Terminal Tools (8 tools) ⚠️
+```
+Command Execution:
+- execute_command: Run shell commands with timeout
+- read_output: Read from running processes
+- force_terminate: Kill processes
+- list_sessions: Show active terminal sessions
+- list_processes: Show running processes
+- kill_process: Terminate processes
+```
+
+### Browser Automation Tools (22 tools) ✅
+```
+Navigation:
+- browser_navigate: Navigate to URLs
+- browser_navigate_back: Go back
+- browser_navigate_forward: Go forward
+- browser_close: Close browser
+
+Interaction:
+- browser_click: Click elements
+- browser_type: Type text
+- browser_hover: Hover over elements
+- browser_drag: Drag and drop
+- browser_select_option: Select dropdown options
+- browser_press_key: Keyboard input
+
+Capture:
+- browser_take_screenshot: Screenshots
+- browser_snapshot: Accessibility snapshots
+- browser_pdf_save: Save as PDF
+
+Management:
+- browser_tab_list: List browser tabs
+- browser_tab_new: Open new tabs
+- browser_tab_select: Switch tabs
+- browser_tab_close: Close tabs
+- browser_file_upload: Upload files
+- browser_wait: Wait for time/conditions
+- browser_resize: Resize window
+- browser_handle_dialog: Handle alerts/dialogs
+- browser_console_messages: Get console logs
+- browser_network_requests: Monitor network
+```
+
+### Search & Edit Tools (2 tools) ⚠️
+```
+Code Operations:
+- search_code: Advanced text/code search with ripgrep
+- edit_block: Surgical text replacements
+```
+
+### AppleScript Tools (1 tool) ✅
+```
+macOS Automation:
+- applescript_execute: Run AppleScript for system integration
+```
+
+### Configuration Tools (2 tools) ✅
+```
+Server Management:
+- get_config: Get server configuration
+- set_config_value: Update configuration values
+```
 
 ## 📁 Project Structure
 
@@ -795,193 +980,6 @@ export GCP_PROJECT_ID="your-project-id"
 
 # Deploy
 ./quick-deploy.sh gcp --proxy-only
-```
-
-## 🔧 All Available Tools
-
-### Tool Categories Overview
-
-```mermaid
-mindmap
-  root((ACF Tools<br/>83 Total))
-    Core ACF
-      Task Management
-        listTasks
-        addTask
-        updateStatus
-        getNextTask
-      Priority System
-        recalculatePriorities
-        getPriorityStatistics
-        bumpTaskPriority
-        prioritizeTask
-      File Watching
-        initializeFileWatcher
-        stopFileWatcher
-        forceSyncTaskFiles
-      Templates
-        getPriorityTemplates
-        addTaskWithTemplate
-    File Operations
-      Basic Operations
-        read_file
-        write_file
-        copy_file
-        delete_file
-      Directory Ops
-        list_directory
-        create_directory
-        tree
-        search_files
-    Terminal
-      Command Execution
-        execute_command
-        read_output
-        force_terminate
-      Process Management
-        list_processes
-        kill_process
-    Browser Automation
-      Navigation
-        browser_navigate
-        browser_navigate_back
-        browser_close
-      Interaction
-        browser_click
-        browser_type
-        browser_hover
-        browser_drag
-      Capture
-        browser_take_screenshot
-        browser_pdf_save
-        browser_snapshot
-      Tab Management
-        browser_tab_list
-        browser_tab_new
-        browser_tab_close
-    Search & Edit
-      search_code
-      edit_block
-    System Integration
-      AppleScript
-        applescript_execute
-      Configuration
-        get_config
-        set_config_value
-```
-
-### Core ACF Tools (33 tools) ✅
-```
-Task Management:
-- listTasks: List all tasks with filtering
-- addTask: Create new tasks with priority/dependencies
-- addSubtask: Add subtasks to existing tasks
-- updateStatus: Change task status (todo/inprogress/done/blocked/error)
-- updateTask: Modify task details
-- removeTask: Delete tasks or subtasks
-- getNextTask: Get next actionable task based on priority/dependencies
-- getContext: Get detailed task information
-- generateTaskFiles: Create individual markdown files for tasks
-- generateTaskTable: Create readable task status table
-- parsePrd: Parse Product Requirements Documents
-- expandTask: AI-powered task breakdown
-- reviseTasks: AI-powered task revision
-- setWorkspace: Configure workspace directory
-- initProject: Initialize new ACF project
-
-Priority Management (Numerical 1-1000 System):
-- recalculatePriorities: Intelligent priority recalculation with dependency analysis
-- getPriorityStatistics: Comprehensive priority distribution and statistics
-- getDependencyAnalysis: Critical path analysis and blocking task detection
-- bumpTaskPriority: Increase task priority by specified amount
-- deferTaskPriority: Decrease task priority by specified amount
-- prioritizeTask: Set task to high priority range (700-899)
-- deprioritizeTask: Set task to low priority range (1-399)
-```
-
-### Filesystem Tools (13 tools) ⚠️
-```
-File Operations:
-- read_file: Read file contents with type detection
-- read_multiple_files: Read multiple files at once
-- write_file: Write/create files
-- copy_file: Copy files and directories
-- move_file: Move/rename files
-- delete_file: Delete files/directories
-- get_file_info: File metadata and statistics
-
-Directory Operations:
-- list_directory: Detailed directory listing
-- create_directory: Create directories
-- tree: Hierarchical directory structure
-- search_files: Find files by pattern
-- list_allowed_directories: Show accessible paths
-- get_filesystem_status: Show security status
-```
-
-### Terminal Tools (8 tools) ⚠️
-```
-Command Execution:
-- execute_command: Run shell commands with timeout
-- read_output: Read from running processes
-- force_terminate: Kill processes
-- list_sessions: Show active terminal sessions
-- list_processes: Show running processes
-- kill_process: Terminate processes
-```
-
-### Browser Automation Tools (22 tools) ✅
-```
-Navigation:
-- browser_navigate: Navigate to URLs
-- browser_navigate_back: Go back
-- browser_navigate_forward: Go forward
-- browser_close: Close browser
-
-Interaction:
-- browser_click: Click elements
-- browser_type: Type text
-- browser_hover: Hover over elements
-- browser_drag: Drag and drop
-- browser_select_option: Select dropdown options
-- browser_press_key: Keyboard input
-
-Capture:
-- browser_take_screenshot: Screenshots
-- browser_snapshot: Accessibility snapshots
-- browser_pdf_save: Save as PDF
-
-Management:
-- browser_tab_list: List browser tabs
-- browser_tab_new: Open new tabs
-- browser_tab_select: Switch tabs
-- browser_tab_close: Close tabs
-- browser_file_upload: Upload files
-- browser_wait: Wait for time/conditions
-- browser_resize: Resize window
-- browser_handle_dialog: Handle alerts/dialogs
-- browser_console_messages: Get console logs
-- browser_network_requests: Monitor network
-```
-
-### Search & Edit Tools (2 tools) ⚠️
-```
-Code Operations:
-- search_code: Advanced text/code search with ripgrep
-- edit_block: Surgical text replacements
-```
-
-### AppleScript Tools (1 tool) ✅
-```
-macOS Automation:
-- applescript_execute: Run AppleScript for system integration
-```
-
-### Configuration Tools (2 tools) ✅
-```
-Server Management:
-- get_config: Get server configuration
-- set_config_value: Update configuration values
 ```
 
 ## 📚 Example Use Cases
