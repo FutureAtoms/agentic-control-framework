@@ -17,6 +17,8 @@ The Agentic Control Framework (ACF) is a production-ready platform that transfor
 - ⚡ **High Performance**: Average response time 24ms, no slow responses (>1s)
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
 
+Author: Abhilash Chadhar
+
 ## 📁 Project Structure
 
 ```
@@ -811,3 +813,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 | **Cloud MCP** | Remote access | 15 minutes | ✅ Production Ready | Full Integration Verified |
 
 For detailed test results and improvement roadmap, see [ACF-TESTING-SUMMARY.md](./ACF-TESTING-SUMMARY.md). 
+
+
