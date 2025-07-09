@@ -1,0 +1,29 @@
+{
+  "defaultShell": "/bin/bash",
+  "blockedCommands": [
+    "rm -rf /",
+    "sudo rm -rf",
+    "format c:",
+    "del /f /s /q c:",
+    "dd if=/dev/zero of=/dev/sda",
+    "mkfs",
+    ":(){:|:&};:"
+  ],
+  "commandTimeout": 10000,
+  "allowedDirectories": "[\"/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework\", \"/Users/abhilashchadhar/test_acf_workspace\", \"/tmp\"]",
+  "fileReadLineLimit": 1000,
+  "fileWriteLineLimit": 50,
+  "telemetryEnabled": false,
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "timeout": 30000,
+    "userDataDir": null
+  },
+  "search": {
+    "maxResults": 100,
+    "timeout": 30000,
+    "includeHidden": false,
+    "ignoreCase": true
+  }
+}

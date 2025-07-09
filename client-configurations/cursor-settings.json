@@ -1,0 +1,11 @@
+{
+  "mcp.servers": {
+    "acf-local": {
+      "url": "http://localhost:8080/sse",
+      "transport": "sse",
+      "description": "Agentic Control Framework - Local"
+    }
+  },
+  "mcp.enabled": true,
+  "mcp.logLevel": "info"
+}

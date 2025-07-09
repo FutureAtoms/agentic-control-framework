@@ -1,0 +1,20 @@
+{
+  "$schema": "https://railway.com/schema.json",
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile.proxy"
+  },
+  "services": [
+    {
+      "name": "acf-mcp-proxy",
+      "icon": "🤖",
+      "settings": {
+        "healthcheck": {
+          "path": "/health",
+          "timeout": 30
+        },
+        "restartPolicy": "always"
+      }
+    }
+  ]
+} 

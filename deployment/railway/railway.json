@@ -1,0 +1,25 @@
+{
+  "name": "acf-mcp-proxy",
+  "description": "Agentic Control Framework with mcp-proxy bridge",
+  "dockerfile": "Dockerfile.proxy",
+  "port": 8080,
+  "environment": {
+    "NODE_ENV": "production",
+    "WORKSPACE_ROOT": "/data",
+    "ALLOWED_DIRS": "/data:/tmp",
+    "ACF_PATH": "/app"
+  },
+  "healthCheck": {
+    "path": "/health",
+    "intervalSeconds": 30,
+    "timeoutSeconds": 10
+  },
+  "resources": {
+    "memory": 1024,
+    "cpu": 1000
+  },
+  "scaling": {
+    "minInstances": 1,
+    "maxInstances": 5
+  }
+} 

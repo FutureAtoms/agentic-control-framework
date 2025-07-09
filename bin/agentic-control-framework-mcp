@@ -19,6 +19,12 @@ const projectRoot = process.env.ACF_PATH || path.resolve(__dirname, '..');
 const tmpDir = path.resolve(projectRoot, '.tmp');
 const workspacePathFile = path.join(tmpDir, 'last-workspace.txt');
 
+// Helper to get command line arguments
+const getArg = (flag) => {
+  const index = process.argv.findIndex(arg => arg === flag);
+  return index !== -1 && index < process.argv.length - 1 ? process.argv[index + 1] : null;
+};
+
 // Create tmp directory if it doesn't exist
 try {
   if (!fs.existsSync(tmpDir)) {
@@ -28,21 +34,45 @@ try {
   console.error('[ERROR] Error creating tmp directory:', err);
 }
 
-// Read last workspace path if available
-// Order of precedence:
-// 1. WORKSPACE_ROOT environment variable
-// 2. Last saved workspace path
-// 3. Current working directory
-let initialWorkspaceRoot = process.env.WORKSPACE_ROOT || process.cwd(); // Default to current directory
-try {
-  if (fs.existsSync(workspacePathFile)) {
-    const savedPath = fs.readFileSync(workspacePathFile, 'utf8').trim();
-    if (savedPath && fs.existsSync(savedPath)) {
-      initialWorkspaceRoot = savedPath;
+// Determine the workspace root with correct precedence.
+let initialWorkspaceRoot = getArg('--workspaceRoot');
+
+if (initialWorkspaceRoot) {
+    // If --workspaceRoot is provided, use it and save it. This is the highest priority.
+    try {
+        fs.writeFileSync(workspacePathFile, initialWorkspaceRoot);
+    } catch (err) {
+        console.error('[ERROR] Error saving workspace path:', err);
     }
-  }
+} else if (process.env.WORKSPACE_ROOT) {
+    // Otherwise, check for the environment variable.
+    initialWorkspaceRoot = process.env.WORKSPACE_ROOT;
+} else {
+    // Otherwise, try to read from the saved file.
+    try {
+        if (fs.existsSync(workspacePathFile)) {
+            const savedPath = fs.readFileSync(workspacePathFile, 'utf8').trim();
+            if (savedPath && fs.existsSync(savedPath)) {
+                initialWorkspaceRoot = savedPath;
+            }
+        }
+    } catch (err) {
+        console.error('[ERROR] Error reading saved workspace path:', err);
+    }
+}
+
+// If still no workspace root, default to the current working directory.
+if (!initialWorkspaceRoot) {
+    initialWorkspaceRoot = process.cwd();
+}
+
+// Save the determined workspace path for future runs if it's not the default
+try {
+    if (initialWorkspaceRoot !== process.cwd()) {
+        fs.writeFileSync(workspacePathFile, initialWorkspaceRoot);
+    }
 } catch (err) {
-  console.error('[ERROR] Error reading saved workspace path:', err);
+    console.error('[ERROR] Error saving workspace path:', err);
 }
 
 // Debug info
