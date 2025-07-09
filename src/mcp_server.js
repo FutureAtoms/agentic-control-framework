@@ -196,17 +196,35 @@ rl.on('line', async (line) => {
     switch (method) {
       case 'initialize':
         logger.debug('Handling initialize request');
-        
-        // Respond immediately
+
+        // Use the latest MCP protocol version
+        const supportedProtocolVersions = ['2025-03-26', '2024-11-05'];
+        const clientProtocolVersion = params?.protocolVersion;
+        let protocolVersion = '2025-03-26'; // Default to latest
+
+        // Check if client requested version is supported
+        if (clientProtocolVersion && supportedProtocolVersions.includes(clientProtocolVersion)) {
+          protocolVersion = clientProtocolVersion;
+        }
+
+        // Respond immediately with proper MCP capabilities
         sendResponse(id, {
+          protocolVersion: protocolVersion,
           capabilities: {
-            tools: {}
+            tools: {
+              listChanged: true
+            },
+            logging: {},
+            resources: {
+              subscribe: false,
+              listChanged: false
+            }
           },
           serverInfo: {
             name: 'agentic-control-framework',
+            title: 'Agentic Control Framework',
             version: '0.1.0'
-          },
-          protocolVersion: params?.protocolVersion || '2.0.0'
+          }
         });
         break;
 
@@ -222,6 +240,7 @@ rl.on('line', async (line) => {
           tools: [
             {
               name: 'setWorkspace',
+              title: 'Set Workspace',
               description: 'Sets the workspace directory for the task manager.',
               inputSchema: {
                 type: 'object',
@@ -233,6 +252,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'initProject',
+              title: 'Initialize Project',
               description: 'Initializes the task manager project.',
               inputSchema: {
                 type: 'object',
@@ -245,6 +265,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'addTask',
+              title: 'Add Task',
               description: 'Adds a new task to the task list.',
               inputSchema: {
                 type: 'object',
@@ -268,6 +289,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'addSubtask',
+              title: 'Add Subtask',
               description: 'Adds a subtask to a specified parent task.',
               inputSchema: {
                 type: 'object',
@@ -282,6 +304,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'listTasks',
+              title: 'List Tasks',
               description: 'Lists tasks, optionally filtered by status.',
               inputSchema: {
                 type: 'object',
@@ -293,6 +316,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'updateStatus',
+              title: 'Update Status',
               description: 'Updates the status of a task or subtask.',
               inputSchema: {
                 type: 'object',
@@ -306,17 +330,20 @@ rl.on('line', async (line) => {
             },
             {
               name: 'getNextTask',
+              title: 'Get Next Task',
               description: 'Gets the next actionable task based on status, dependencies, and priority.',
               inputSchema: {
                 type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                properties: {}
+              },
+              annotations: {
+                readOnlyHint: true,
+                openWorldHint: false
               }
             },
             {
               name: 'updateTask',
+              title: 'Update Task',
               description: 'Updates the details of a task (title, description, priority, etc.). Does not update status.',
               inputSchema: {
                 type: 'object',
@@ -354,6 +381,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'removeTask',
+              title: 'Remove Task',
               description: 'Removes a task or subtask by its ID.',
               inputSchema: {
                 type: 'object',
@@ -376,13 +404,16 @@ rl.on('line', async (line) => {
             },
             {
               name: 'generateTaskFiles',
+              title: 'Generate Task Files',
               description: 'Generates individual Markdown files for each task in the tasks/ directory.',
               inputSchema: {
                 type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                properties: {}
+              },
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                openWorldHint: false
               }
             },
             {
@@ -421,13 +452,16 @@ rl.on('line', async (line) => {
             },
             {
               name: 'generateTaskTable',
+              title: 'Generate Task Table',
               description: 'Generates a human-readable Markdown file with task statuses and checkboxes.',
               inputSchema: {
                 type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                properties: {}
+              },
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                openWorldHint: false
               }
             },
             // Priority management tools
@@ -662,6 +696,7 @@ rl.on('line', async (line) => {
             // Filesystem tools
             {
               name: 'read_file',
+              title: 'Read File',
               description: 'Read the complete contents of a file from the file system or from a URL.',
               inputSchema: {
                 type: 'object',
@@ -690,6 +725,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'write_file',
+              title: 'Write File',
               description: 'Create a new file or overwrite an existing file with new content.' + (readonlyMode ? ' (DISABLED IN READ-ONLY MODE)' : ''),
               inputSchema: {
                 type: 'object',
@@ -796,13 +832,15 @@ rl.on('line', async (line) => {
             },
             {
               name: 'list_allowed_directories',
+              title: 'List Allowed Directories',
               description: 'Returns the list of directories that this server is allowed to access.',
               inputSchema: {
                 type: 'object',
-                properties: {
-                  random_string: { type: 'string', description: 'Dummy parameter for no-parameter tools' }
-                },
-                required: ['random_string']
+                properties: {}
+              },
+              annotations: {
+                readOnlyHint: true,
+                openWorldHint: false
               }
             },
             {
@@ -843,6 +881,7 @@ rl.on('line', async (line) => {
             },
             {
               name: 'execute_command',
+              title: 'Execute Command',
               description: 'Execute a terminal command with timeout',
               inputSchema: {
                 type: 'object',

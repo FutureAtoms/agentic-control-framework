@@ -1,21 +1,93 @@
 # 🤖 Agentic Control Framework (ACF)
 
-**A comprehensive toolkit for autonomous agent development with 64+ specialized tools**
+**A comprehensive toolkit for autonomous agent development with 83+ specialized tools**
 
-![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-100%25%20Pass%20Rate-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen)
+![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-100%25%20Pass%20Rate-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202025--03--26-Compliant-blue)
 
 ## 🌟 Overview
 
-The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 64+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
+The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 83+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        CC[Claude Code]
+        CD[Claude Desktop]
+        CU[Cursor IDE]
+        VS[VS Code]
+        CLI[CLI Interface]
+    end
+
+    subgraph "Protocol Layer"
+        MCP[MCP Protocol 2025-03-26]
+        HTTP[HTTP/SSE Transport]
+        STDIO[STDIO Transport]
+    end
+
+    subgraph "ACF Core"
+        MS[MCP Server]
+        TM[Task Manager]
+        PE[Priority Engine]
+        FW[File Watcher]
+    end
+
+    subgraph "Tool Categories"
+        CT[Core ACF Tools<br/>33 tools]
+        FT[File Operations<br/>12 tools]
+        TT[Terminal Tools<br/>6 tools]
+        BT[Browser Tools<br/>25 tools]
+        ST[Search/Edit<br/>2 tools]
+        AT[AppleScript<br/>1 tool]
+        CFT[Config Tools<br/>3 tools]
+    end
+
+    subgraph "Storage & External"
+        FS[File System]
+        DB[Task Database]
+        BR[Browser Engine]
+        OS[Operating System]
+    end
+
+    CC --> MCP
+    CD --> MCP
+    CU --> MCP
+    VS --> MCP
+    CLI --> TM
+
+    MCP --> MS
+    HTTP --> MS
+    STDIO --> MS
+
+    MS --> TM
+    MS --> PE
+    MS --> FW
+
+    TM --> CT
+    MS --> FT
+    MS --> TT
+    MS --> BT
+    MS --> ST
+    MS --> AT
+    MS --> CFT
+
+    CT --> DB
+    FT --> FS
+    TT --> OS
+    BT --> BR
+    FW --> FS
+```
 
 **Key Features:**
-- 🔧 **64+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
+- 🔧 **83+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
 - 🎯 **3 Usage Modes**: CLI, Local MCP, Cloud MCP for maximum flexibility
-- 🔗 **Universal Compatibility**: Works with Cursor, Claude Desktop, VS Code, and any MCP-compatible client
+- 🔗 **Universal Compatibility**: Works with Claude Code, Cursor, Claude Desktop, VS Code, and any MCP-compatible client
 - ☁️ **Cloud-Ready**: Deploy to GCP, Railway, Fly.io with auto-scaling
-- 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (25/25 tests passing)
-- ⚡ **High Performance**: Average response time 24ms, no slow responses (>1s)
+- 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (83/83 tools verified)
+- ⚡ **High Performance**: Average response time 200-1000ms, excellent reliability
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
+- 📋 **MCP 2025-03-26 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
 
 ## 📁 Project Structure
 
@@ -235,6 +307,55 @@ node test-simple-tools.js
 
 ## 📋 Usage Modes
 
+### Usage Mode Comparison
+
+```mermaid
+graph LR
+    subgraph "CLI Mode"
+        CLI1[Direct Commands]
+        CLI2[Automation Scripts]
+        CLI3[CI/CD Integration]
+    end
+
+    subgraph "Local MCP Mode"
+        MCP1[Claude Code]
+        MCP2[Cursor IDE]
+        MCP3[Claude Desktop]
+        MCP4[VS Code]
+    end
+
+    subgraph "Remote MCP Mode"
+        REM1[Web Clients]
+        REM2[Distributed Teams]
+        REM3[Cloud Deployment]
+        REM4[Multi-Client Access]
+    end
+
+    CLI1 --> |Fast & Direct| ACF[ACF Core]
+    CLI2 --> |Scriptable| ACF
+    CLI3 --> |Automated| ACF
+
+    MCP1 --> |Natural Language| ACF
+    MCP2 --> |IDE Integration| ACF
+    MCP3 --> |AI Assistant| ACF
+    MCP4 --> |Extension| ACF
+
+    REM1 --> |HTTP/SSE| PROXY[mcp-proxy]
+    REM2 --> |Remote Access| PROXY
+    REM3 --> |Scalable| PROXY
+    REM4 --> |Concurrent| PROXY
+
+    PROXY --> ACF
+
+    ACF --> TOOLS[83+ Tools]
+
+    style CLI1 fill:#e1f5fe
+    style MCP1 fill:#f3e5f5
+    style REM1 fill:#e8f5e8
+    style ACF fill:#fff3e0
+    style TOOLS fill:#fce4ec
+```
+
 ## 1. 🖥️ CLI Mode (100% Working)
 
 **Perfect for**: Automated scripts, local development, CI/CD integration
@@ -282,6 +403,68 @@ cd your-project
 ## 🎯 Numerical Priority System (1-1000)
 
 ACF features a sophisticated numerical priority system that replaces traditional 4-level priorities with a flexible 1-1000 scale, providing fine-grained control and intelligent dependency management.
+
+### Priority System Architecture
+
+```mermaid
+graph TD
+    subgraph "Priority Ranges"
+        CRIT[🚨 Critical<br/>900-1000<br/>Security, Blockers]
+        HIGH[🔴 High<br/>700-899<br/>Important Features]
+        MED[🟡 Medium<br/>400-699<br/>Standard Work]
+        LOW[🟢 Low<br/>1-399<br/>Documentation]
+    end
+
+    subgraph "Priority Engine"
+        PE[Priority Engine]
+        DA[Dependency Analysis]
+        TA[Time Decay]
+        EW[Effort Weighting]
+        UT[Uniqueness Tracker]
+    end
+
+    subgraph "Algorithms"
+        DB[Dependency Boosts]
+        CP[Critical Path]
+        DO[Distribution Optimization]
+        AR[Auto Recalculation]
+    end
+
+    subgraph "Operations"
+        BUMP[Bump Priority]
+        DEFER[Defer Priority]
+        PRIO[Prioritize]
+        DEPRIO[Deprioritize]
+        RECALC[Recalculate All]
+    end
+
+    PE --> DA
+    PE --> TA
+    PE --> EW
+    PE --> UT
+
+    DA --> DB
+    DA --> CP
+    PE --> DO
+    PE --> AR
+
+    BUMP --> PE
+    DEFER --> PE
+    PRIO --> PE
+    DEPRIO --> PE
+    RECALC --> PE
+
+    PE --> CRIT
+    PE --> HIGH
+    PE --> MED
+    PE --> LOW
+
+    style CRIT fill:#ffebee
+    style HIGH fill:#fff3e0
+    style MED fill:#f9fbe7
+    style LOW fill:#e8f5e8
+    style PE fill:#e3f2fd
+```
 
 ### Priority Ranges
 - **🟢 Low (1-399)**: Documentation, cleanup, nice-to-have features
@@ -542,7 +725,78 @@ export GCP_PROJECT_ID="your-project-id"
 
 ## 🔧 All Available Tools
 
-### Core ACF Tools (22 tools) ✅
+### Tool Categories Overview
+
+```mermaid
+mindmap
+  root((ACF Tools<br/>83 Total))
+    Core ACF
+      Task Management
+        listTasks
+        addTask
+        updateStatus
+        getNextTask
+      Priority System
+        recalculatePriorities
+        getPriorityStatistics
+        bumpTaskPriority
+        prioritizeTask
+      File Watching
+        initializeFileWatcher
+        stopFileWatcher
+        forceSyncTaskFiles
+      Templates
+        getPriorityTemplates
+        addTaskWithTemplate
+    File Operations
+      Basic Operations
+        read_file
+        write_file
+        copy_file
+        delete_file
+      Directory Ops
+        list_directory
+        create_directory
+        tree
+        search_files
+    Terminal
+      Command Execution
+        execute_command
+        read_output
+        force_terminate
+      Process Management
+        list_processes
+        kill_process
+    Browser Automation
+      Navigation
+        browser_navigate
+        browser_navigate_back
+        browser_close
+      Interaction
+        browser_click
+        browser_type
+        browser_hover
+        browser_drag
+      Capture
+        browser_take_screenshot
+        browser_pdf_save
+        browser_snapshot
+      Tab Management
+        browser_tab_list
+        browser_tab_new
+        browser_tab_close
+    Search & Edit
+      search_code
+      edit_block
+    System Integration
+      AppleScript
+        applescript_execute
+      Configuration
+        get_config
+        set_config_value
+```
+
+### Core ACF Tools (33 tools) ✅
 ```
 Task Management:
 - listTasks: List all tasks with filtering

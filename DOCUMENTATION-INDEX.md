@@ -17,11 +17,18 @@
 
 ## 🔧 Technical Documentation
 
+### Architecture & Design
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - 🆕 Comprehensive system architecture with Mermaid diagrams
+- **[docs/TOOL_REFERENCE.md](docs/TOOL_REFERENCE.md)** - 🆕 Complete tool reference with workflow diagrams
+- **[docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)** - 🆕 Complete deployment guide with cloud platform specifics
+
 ### MCP Integration
 - **[docs/MCP_INTEGRATION_GUIDE.md](docs/MCP_INTEGRATION_GUIDE.md)** - Complete MCP integration reference
 - **[docs/enhanced-mcp-tools.md](docs/enhanced-mcp-tools.md)** - Detailed tool documentation
 
 ### Testing & Quality Assurance
+- **[TOOL_CATEGORY_VERIFICATION_REPORT.md](TOOL_CATEGORY_VERIFICATION_REPORT.md)** - 🆕 Complete verification of all 83 tools
+- **[COMPREHENSIVE_FUNCTIONALITY_TEST_REPORT.md](COMPREHENSIVE_FUNCTIONALITY_TEST_REPORT.md)** - 🆕 End-to-end functionality testing
 - **[test/README.md](test/README.md)** - Testing framework overview
 - **[test/reports/ACF-TESTING-SUMMARY.md](test/reports/ACF-TESTING-SUMMARY.md)** - Latest test results
 - **[docs/TESTING_SUMMARY.md](docs/TESTING_SUMMARY.md)** - Historical testing summary
