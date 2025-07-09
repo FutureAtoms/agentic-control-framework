@@ -337,6 +337,62 @@ Always update:
 - Environment variables in `.env.example`
 - Config options in `config.json`
 
+## 🚀 Usage with Claude Code (Recommended)
+
+### Why Claude Code?
+Claude Code provides the best integration experience with ACF:
+- **Native MCP Support**: First-class tool discovery and execution
+- **Rich UI**: Tool descriptions, parameter hints, and validation
+- **Performance**: Optimized for real-time streaming
+- **Debugging**: Advanced error handling and logging
+- **Official Support**: Maintained by Anthropic
+
+### Quick Setup
+
+1. **Install and configure ACF**:
+```bash
+git clone https://github.com/FutureAtoms/agentic-control-framework.git
+cd agentic-control-framework
+npm install
+./setup-claude-code.sh
+```
+
+2. **Start Claude Code**:
+```bash
+claude-code --mcp-config claude-code-mcp-config.json
+```
+
+3. **Try example commands**:
+```
+Initialize a new project called "My Web App"
+Add a high-priority task for user authentication
+What should I work on next?
+Search for TODO comments and create tasks
+Execute npm test and update task status
+```
+
+### Advanced Usage Patterns
+
+**Task-Driven Development**:
+```
+Create a critical task for implementing JWT authentication
+Add subtasks for token generation, validation, and refresh
+Generate task files for the team
+```
+
+**Automated Testing Integration**:
+```
+Execute the test suite and create debugging tasks if there are failures
+Monitor file changes and update task statuses automatically
+```
+
+**Browser Automation**:
+```
+Navigate to the project requirements page
+Take a screenshot and save it as requirements.png
+Parse the requirements and create tasks
+```
+
 ## Security Considerations
 
 ### 1. Path Validation

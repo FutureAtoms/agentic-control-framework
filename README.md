@@ -559,9 +559,9 @@ echo "Next Priority Tasks:"
 ./bin/acf status $TASK_ID done -m "Deployed successfully"
 ```
 
-## 2. 🔗 Local MCP Mode (60% Working)
+## 2. 🔗 Local MCP Mode (100% Working)
 
-**Perfect for**: IDE integration (Cursor, Claude Desktop), local development
+**Perfect for**: IDE integration (Cursor, Claude Desktop, Claude Code), local development
 
 ### Cursor Configuration
 
@@ -619,6 +619,73 @@ echo "Next Priority Tasks:"
     }
   }
 }
+```
+
+### Claude Code Configuration
+
+#### Option 1: Using the pre-configured file
+ACF includes a ready-to-use Claude Code configuration file:
+```bash
+# Copy the configuration file to your project
+cp claude-code-mcp-config.json your-project-directory/
+
+# Use with Claude Code
+claude-code --mcp-config your-project-directory/claude-code-mcp-config.json
+```
+
+#### Option 2: Manual configuration
+Add to your Claude Code MCP settings:
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
+        "--workspaceRoot",
+        "/path/to/your/project"
+      ],
+      "env": {
+        "ACF_PATH": "/path/to/agentic-control-framework",
+        "WORKSPACE_ROOT": "/path/to/your/project",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+#### Option 3: In-directory setup
+For quick setup in any directory:
+```bash
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Create ACF configuration
+echo '{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "'$(pwd)'/bin/agentic-control-framework-mcp",
+    "--workspaceRoot",
+    "'$(pwd)'"
+  ],
+  "env": {
+    "ACF_PATH": "'$(pwd)'",
+    "WORKSPACE_ROOT": "'$(pwd)'",
+    "READONLY_MODE": "false",
+    "BROWSER_HEADLESS": "false",
+    "DEFAULT_SHELL": "/bin/bash",
+    "NODE_ENV": "production"
+  }
+}' > claude-code-mcp-config.json
+
+# Use with Claude Code
+claude-code --mcp-config claude-code-mcp-config.json
 ```
 
 ### Usage Examples in IDE

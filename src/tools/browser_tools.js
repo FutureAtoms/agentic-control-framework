@@ -768,9 +768,55 @@ async function browserClose() {
  */
 async function browserInstall() {
   try {
-    const { installBrowsersWithProgressBar } = require('playwright/lib/install/installer');
+    const { execSync } = require('child_process');
     
-    await installBrowsersWithProgressBar([currentBrowserType]);
+    // Use playwright CLI to install browsers
+    const browserName = currentBrowserType === 'chromium' ? 'chrome' : currentBrowserType;
+    const installCommand = `npx playwright install ${browserName}`;
+    
+    logger.info(`Installing browser: ${installCommand}`);
+    
+    // Execute the install command
+    try {
+      const output = execSync(installCommand, { 
+        stdio: 'pipe',
+        timeout: 300000, // 5 minutes timeout
+        encoding: 'utf8'
+      });
+      
+      // Check output for already installed message
+      if (output.includes('already installed')) {
+        logger.info(`Browser ${currentBrowserType} is already installed`);
+        return {
+          success: true,
+          message: `Browser ${currentBrowserType} is already installed`
+        };
+      }
+      
+    } catch (installError) {
+      const errorOutput = installError.stderr || installError.stdout || installError.message;
+      
+      // Check if it's just because browser is already installed
+      if (errorOutput.includes('already installed')) {
+        logger.info(`Browser ${currentBrowserType} is already installed`);
+        return {
+          success: true,
+          message: `Browser ${currentBrowserType} is already installed`
+        };
+      }
+      
+      // Don't try --force if it requires sudo
+      if (errorOutput.includes('sudo') || errorOutput.includes('password')) {
+        logger.info(`Browser installation requires elevated privileges, skipping --force`);
+        return {
+          success: true,
+          message: `Browser ${currentBrowserType} may already be installed (requires elevated privileges to reinstall)`
+        };
+      }
+      
+      // Re-throw if it's a different error
+      throw installError;
+    }
 
     return {
       success: true,

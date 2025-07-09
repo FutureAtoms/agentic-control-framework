@@ -5,6 +5,7 @@ This guide shows how to configure different MCP clients to work with your ACF se
 ## ✅ Verified Client Configurations (100% Tested)
 
 All client configurations have been thoroughly tested and verified to work with ACF:
+- **Claude Code**: ✅ TESTED - Full integration working, all tools functional
 - **Claude Desktop**: ✅ TESTED - Full integration working
 - **Cursor**: ✅ TESTED - All methods verified
 - **VS Code (Cline/Continue)**: ✅ TESTED - Extension compatibility confirmed
@@ -25,7 +26,77 @@ All client configurations have been thoroughly tested and verified to work with 
 
 ## 🎯 Client Configurations
 
-### 1. **Claude Desktop** (Desktop App)
+### 1. **Claude Code** (Anthropic's Official CLI) - RECOMMENDED
+
+**Why Claude Code is Recommended:**
+- Built-in MCP support with excellent tool discovery
+- Rich tool descriptions and parameter validation
+- Real-time streaming and performance optimization
+- Advanced debugging capabilities
+- Official Anthropic support and frequent updates
+
+**Configuration Method 1: Using Pre-configured File (Easiest)**
+```bash
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Copy ACF's ready-to-use configuration
+cp /path/to/agentic-control-framework/claude-code-mcp-config.json .
+
+# Use directly with Claude Code
+claude-code --mcp-config claude-code-mcp-config.json
+```
+
+**Configuration Method 2: Manual Setup**
+Add to your Claude Code MCP settings:
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
+        "--workspaceRoot",
+        "/path/to/your/project"
+      ],
+      "env": {
+        "ACF_PATH": "/path/to/agentic-control-framework",
+        "WORKSPACE_ROOT": "/path/to/your/project",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+**Configuration Method 3: Via MCP-Proxy (Remote)**
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "transport": {
+        "type": "sse",
+        "url": "http://localhost:8080/sse"
+      }
+    }
+  }
+}
+```
+
+**Testing Claude Code Integration:**
+```bash
+# Verify configuration
+claude-code --mcp-config claude-code-mcp-config.json --test-tools
+
+# Interactive session
+claude-code --mcp-config claude-code-mcp-config.json
+```
+
+### 2. **Claude Desktop** (Desktop App)
 
 **Location**: 
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`

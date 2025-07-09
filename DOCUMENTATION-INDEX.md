@@ -12,7 +12,8 @@
 - **[docs/COMPLETE_TUTORIAL.md](docs/COMPLETE_TUTORIAL.md)** - Comprehensive tutorial
 
 ### Client Integration
-- **[client-configurations/README.md](client-configurations/README.md)** - MCP client setup (Cursor, Claude Desktop, VS Code)
+- **[docs/CLAUDE_CODE_SETUP_GUIDE.md](docs/CLAUDE_CODE_SETUP_GUIDE.md)** - **🚀 Claude Code Setup Guide (Recommended)**
+- **[client-configurations/README.md](client-configurations/README.md)** - MCP client setup (Claude Code, Cursor, Claude Desktop, VS Code)
 - **[CURSOR-SETUP-GUIDE.md](CURSOR-SETUP-GUIDE.md)** - Cursor IDE integration guide
 
 ## 🔧 Technical Documentation
