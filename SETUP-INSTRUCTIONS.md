@@ -4,7 +4,77 @@ Your ACF MCP-proxy server is running and ready for client connections!
 
 ## 🚀 Quick Setup
 
-### 1. **Cursor** (Recommended for development)
+### 1. **Claude Code** (Recommended - Best Integration)
+
+**Why Claude Code?**
+- Native MCP support with excellent tool discovery
+- Built-in debugging and validation
+- Real-time streaming performance
+- Official Anthropic support
+
+**Setup Method 1: Using Pre-configured File (Easiest)**
+```bash
+# Copy ACF's ready-to-use configuration
+cp claude-code-mcp-config.json your-project-directory/
+
+# Use with Claude Code
+claude-code --mcp-config your-project-directory/claude-code-mcp-config.json
+```
+
+**Setup Method 2: Quick Script Setup**
+```bash
+# Navigate to your project
+cd /path/to/your/project
+
+# Create configuration (replace paths as needed)
+cat > claude-code-mcp-config.json << EOF
+{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
+    "--workspaceRoot",
+    "$(pwd)"
+  ],
+  "env": {
+    "ACF_PATH": "/path/to/agentic-control-framework",
+    "WORKSPACE_ROOT": "$(pwd)",
+    "READONLY_MODE": "false",
+    "BROWSER_HEADLESS": "false",
+    "DEFAULT_SHELL": "/bin/bash",
+    "NODE_ENV": "production"
+  }
+}
+EOF
+
+# Start Claude Code
+claude-code --mcp-config claude-code-mcp-config.json
+```
+
+**Setup Method 3: Via MCP-Proxy (Remote)**
+```bash
+# Start MCP proxy
+mcp-proxy --port 8080 --debug node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
+
+# Configure Claude Code for remote access
+cat > claude-code-remote-config.json << EOF
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "transport": {
+        "type": "sse",
+        "url": "http://localhost:8080/sse"
+      }
+    }
+  }
+}
+EOF
+
+# Use remote configuration
+claude-code --mcp-config claude-code-remote-config.json
+```
+
+### 2. **Cursor** (Great for development)
 
 **Method 1: Via Settings UI**
 1. Open Cursor → Settings → Search "MCP"
@@ -34,8 +104,29 @@ Your ACF MCP-proxy server is running and ready for client connections!
 
 After setup, your client should:
 1. Show ACF server as connected
-2. List 64+ available tools
+2. List 83+ available tools
 3. Allow you to execute ACF commands
+
+### Test Your Setup
+
+**For Claude Code:**
+```bash
+# Test configuration
+claude-code --mcp-config claude-code-mcp-config.json --test-tools
+
+# Interactive test
+claude-code --mcp-config claude-code-mcp-config.json
+# Then try: "List all available tools"
+```
+
+**For other MCP clients:**
+```bash
+# Test server health
+curl http://localhost:8080/health
+
+# Test tool listing
+curl -H "Accept: text/event-stream" http://localhost:8080/sse
+```
 
 ## 🆘 Troubleshooting
 

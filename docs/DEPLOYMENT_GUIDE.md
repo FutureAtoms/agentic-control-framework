@@ -100,6 +100,43 @@ sequenceDiagram
     MCP-->>IDE: Response
 ```
 
+#### Claude Code Configuration (Recommended)
+
+**Local Development:**
+```json
+{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
+    "--workspaceRoot",
+    "/path/to/your/project"
+  ],
+  "env": {
+    "ACF_PATH": "/path/to/agentic-control-framework",
+    "WORKSPACE_ROOT": "/path/to/your/project",
+    "READONLY_MODE": "false",
+    "BROWSER_HEADLESS": "false",
+    "DEFAULT_SHELL": "/bin/bash",
+    "NODE_ENV": "production"
+  }
+}
+```
+
+**Remote Deployment:**
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "transport": {
+        "type": "sse",
+        "url": "https://your-deployment-url.com/sse"
+      }
+    }
+  }
+}
+```
+
 #### Cursor Configuration
 
 ```json
