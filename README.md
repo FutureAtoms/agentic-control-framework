@@ -870,7 +870,7 @@ claude mcp add acf-project -s project \
   -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 
 # This creates a .mcp.json file that can be committed to version control
-# Team members can then use: claude mcp sync
+# Team members can then use: claude
 
 # Start Claude with shared ACF tools
 claude

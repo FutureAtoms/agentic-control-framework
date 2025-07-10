@@ -97,7 +97,32 @@ claude mcp add acf-server \
 ### Remote Configuration (via mcp-proxy)
 ```bash
 # Add remote ACF server
-claude mcp add acf-remote --url http://localhost:8080/sse
+claude mcp add --transport sse acf-remote http://localhost:8080/sse
+```
+
+### Project-Scoped Configuration
+```bash
+# Add ACF server for current project only (shared via .mcp.json)
+claude mcp add -s project acf-project \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
+```
+
+### User-Scoped Configuration
+```bash
+# Add ACF server available across all projects
+claude mcp add -s user acf-global \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 ```
 
 ## 🛠️ Environment Variables
@@ -298,6 +323,15 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | \
 
 # Test with Claude Code
 claude --test-tools
+
+# List all configured MCP servers
+claude mcp list
+
+# Get details about ACF server
+claude mcp get acf-server
+
+# Remove ACF server (if needed)
+claude mcp remove acf-server
 
 # Run comprehensive tests
 cd /path/to/agentic-control-framework
