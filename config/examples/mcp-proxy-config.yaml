@@ -1,0 +1,92 @@
+# mcp-proxy configuration for Agentic Control Framework
+# Converts STDIO-based ACF server to HTTP/SSE without code changes
+# Production-ready configuration for commercial deployment
+
+servers:
+  acf:
+    command: "node"
+    args: ["/app/bin/agentic-control-framework-mcp"]
+    env:
+      WORKSPACE_ROOT: "/data"
+      ALLOWED_DIRS: "/data:/tmp:/workspace"
+      ACF_PATH: "/app"
+      DEBUG: "false"
+      NODE_ENV: "production"
+    description: "Agentic Control Framework - 64+ Tools for AI Agents"
+    restart: true
+    restartDelay: 1000
+    
+# Server configuration
+host: "0.0.0.0"  # For Docker deployment
+port: 8080
+cors:
+  enabled: true
+  origins: 
+    - "https://claude.ai"
+    - "https://cursor.sh" 
+    - "https://codeium.com"
+    - "https://continue.dev"
+    - "*"  # For development - restrict in production
+
+# Authentication configuration
+auth:
+  type: "bearer"
+  tokens:
+    - "acf-demo-token-2024"
+    - "acf-free-tier-token"
+  # Production tokens should be set via environment variables
+  # AUTH_TOKENS="token1,token2,token3"
+
+# Performance settings for commercial deployment
+performance:
+  maxConnections: 50
+  connectionTimeout: 30000
+  keepAlive: true
+  requestTimeout: 300000  # 5 minutes for long-running operations
+  pooling:
+    enabled: true
+    maxPool: 10
+    idleTimeout: 60000
+
+# Caching for better performance
+cache:
+  enabled: true
+  ttl: 3600  # 1 hour
+  maxSize: 1000
+  
+# Logging for production monitoring
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  
+# Health check endpoint
+healthCheck:
+  enabled: true
+  path: "/health"
+  interval: 30000
+  
+# Rate limiting (requests per minute per token)
+rateLimit:
+  enabled: true
+  requests: 1000
+  window: 60000
+  
+# Metrics for monitoring
+metrics:
+  enabled: true
+  path: "/metrics"
+  prometheus: true
+  
+# Security settings
+security:
+  maxRequestSize: "10mb"
+  helmet: true
+  trustProxy: true
+  
+# Circuit breaker for reliability
+circuitBreaker:
+  enabled: true
+  threshold: 5
+  timeout: 30000
+  resetTimeout: 60000 

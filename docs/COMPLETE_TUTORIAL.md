@@ -97,37 +97,37 @@ Enhanced functionality from Desktop Commander and Playwright:
 
 - **`terminal_tools.js`**: Terminal and process management
   ```javascript
-  - executeCommand()     // Run shell commands
-  - listProcesses()      // List system processes
-  - killProcess()        // Terminate processes
-  - getConfig()          // Get/set configuration
+  - execute_command()    // Run shell commands
+  - list_processes()     // List system processes
+  - kill_process()       // Terminate processes
+  - get_config()         // Get/set configuration
   ```
 
 - **`browser_tools.js`**: Browser automation with Playwright
   ```javascript
-  - browserNavigate()    // Navigate to URLs
-  - browserClick()       // Click elements
-  - browserType()        // Type text
-  - browserScreenshot()  // Capture screenshots
+  - browser_navigate()    // Navigate to URLs
+  - browser_click()       // Click elements
+  - browser_type()        // Type text
+  - browser_take_screenshot()  // Capture screenshots
   ```
 
 - **`search_tools.js`**: Advanced code search
   ```javascript
-  - searchCode()         // Search using ripgrep
+  - search_code()        // Search using ripgrep
   - Pattern matching with context
   - File filtering options
   ```
 
 - **`edit_tools.js`**: Surgical text editing
   ```javascript
-  - editBlock()          // Replace text with fuzzy matching
+  - edit_block()         // Replace text with fuzzy matching
   - Multi-occurrence support
   - Diff generation
   ```
 
 - **`enhanced_filesystem_tools.js`**: Enhanced file operations
   ```javascript
-  - readFileEnhanced()   // Read files or URLs
+  - read_file()          // Read files or URLs
   - Timeout support for network requests
   ```
 

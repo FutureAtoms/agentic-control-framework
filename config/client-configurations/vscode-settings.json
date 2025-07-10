@@ -1,0 +1,15 @@
+{
+  "cline.mcpServers": {
+    "acf-local": {
+      "url": "http://localhost:8080/sse",
+      "transport": "sse"
+    }
+  },
+  "continue.mcpServers": [
+    {
+      "name": "acf-local",
+      "url": "http://localhost:8080/sse",
+      "transport": "sse"
+    }
+  ]
+}

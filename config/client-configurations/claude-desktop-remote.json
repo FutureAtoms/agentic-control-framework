@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "acf-remote": {
+      "url": "http://localhost:8080/sse",
+      "transport": "sse",
+      "description": "Agentic Control Framework - Remote via mcp-proxy"
+    },
+    "acf-cloud": {
+      "url": "https://your-domain.com/sse",
+      "transport": "sse",
+      "description": "Agentic Control Framework - Cloud Deployment",
+      "headers": {
+        "Authorization": "Bearer your-api-token"
+      }
+    }
+  }
+}

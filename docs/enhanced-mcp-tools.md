@@ -466,7 +466,7 @@ for (const match of results.matches) {
 - Install ripgrep for `search_code` functionality
 
 ### Browser Tools
-- Run `browser_install()` if browser not found
+- Run `browser_install` tool if browser not found
 - Use headless mode for CI/CD environments
 - Check console messages for page errors
 

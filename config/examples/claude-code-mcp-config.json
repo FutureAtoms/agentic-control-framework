@@ -1,0 +1,17 @@
+{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/agentic-control-framework-mcp",
+    "--workspaceRoot",
+    "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework"
+  ],
+  "env": {
+    "ACF_PATH": "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework",
+    "WORKSPACE_ROOT": "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework",
+    "READONLY_MODE": "false",
+    "BROWSER_HEADLESS": "false",
+    "DEFAULT_SHELL": "/bin/bash",
+    "NODE_ENV": "production"
+  }
+}

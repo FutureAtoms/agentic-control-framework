@@ -394,8 +394,8 @@ npx playwright --version
 
 # Test browser tools
 node -e "
-const { browserInstall } = require('./src/tools/browser_tools');
-browserInstall().then(console.log);
+const browserTools = require('./src/tools/browser_tools');
+browserTools.browserInstall().then(console.log);
 "
 ```
 

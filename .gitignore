@@ -39,3 +39,9 @@ test_results.txt
 mcp_test.js
 .tmp/
 .task_manager/
+
+# User-specific configuration files
+claude-mcp-config.json
+config.json
+mcp-connection.json
+settings.json
