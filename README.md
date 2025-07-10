@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/futureatoms-agentic-control-framework-badge.png)](https://mseep.ai/app/futureatoms-agentic-control-framework)
+
 # 🤖 Agentic Control Framework (ACF)
 
 **A comprehensive toolkit for autonomous agent development with 83+ specialized tools**
