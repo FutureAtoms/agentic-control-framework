@@ -810,14 +810,24 @@ echo "Next Priority Tasks:"
 
 ### Claude Code Configuration
 
-#### Option 1: Using the pre-configured file
-ACF includes a ready-to-use Claude Code configuration file:
+#### Option 1: Using Claude MCP commands (Recommended)
+Configure ACF as an MCP server using Claude's built-in commands:
 ```bash
-# Copy the configuration file to your project
-cp claude-code-mcp-config.json your-project-directory/
+# Navigate to your project directory
+cd your-project-directory
 
-# Use with Claude Code
-claude-code --mcp-config your-project-directory/claude-code-mcp-config.json
+# Add ACF as an MCP server
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
+
+# Start Claude with ACF tools available
+claude
 ```
 
 #### Option 2: Manual configuration
@@ -846,33 +856,24 @@ Add to your Claude Code MCP settings:
 }
 ```
 
-#### Option 3: In-directory setup
-For quick setup in any directory:
+#### Option 3: Project-scoped setup
+For team collaboration with shared MCP configuration:
 ```bash
 # Navigate to your project directory
 cd /path/to/your/project
 
-# Create ACF configuration
-echo '{
-  "type": "stdio",
-  "command": "node",
-  "args": [
-    "'$(pwd)'/bin/agentic-control-framework-mcp",
-    "--workspaceRoot",
-    "'$(pwd)'"
-  ],
-  "env": {
-    "ACF_PATH": "'$(pwd)'",
-    "WORKSPACE_ROOT": "'$(pwd)'",
-    "READONLY_MODE": "false",
-    "BROWSER_HEADLESS": "false",
-    "DEFAULT_SHELL": "/bin/bash",
-    "NODE_ENV": "production"
-  }
-}' > claude-code-mcp-config.json
+# Add ACF as project-scoped MCP server (shared with team)
+claude mcp add acf-project -s project \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 
-# Use with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+# This creates a .mcp.json file that can be committed to version control
+# Team members can then use: claude mcp sync
+
+# Start Claude with shared ACF tools
+claude
 ```
 
 ### Usage Examples in IDE

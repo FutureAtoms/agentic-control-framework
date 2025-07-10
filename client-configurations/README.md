@@ -41,10 +41,20 @@ All client configurations have been thoroughly tested and verified to work with 
 cd /path/to/your/project
 
 # Copy ACF's ready-to-use configuration
-cp /path/to/agentic-control-framework/claude-code-mcp-config.json .
+cp /path/to/agentic-control-framework/claude-mcp-config.json .
 
-# Use directly with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
+
+# Start Claude Code
+claude
 ```
 
 **Configuration Method 2: Manual Setup**
@@ -90,10 +100,10 @@ Add to your Claude Code MCP settings:
 **Testing Claude Code Integration:**
 ```bash
 # Verify configuration
-claude-code --mcp-config claude-code-mcp-config.json --test-tools
+claude --test-tools
 
 # Interactive session
-claude-code --mcp-config claude-code-mcp-config.json
+claude
 ```
 
 ### 2. **Claude Desktop** (Desktop App)

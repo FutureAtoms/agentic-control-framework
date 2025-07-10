@@ -79,14 +79,18 @@ ACF includes a ready-to-use Claude Code configuration file:
 # Navigate to your project directory
 cd /path/to/your/project
 
-# Copy the pre-configured file
-cp /path/to/agentic-control-framework/claude-code-mcp-config.json .
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 
-# Edit the paths in the config file (if needed)
-nano claude-code-mcp-config.json
-
-# Use with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+# Start Claude Code
+claude
 ```
 
 #### Method 2: Manual Configuration
@@ -121,12 +125,12 @@ For rapid deployment in any directory:
 
 ```bash
 # Create a quick setup script
-cat > setup-claude-code.sh << 'EOF'
+cat > setup-claude.sh << 'EOF'
 #!/bin/bash
 ACF_PATH="/path/to/agentic-control-framework"
 WORKSPACE_ROOT="$(pwd)"
 
-cat > claude-code-mcp-config.json << EOL
+cat > claude-mcp-config.json << EOL
 {
   "type": "stdio",
   "command": "node",
@@ -146,12 +150,13 @@ cat > claude-code-mcp-config.json << EOL
 }
 EOL
 
-echo "Claude Code configuration created: claude-code-mcp-config.json"
-echo "Run: claude-code --mcp-config claude-code-mcp-config.json"
+echo "Claude Code configuration created: claude-mcp-config.json"
+echo "Add server with: claude mcp add acf-server ..."
+echo "Run: claude"
 EOF
 
-chmod +x setup-claude-code.sh
-./setup-claude-code.sh
+chmod +x setup-claude.sh
+./setup-claude.sh
 ```
 
 ### Remote Claude Code Configuration (via mcp-proxy)

@@ -359,7 +359,7 @@ npm install
 
 2. **Start Claude Code**:
 ```bash
-claude-code --mcp-config claude-code-mcp-config.json
+claude
 ```
 
 3. **Try example commands**:

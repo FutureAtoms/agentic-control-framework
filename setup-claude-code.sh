@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🚀 Claude Code Setup Script for ACF
-# This script creates a claude-code-mcp-config.json file for your project
+# This script creates a claude-mcp-config.json file for your project
 
 set -e
 
@@ -19,7 +19,7 @@ if [ ! -f "$ACF_PATH/bin/agentic-control-framework-mcp" ]; then
 fi
 
 # Create Claude Code configuration
-cat > claude-code-mcp-config.json << EOF
+cat > claude-mcp-config.json << EOF
 {
   "type": "stdio",
   "command": "node",
@@ -39,7 +39,7 @@ cat > claude-code-mcp-config.json << EOF
 }
 EOF
 
-echo "✅ Claude Code configuration created: claude-code-mcp-config.json"
+echo "✅ Claude Code configuration created: claude-mcp-config.json"
 echo ""
 echo "📋 Configuration details:"
 echo "   - ACF Path: $ACF_PATH"
@@ -47,10 +47,20 @@ echo "   - Workspace: $PROJECT_ROOT"
 echo "   - Mode: Full access (read/write)"
 echo "   - Browser: UI enabled"
 echo ""
-echo "🚀 To start Claude Code with ACF:"
-echo "   claude-code --mcp-config claude-code-mcp-config.json"
+echo "🚀 To add ACF server to Claude Code:"
+echo "   claude mcp add acf-server \\"
+echo "     -e ACF_PATH=\"$ACF_PATH\" \\"
+echo "     -e WORKSPACE_ROOT=\"$PROJECT_ROOT\" \\"
+echo "     -e READONLY_MODE=\"false\" \\"
+echo "     -e BROWSER_HEADLESS=\"false\" \\"
+echo "     -e DEFAULT_SHELL=\"/bin/bash\" \\"
+echo "     -e NODE_ENV=\"production\" \\"
+echo "     -- node $ACF_PATH/bin/agentic-control-framework-mcp --workspaceRoot \"$PROJECT_ROOT\""
+echo ""
+echo "🚀 To start Claude Code:"
+echo "   claude"
 echo ""
 echo "🧪 To test the configuration:"
-echo "   claude-code --mcp-config claude-code-mcp-config.json --test-tools"
+echo "   claude --test-tools"
 echo ""
 echo "📚 For more help, see: docs/CLAUDE_CODE_SETUP_GUIDE.md"

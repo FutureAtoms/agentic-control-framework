@@ -27,11 +27,18 @@ cd agentic-control-framework
 # Install dependencies
 npm install
 
-# Setup for Claude Code (creates claude-code-mcp-config.json)
-./setup-claude-code.sh
+# Setup for Claude Code
+./setup-claude.sh
 
-# Start Claude Code with ACF
-claude-code --mcp-config claude-code-mcp-config.json
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="$(pwd)" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node ./bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 ```
 
 ### Option 2: Manual Configuration
@@ -40,77 +47,57 @@ claude-code --mcp-config claude-code-mcp-config.json
 cd /path/to/your/project
 
 # Copy ACF's pre-configured file
-cp /path/to/agentic-control-framework/claude-code-mcp-config.json .
+cp /path/to/agentic-control-framework/claude-mcp-config.json .
 
-# Edit paths if needed
-nano claude-code-mcp-config.json
-
-# Use with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="/path/to/your/project" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "/path/to/your/project"
 ```
 
 ## 📋 Configuration Options
 
-### Basic Configuration (claude-code-mcp-config.json)
-```json
-{
-  "type": "stdio",
-  "command": "node",
-  "args": [
-    "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
-    "--workspaceRoot",
-    "/path/to/your/project"
-  ],
-  "env": {
-    "ACF_PATH": "/path/to/agentic-control-framework",
-    "WORKSPACE_ROOT": "/path/to/your/project",
-    "READONLY_MODE": "false",
-    "BROWSER_HEADLESS": "false",
-    "DEFAULT_SHELL": "/bin/bash",
-    "NODE_ENV": "production"
-  }
-}
+### Basic Configuration
+```bash
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="/path/to/your/project" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "/path/to/your/project"
 ```
 
 ### Advanced Configuration
-```json
-{
-  "type": "stdio",
-  "command": "node",
-  "args": [
-    "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
-    "--workspaceRoot",
-    "/path/to/your/project"
-  ],
-  "env": {
-    "ACF_PATH": "/path/to/agentic-control-framework",
-    "WORKSPACE_ROOT": "/path/to/your/project",
-    "READONLY_MODE": "false",
-    "BROWSER_HEADLESS": "false",
-    "DEFAULT_SHELL": "/bin/bash",
-    "NODE_ENV": "production",
-    "BROWSER_TYPE": "chromium",
-    "COMMAND_TIMEOUT": "30000",
-    "MAX_SEARCH_RESULTS": "100",
-    "ALLOWED_DIRS": "/path/to/your/project:/tmp:/home/user/shared",
-    "BLOCKED_COMMANDS": "sudo rm -rf,rm -rf /",
-    "TELEMETRY_ENABLED": "false"
-  }
-}
+```bash
+# Add ACF server with advanced options
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="/path/to/your/project" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -e BROWSER_TYPE="chromium" \
+  -e COMMAND_TIMEOUT="30000" \
+  -e MAX_SEARCH_RESULTS="100" \
+  -e ALLOWED_DIRS="/path/to/your/project:/tmp:/home/user/shared" \
+  -e BLOCKED_COMMANDS="sudo rm -rf,rm -rf /" \
+  -e TELEMETRY_ENABLED="false" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "/path/to/your/project"
 ```
 
 ### Remote Configuration (via mcp-proxy)
-```json
-{
-  "mcpServers": {
-    "agentic-control-framework": {
-      "transport": {
-        "type": "sse",
-        "url": "http://localhost:8080/sse"
-      }
-    }
-  }
-}
+```bash
+# Add remote ACF server
+claude mcp add acf-remote --url http://localhost:8080/sse
 ```
 
 ## 🛠️ Environment Variables
@@ -150,8 +137,8 @@ export TELEMETRY_ENABLED="false"  # Disable telemetry
 
 ### Basic Task Management
 ```bash
-# Start Claude Code with ACF
-claude-code --mcp-config claude-code-mcp-config.json
+# Start Claude Code (ACF server should already be added)
+claude
 
 # Then use natural language:
 ```
@@ -213,7 +200,7 @@ PROJECT_ROOT="$(pwd)"
 ACF_PATH="/path/to/agentic-control-framework"
 
 # Create Claude Code configuration
-cat > claude-code-mcp-config.json << EOF
+cat > claude-mcp-config.json << EOF
 {
   "type": "stdio",
   "command": "node",
@@ -240,8 +227,8 @@ if [ ! -d ".acf" ]; then
     node "${ACF_PATH}/bin/agentic-control-framework-mcp" --init
 fi
 
-echo "Claude Code configuration created: claude-code-mcp-config.json"
-echo "Run: claude-code --mcp-config claude-code-mcp-config.json"
+echo "Claude Code configuration created: claude-mcp-config.json"
+echo "Run: claude (server should already be added)"
 ```
 
 ### Multiple Project Configurations
@@ -250,16 +237,19 @@ Manage multiple projects with separate configurations:
 ```bash
 # Project A
 cd /path/to/project-a
-cp /path/to/acf/claude-code-mcp-config.json claude-code-config-a.json
-# Edit paths in claude-code-config-a.json
+cp /path/to/acf/claude-mcp-config.json claude-config-a.json
+# Edit paths in claude-config-a.json
 
 # Project B
 cd /path/to/project-b
-cp /path/to/acf/claude-code-mcp-config.json claude-code-config-b.json
-# Edit paths in claude-code-config-b.json
+cp /path/to/acf/claude-mcp-config.json claude-config-b.json
+# Edit paths in claude-config-b.json
 
-# Use with specific project
-claude-code --mcp-config /path/to/project-a/claude-code-config-a.json
+# Add project-specific server
+claude mcp add project-a-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="/path/to/project-a" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "/path/to/project-a"
 ```
 
 ## 📊 Tool Categories Available
@@ -307,7 +297,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | \
   node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp
 
 # Test with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json --test-tools
+claude --test-tools
 
 # Run comprehensive tests
 cd /path/to/agentic-control-framework
@@ -317,7 +307,7 @@ npm test
 ### Validate Configuration
 ```bash
 # Check configuration syntax
-node -e "console.log(JSON.parse(require('fs').readFileSync('claude-code-mcp-config.json', 'utf8')))"
+node -e "console.log(JSON.parse(require('fs').readFileSync('claude-mcp-config.json', 'utf8')))"
 
 # Verify paths exist
 ls -la /path/to/agentic-control-framework/bin/agentic-control-framework-mcp
@@ -334,7 +324,7 @@ node bin/agentic-control-framework-mcp --version
 **1. Claude Code can't find MCP server**
 ```bash
 # Check configuration file syntax
-node -c claude-code-mcp-config.json
+node -c claude-mcp-config.json
 
 # Verify paths are absolute
 ls -la /path/to/agentic-control-framework/bin/agentic-control-framework-mcp
@@ -381,10 +371,10 @@ browserInstall().then(console.log);
 ls -la /path/to/your/project
 
 # Verify ALLOWED_DIRS includes your workspace
-grep -r "ALLOWED_DIRS" claude-code-mcp-config.json
+grep -r "ALLOWED_DIRS" claude-mcp-config.json
 
 # Check READONLY_MODE
-grep -r "READONLY_MODE" claude-code-mcp-config.json
+grep -r "READONLY_MODE" claude-mcp-config.json
 ```
 
 ### Debug Mode
@@ -480,7 +470,7 @@ Enable debug logging:
 ### Local Development
 ```bash
 # Development mode
-claude-code --mcp-config claude-code-mcp-config.json
+claude
 ```
 
 ### Remote Server
@@ -491,7 +481,7 @@ mcp-proxy --port 8080 --debug \
   --workspaceRoot /path/to/your/project
 
 # Configure Claude Code for remote
-cat > claude-code-remote-config.json << EOF
+cat > claude-remote-config.json << EOF
 {
   "mcpServers": {
     "agentic-control-framework": {
@@ -504,8 +494,8 @@ cat > claude-code-remote-config.json << EOF
 }
 EOF
 
-# Use remote configuration
-claude-code --mcp-config claude-code-remote-config.json
+# Start Claude Code with remote server
+claude
 ```
 
 ## 🆘 Support & Community
@@ -529,7 +519,7 @@ claude-code --mcp-config claude-code-remote-config.json
 **🎉 You're now ready to use ACF with Claude Code! Enjoy the most powerful task management and automation experience available.**
 
 **Next Steps:**
-1. Test your configuration with `claude-code --mcp-config claude-code-mcp-config.json`
+1. Test your configuration with `claude`
 2. Try the example workflows above
 3. Explore the 83+ tools available
 4. Join our community for tips and best practices

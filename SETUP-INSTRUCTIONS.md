@@ -14,11 +14,18 @@ Your ACF MCP-proxy server is running and ready for client connections!
 
 **Setup Method 1: Using Pre-configured File (Easiest)**
 ```bash
-# Copy ACF's ready-to-use configuration
-cp claude-code-mcp-config.json your-project-directory/
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="your-project-directory" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "your-project-directory"
 
-# Use with Claude Code
-claude-code --mcp-config your-project-directory/claude-code-mcp-config.json
+# Start Claude Code
+claude
 ```
 
 **Setup Method 2: Quick Script Setup**
@@ -27,7 +34,7 @@ claude-code --mcp-config your-project-directory/claude-code-mcp-config.json
 cd /path/to/your/project
 
 # Create configuration (replace paths as needed)
-cat > claude-code-mcp-config.json << EOF
+cat > claude-mcp-config.json << EOF
 {
   "type": "stdio",
   "command": "node",
@@ -48,7 +55,7 @@ cat > claude-code-mcp-config.json << EOF
 EOF
 
 # Start Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+claude
 ```
 
 **Setup Method 3: Via MCP-Proxy (Remote)**
@@ -57,7 +64,7 @@ claude-code --mcp-config claude-code-mcp-config.json
 mcp-proxy --port 8080 --debug node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
 
 # Configure Claude Code for remote access
-cat > claude-code-remote-config.json << EOF
+cat > claude-remote-config.json << EOF
 {
   "mcpServers": {
     "agentic-control-framework": {
@@ -71,7 +78,7 @@ cat > claude-code-remote-config.json << EOF
 EOF
 
 # Use remote configuration
-claude-code --mcp-config claude-code-remote-config.json
+claude
 ```
 
 ### 2. **Cursor** (Great for development)
@@ -112,10 +119,10 @@ After setup, your client should:
 **For Claude Code:**
 ```bash
 # Test configuration
-claude-code --mcp-config claude-code-mcp-config.json --test-tools
+claude --test-tools
 
 # Interactive test
-claude-code --mcp-config claude-code-mcp-config.json
+claude
 # Then try: "List all available tools"
 ```
 
