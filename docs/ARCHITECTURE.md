@@ -21,7 +21,7 @@ graph TB
     end
     
     subgraph "Protocol & Transport Layer"
-        MCP[MCP Protocol 2025-03-26]
+        MCP[MCP Protocol 2025-06-18]
         HTTP[HTTP Transport]
         SSE[Server-Sent Events]
         STDIO[STDIO Transport]

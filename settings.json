@@ -1,7 +1,0 @@
-{
-  "agentic-control-framework": {
-    "mcp": "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/bin/agentic-control-framework-mcp",
-    "apiKey": "GEMINI_API_KEY",
-    "workspace": "/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework"
-  }
-}

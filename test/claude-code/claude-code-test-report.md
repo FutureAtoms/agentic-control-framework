@@ -1,6 +1,6 @@
 # Claude Code Compatibility Test Report
 
-**Generated:** Wed Jul  9 22:16:41 CEST 2025
+**Generated:** Thu Jul 10 13:55:36 CEST 2025
 **ACF Version:** 0.1.1
 **Node.js Version:** v24.2.0
 **Test Environment:** Darwin 24.5.0
@@ -63,7 +63,7 @@
 
 - **Test Framework:** Mocha
 - **Test Coverage:** Protocol, Schema, Execution, Remote Integration
-- **Test Duration:** Wed Jul  9 22:17:14 CEST 2025
+- **Test Duration:** Thu Jul 10 13:56:11 CEST 2025
 - **Platform:** Darwin 24.5.0
 
 ---

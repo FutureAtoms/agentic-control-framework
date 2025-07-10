@@ -1,0 +1,17 @@
+{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "${ACF_PATH}/bin/agentic-control-framework-mcp",
+    "--workspaceRoot",
+    "${WORKSPACE_ROOT}"
+  ],
+  "env": {
+    "ACF_PATH": "${ACF_PATH}",
+    "WORKSPACE_ROOT": "${WORKSPACE_ROOT}",
+    "READONLY_MODE": "false",
+    "BROWSER_HEADLESS": "false",
+    "DEFAULT_SHELL": "/bin/bash",
+    "NODE_ENV": "production"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "mcp.servers": {
+    "acf-remote": {
+      "url": "http://localhost:8080/sse",
+      "transport": "sse",
+      "description": "Agentic Control Framework - Remote via mcp-proxy",
+      "timeout": 30000
+    },
+    "acf-cloud": {
+      "url": "https://your-domain.com/sse",
+      "transport": "sse",
+      "description": "Agentic Control Framework - Cloud Deployment",
+      "headers": {
+        "Authorization": "Bearer your-api-token"
+      },
+      "timeout": 30000
+    }
+  },
+  "mcp.enabled": true,
+  "mcp.logLevel": "info",
+  "mcp.retryAttempts": 3,
+  "mcp.retryDelay": 1000
+}

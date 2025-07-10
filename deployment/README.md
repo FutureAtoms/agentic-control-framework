@@ -60,7 +60,7 @@ The fastest path to commercial deployment using mcp-proxy to convert your existi
 
 ## 🔧 Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 22+ (LTS) and npm
 - Docker and Docker Compose
 - Platform-specific CLI (gcloud, railway, or fly)
 

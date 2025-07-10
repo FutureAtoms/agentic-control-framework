@@ -28,7 +28,7 @@ Successfully integrated 39 new tools from Desktop Commander MCP and Playwright M
 - `edit_block` - Surgical text replacement
 - Enhanced `read_file` - URL support added
 
-### From Playwright MCP (28 tools)
+### From Playwright MCP (25 tools)
 
 #### Navigation (3 tools)
 - `browser_navigate`

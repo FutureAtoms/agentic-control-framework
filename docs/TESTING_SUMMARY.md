@@ -27,13 +27,13 @@
 **Test:** Browser tools functionality
 ```javascript
 // Test browser navigation
-await browserNavigate('https://example.com');
+await browser_navigate({ url: 'https://example.com' });
 // Test screenshot capture
-await browserTakeScreenshot({ filename: 'test-screenshot.png' });
+await browser_take_screenshot({ filename: 'test-screenshot.png' });
 // Test page snapshot
-await browserSnapshot();
+await browser_snapshot();
 // Test browser close
-await browserClose();
+await browser_close();
 ```
 
 **Result:** All browser automation tools working
@@ -51,7 +51,7 @@ await browserClose();
 
 **Result:** MCP server functioning properly
 - JSON-RPC communication working
-- All 63 tools registered and available
+- All 83+ tools registered and available
 - Tool execution successful
 
 ### 4. Dependency Installation ✅

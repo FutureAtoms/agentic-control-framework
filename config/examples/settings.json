@@ -1,0 +1,7 @@
+{
+  "agentic-control-framework": {
+    "mcp": "${ACF_PATH}/bin/agentic-control-framework-mcp",
+    "apiKey": "GEMINI_API_KEY",
+    "workspace": "${WORKSPACE_ROOT}"
+  }
+}

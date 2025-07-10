@@ -1,0 +1,6 @@
+{
+  "agentic-control-framework": {
+    "command": "${ACF_PATH}/bin/agentic-control-framework-mcp",
+    "protocol": "MCP"
+  }
+}

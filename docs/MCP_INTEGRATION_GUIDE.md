@@ -9,7 +9,7 @@
 The Agentic Control Framework provides a fully tested, production-ready MCP server with 83+ specialized tools. **All tests are passing with 100% success rate** and excellent performance metrics.
 
 ### ✅ Test Results Summary
-- **MCP Protocol Compliance**: ✅ PASSED (Latest MCP 2025-03-26 protocol supported)
+- **MCP Protocol Compliance**: ✅ PASSED (Latest MCP 2025-06-18 protocol supported)
 - **Tool Registration**: ✅ PASSED (All 83+ tools properly registered with titles and annotations)
 - **Client Integration**: ✅ PASSED (Claude Code, Cursor, Claude Desktop, VS Code verified)
 - **Performance**: ✅ EXCELLENT (24ms average response time)
@@ -79,14 +79,18 @@ ACF includes a ready-to-use Claude Code configuration file:
 # Navigate to your project directory
 cd /path/to/your/project
 
-# Copy the pre-configured file
-cp /path/to/agentic-control-framework/claude-code-mcp-config.json .
+# Add ACF server to Claude Code
+claude mcp add acf-server \
+  -e ACF_PATH="/path/to/agentic-control-framework" \
+  -e WORKSPACE_ROOT="$(pwd)" \
+  -e READONLY_MODE="false" \
+  -e BROWSER_HEADLESS="false" \
+  -e DEFAULT_SHELL="/bin/bash" \
+  -e NODE_ENV="production" \
+  -- node /path/to/agentic-control-framework/bin/agentic-control-framework-mcp --workspaceRoot "$(pwd)"
 
-# Edit the paths in the config file (if needed)
-nano claude-code-mcp-config.json
-
-# Use with Claude Code
-claude-code --mcp-config claude-code-mcp-config.json
+# Start Claude Code
+claude
 ```
 
 #### Method 2: Manual Configuration
@@ -121,12 +125,12 @@ For rapid deployment in any directory:
 
 ```bash
 # Create a quick setup script
-cat > setup-claude-code.sh << 'EOF'
+cat > setup-claude.sh << 'EOF'
 #!/bin/bash
 ACF_PATH="/path/to/agentic-control-framework"
 WORKSPACE_ROOT="$(pwd)"
 
-cat > claude-code-mcp-config.json << EOL
+cat > claude-mcp-config.json << EOL
 {
   "type": "stdio",
   "command": "node",
@@ -146,12 +150,13 @@ cat > claude-code-mcp-config.json << EOL
 }
 EOL
 
-echo "Claude Code configuration created: claude-code-mcp-config.json"
-echo "Run: claude-code --mcp-config claude-code-mcp-config.json"
+echo "Claude Code configuration created: claude-mcp-config.json"
+echo "Add server with: claude mcp add acf-server ..."
+echo "Run: claude"
 EOF
 
-chmod +x setup-claude-code.sh
-./setup-claude-code.sh
+chmod +x setup-claude.sh
+./setup-claude.sh
 ```
 
 ### Remote Claude Code Configuration (via mcp-proxy)
@@ -244,12 +249,12 @@ mcpServer.stderr.pipe(process.stderr);
 process.stdin.pipe(mcpServer.stdin);
 ```
 
-## 🔧 Latest MCP Schema Improvements (2025-03-26)
+## 🔧 Latest MCP Schema Improvements (2025-06-18)
 
 ACF MCP server now fully complies with the latest MCP specification:
 
 ### Protocol Version Support
-- **Latest Protocol**: `2025-03-26` (default)
+- **Latest Protocol**: `2025-06-18` (default)
 - **Backward Compatibility**: `2024-11-05`
 - **Auto-negotiation**: Automatically selects best supported version
 
@@ -522,7 +527,7 @@ env:
    - Check Claude Code's MCP logs for connection errors
 
 2. **Tools not showing up or working incorrectly**
-   - Ensure ACF MCP server is using the latest protocol version (2025-03-26)
+   - Ensure ACF MCP server is using the latest protocol version (2025-06-18)
    - Check that all tool definitions have proper `title` and `inputSchema`
    - Verify no dummy parameters are being used
    - Test the MCP server directly with JSON-RPC calls
@@ -538,7 +543,7 @@ env:
 1. **Browser not found**
    ```bash
    # Install browsers
-   npx playwright install chromium
+   npx playwright install --with-deps
    ```
 
 2. **Permission denied for commands**

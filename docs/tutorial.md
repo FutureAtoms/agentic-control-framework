@@ -30,7 +30,7 @@ This tutorial will guide you through setting up and using the Agentic Control Fr
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js 22+ (LTS)
 - npm or yarn
 - Cursor IDE (for MCP integration)
 - (Optional) Google Gemini API key for AI-powered features

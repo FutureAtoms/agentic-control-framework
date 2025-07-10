@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "agentic-control-framework-remote": {
+      "transport": {
+        "type": "sse",
+        "url": "http://localhost:8080/sse"
+      },
+      "description": "Agentic Control Framework - Remote via mcp-proxy",
+      "timeout": 30000
+    },
+    "agentic-control-framework-cloud": {
+      "transport": {
+        "type": "sse",
+        "url": "https://your-domain.com/sse",
+        "headers": {
+          "Authorization": "Bearer your-api-token"
+        }
+      },
+      "description": "Agentic Control Framework - Cloud Deployment",
+      "timeout": 30000
+    }
+  }
+}
