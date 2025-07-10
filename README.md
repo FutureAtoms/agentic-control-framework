@@ -1,4 +1,3 @@
-[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/futureatoms-agentic-control-framework-badge.png)](https://mseep.ai/app/futureatoms-agentic-control-framework)
 
 # 🤖 Agentic Control Framework (ACF)
 
@@ -285,6 +284,7 @@ Server Management:
 - get_config: Get server configuration
 - set_config_value: Update configuration values
 ```
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/futureatoms-agentic-control-framework-badge.png)](https://mseep.ai/app/futureatoms-agentic-control-framework)
 
 ## 📁 Project Structure
 
