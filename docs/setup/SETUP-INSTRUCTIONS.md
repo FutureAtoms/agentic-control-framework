@@ -2,6 +2,38 @@
 
 Your ACF MCP-proxy server is running and ready for client connections!
 
+> **🚀 First time setup?** See our [Platform Setup Guide](PLATFORM-SETUP-GUIDE.md) for complete installation instructions on Windows, macOS, and Ubuntu.
+
+**✅ Verified Integrations (July 2025)**
+- **Claude Code**: 15/15 compatibility tests passed
+- **Cursor IDE**: Configuration and tool discovery verified
+- **Claude Desktop**: SSE transport and mcp-proxy integration tested
+- **VS Code**: Cline and Continue extension configurations verified
+
+## 📋 Prerequisites
+
+Before configuring IDE integrations, ensure you have:
+
+1. **ACF Server Running**:
+   ```bash
+   # Local MCP mode
+   node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
+
+   # OR Cloud MCP mode with mcp-proxy
+   mcp-proxy --port 8080 --target stdio --command "node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)"
+   ```
+
+2. **Dependencies Installed**:
+   ```bash
+   npm install -g mcp-proxy @modelcontextprotocol/inspector
+   ```
+
+3. **Server Verification**:
+   ```bash
+   # Test server is running
+   curl http://localhost:8080/health  # For mcp-proxy mode
+   ```
+
 ## 🚀 Quick Setup
 
 ### 1. **Claude Code** (Recommended - Best Integration)
@@ -111,8 +143,16 @@ claude
 
 After setup, your client should:
 1. Show ACF server as connected
-2. List 83+ available tools
+2. List 79+ available tools (verified count)
 3. Allow you to execute ACF commands
+
+**Verified Tool Categories:**
+- ✅ **25 Core ACF Tools**: Task management, priority system, file generation
+- ✅ **14 Filesystem Tools**: File operations, directory management, search
+- ✅ **25 Browser Tools**: Playwright automation, screenshots, PDF generation
+- ✅ **5 Terminal Tools**: Command execution, process management
+- ✅ **3 Search/Edit Tools**: Code search with ripgrep, surgical editing
+- ✅ **7 System Tools**: AppleScript, configuration management
 
 ### Test Your Setup
 

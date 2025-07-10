@@ -4,7 +4,7 @@
 # This script configures the environment for the Agentic Control Framework
 
 # Get the absolute path of the project directory
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 echo "Project directory: $PROJECT_DIR"
 
 # Make scripts executable

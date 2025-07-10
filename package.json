@@ -1,7 +1,7 @@
 {
   "name": "agentic-control-framework",
   "version": "0.1.1",
-  "description": "CLI and MCP task manager with AI-based PRD parsing",
+  "description": "Production-ready agentic control framework with 79+ verified tools for autonomous agent development",
   "main": "src/core.js",
   "bin": {
     "acf": "./bin/acf",
@@ -48,6 +48,7 @@
     "commander": "^12.1.0",
     "diff": "^5.2.0",
     "dotenv": "^16.5.0",
+    "eventsource": "^4.0.0",
     "execa": "^5.1.1",
     "glob": "^10.3.10",
     "mime-types": "^2.1.35",

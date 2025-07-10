@@ -9,7 +9,7 @@ echo "🤖 Setting up Claude Code for Agentic Control Framework..."
 
 # Get current directory
 PROJECT_ROOT="$(pwd)"
-ACF_PATH="$(dirname "$(readlink -f "$0")")"
+ACF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Check if we're in the ACF directory
 if [ ! -f "$ACF_PATH/bin/agentic-control-framework-mcp" ]; then

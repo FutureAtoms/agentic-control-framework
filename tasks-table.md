@@ -1,29 +1,13 @@
 # ACF Tool Testing Project
 Comprehensive testing of all Agentic Control Framework tools
 
-## Summary
-
-**✅ Done**: 7 | **🔄 In Progress**: 1 | **🔬 Testing**: 0 | **⬜ Todo**: 34 | **❌ Blocked**: 0 | **⚠️ Error**: 0
-
-**Progress**: 17%
-
-[███                 ] 17%
-
-### Priority Distribution
-
-🚨 **Critical (900+)**: 25 | 🔴 **High (700-899)**: 6 | 🟡 **Medium (500-699)**: 11 | 🟢 **Low (<500)**: 0
-
-```
-Priority Distribution Chart:
-🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🔴🔴🔴🔴🔴🔴🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡
-```
-
-| Priority | Count | Percentage |
-|:---------|:-----:|:----------:|
-| 🚨 Critical | 25 | 59.5% |
-| 🔴 High | 6 | 14.3% |
-| 🟡 Medium | 11 | 26.2% |
-| 🟢 Low | 0 | 0.0% |
+> ## 📈 Project Summary
+> 
+> **✅ Done**: 7 | **🔄 In Progress**: 1 | **⬜ Todo**: 34 | **❌ Blocked**: 0
+> 
+> **Progress**: 17% `███░░░░░░░░░░░░░░░░░` 7/42 tasks
+> 
+> **Priorities**: 🚨 **Critical**: 25 | 🔴 **High**: 6 | 🟡 **Medium**: 11 | 🟢 **Low**: 0
 
 ## Tasks
 

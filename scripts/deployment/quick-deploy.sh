@@ -9,7 +9,7 @@ set -e
 # Configuration
 SERVICE_NAME="acf-mcp-proxy"
 AUTH_SERVICE_NAME="acf-auth-proxy"
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEPLOY_MODE=${DEPLOY_MODE:-"with-auth"}  # "proxy-only" or "with-auth"
 
 # Colors
@@ -134,7 +134,7 @@ services:
   mcp-proxy:
     build:
       context: .
-      dockerfile: Dockerfile.proxy
+      dockerfile: deployment/docker/Dockerfile.proxy
     environment:
       - NODE_ENV=production
       - WORKSPACE_ROOT=/data
@@ -182,7 +182,7 @@ services:
   mcp-proxy:
     build:
       context: .
-      dockerfile: Dockerfile.proxy
+      dockerfile: deployment/docker/Dockerfile.proxy
     ports:
       - "8080:8080"
     environment:
@@ -233,7 +233,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-CMD ["node", "auth-proxy.js"]
+CMD ["node", "src/auth-proxy.js"]
 EOF
         
         success "Auth proxy Dockerfile created"
