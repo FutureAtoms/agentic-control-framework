@@ -77,7 +77,7 @@ graph TB
 #### Updated Statistics
 - **Tool Count**: Updated from 64+ to 83 tools
 - **Test Coverage**: Updated to reflect 100% verification
-- **MCP Compliance**: Added MCP 2025-03-26 compliance badge
+- **MCP Compliance**: Added MCP 2025-06-18 compliance badge
 - **Claude Code**: Added Claude Code compatibility badge
 
 #### Added Tool Overview Mindmap

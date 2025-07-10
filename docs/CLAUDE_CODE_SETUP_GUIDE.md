@@ -387,7 +387,7 @@ console.log(fs.readFileSync(path.join(process.env.WORKSPACE_ROOT, 'package.json'
 **3. Browser tools failing**
 ```bash
 # Install browsers
-npx playwright install chromium
+npx playwright install --with-deps
 
 # Check browser installation
 npx playwright --version

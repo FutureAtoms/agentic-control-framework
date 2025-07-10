@@ -9,7 +9,7 @@
 The Agentic Control Framework provides a fully tested, production-ready MCP server with 83+ specialized tools. **All tests are passing with 100% success rate** and excellent performance metrics.
 
 ### ✅ Test Results Summary
-- **MCP Protocol Compliance**: ✅ PASSED (Latest MCP 2025-03-26 protocol supported)
+- **MCP Protocol Compliance**: ✅ PASSED (Latest MCP 2025-06-18 protocol supported)
 - **Tool Registration**: ✅ PASSED (All 83+ tools properly registered with titles and annotations)
 - **Client Integration**: ✅ PASSED (Claude Code, Cursor, Claude Desktop, VS Code verified)
 - **Performance**: ✅ EXCELLENT (24ms average response time)
@@ -249,12 +249,12 @@ mcpServer.stderr.pipe(process.stderr);
 process.stdin.pipe(mcpServer.stdin);
 ```
 
-## 🔧 Latest MCP Schema Improvements (2025-03-26)
+## 🔧 Latest MCP Schema Improvements (2025-06-18)
 
 ACF MCP server now fully complies with the latest MCP specification:
 
 ### Protocol Version Support
-- **Latest Protocol**: `2025-03-26` (default)
+- **Latest Protocol**: `2025-06-18` (default)
 - **Backward Compatibility**: `2024-11-05`
 - **Auto-negotiation**: Automatically selects best supported version
 
@@ -527,7 +527,7 @@ env:
    - Check Claude Code's MCP logs for connection errors
 
 2. **Tools not showing up or working incorrectly**
-   - Ensure ACF MCP server is using the latest protocol version (2025-03-26)
+   - Ensure ACF MCP server is using the latest protocol version (2025-06-18)
    - Check that all tool definitions have proper `title` and `inputSchema`
    - Verify no dummy parameters are being used
    - Test the MCP server directly with JSON-RPC calls
@@ -543,7 +543,7 @@ env:
 1. **Browser not found**
    ```bash
    # Install browsers
-   npx playwright install chromium
+   npx playwright install --with-deps
    ```
 
 2. **Permission denied for commands**

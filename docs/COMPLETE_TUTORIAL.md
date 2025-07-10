@@ -435,7 +435,7 @@ blockedCommands: [
    - Enable debug logging: `DEBUG=true`
 
 3. **Browser Automation Issues**
-   - Install browsers: `npx playwright install`
+   - Install browsers: `npx playwright install --with-deps`
    - Check `BROWSER_TYPE` setting
    - Verify display for non-headless mode
 

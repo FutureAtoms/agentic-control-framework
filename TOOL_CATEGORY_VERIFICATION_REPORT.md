@@ -167,7 +167,7 @@ All 83 tools across 6 major categories have been systematically verified and are
 5. **Browser Operations**: ⚠️ `browser_install` has minor Playwright configuration issue
 
 ### Protocol Compliance
-- ✅ **MCP 2025-03-26**: Latest protocol version supported
+- ✅ **MCP 2025-06-18**: Latest protocol version supported
 - ✅ **Tool Titles**: Human-readable titles for Claude Code integration
 - ✅ **Annotations**: Behavior hints properly implemented
 - ✅ **Schema Validation**: All tools have proper JSON schema

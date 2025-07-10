@@ -24,7 +24,7 @@ graph TB
     end
 
     subgraph "Protocol Layer"
-        MCP[MCP Protocol 2025-03-26]
+        MCP[MCP Protocol 2025-06-18]
         HTTP[HTTP/SSE Transport]
         STDIO[STDIO Transport]
     end
@@ -90,7 +90,7 @@ graph TB
 - 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (83/83 tools verified)
 - ⚡ **High Performance**: Average response time 200-1000ms, excellent reliability
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
-- 📋 **MCP 2025-03-26 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
+- 📋 **MCP 2025-06-18 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
 
 ## 🔧 All Available Tools
 
@@ -481,7 +481,7 @@ agentic-control-framework/
 
 ### Prerequisites
 ```bash
-# Install Node.js 18+
+# Install Node.js 22+ (LTS)
 node --version
 
 # Install dependencies
@@ -945,7 +945,7 @@ curl http://localhost:8080/health
 # MCP initialization
 curl -X POST http://localhost:8080/stream \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}'
 
 # List available tools
 curl -X POST http://localhost:8080/stream \
@@ -1074,7 +1074,7 @@ ls -la tasks.json
 chmod +x bin/acf
 
 # Check Node.js version
-node --version  # Should be 18+
+node --version  # Should be 22+
 ```
 
 ### MCP Mode Issues

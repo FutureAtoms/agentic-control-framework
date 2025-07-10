@@ -145,40 +145,37 @@ claude
 - **macOS**: `~/Library/Application Support/Cursor/User/globalStorage/state.vscdb` or via settings
 - **Windows**: `%APPDATA%\Cursor\User\globalStorage\state.vscdb`
 
-**Method 1: Via Settings UI**
-1. Open Cursor → Settings → Extensions → MCP
-2. Add new server:
+**Method 1: Via MCP Settings (Recommended)**
+1. Open Cursor → Go to MCP settings in the UI
+2. Click "Add Custom Server" or use deep link integration
+3. Configure ACF server:
    - **Name**: `acf-local`
    - **URL**: `http://localhost:8080/sse`
    - **Transport**: `sse`
 
-**Method 2: Via Configuration File**
-Create or edit: `~/.cursor/mcp_config.json`
+**Method 2: Via Deep Link (For Developers)**
+Use Cursor's deep link system for easier integration:
+```bash
+# Open Cursor with ACF MCP server configuration
+open "cursor://anysphere.cursor-deeplink/mcp/install?name=acf-local&url=http://localhost:8080/sse&transport=sse"
+```
+
+**Method 3: Manual Configuration (Legacy)**
+1. Create configuration file: `~/.cursor/mcp_config.json`
+2. Add server configuration:
 ```json
 {
   "mcpServers": {
     "acf-local": {
       "url": "http://localhost:8080/sse",
-      "transport": "sse"
+      "transport": "sse",
+      "protocolVersion": "2025-06-18"
     }
   }
 }
 ```
 
-**Method 3: Via Cursor Settings JSON**
-1. Open Command Palette (`Cmd+Shift+P`)
-2. Search "Preferences: Open User Settings (JSON)"
-3. Add:
-```json
-{
-  "mcp.servers": {
-    "acf-local": {
-      "url": "http://localhost:8080/sse",
-      "transport": "sse"
-    }
-  }
-}
-```
+**Note**: Cursor now supports MCP servers through their official UI. Check Settings → Tools → MCP for the latest configuration options.
 
 ### 3. **Cline (VS Code Extension)**
 
@@ -254,7 +251,7 @@ For any MCP-compatible client:
   "server": {
     "url": "http://localhost:8080/sse",
     "transport": "sse",
-    "protocol": "2024-11-05"
+    "protocol": "2025-06-18"
   }
 }
 ```
@@ -324,7 +321,7 @@ curl -X POST http://localhost:8080/stream \
     "id": 1,
     "method": "initialize",
     "params": {
-      "protocolVersion": "2024-11-05",
+      "protocolVersion": "2025-06-18",
       "capabilities": {},
       "clientInfo": {
         "name": "test-client",

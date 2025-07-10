@@ -117,7 +117,7 @@ curl -X POST http://localhost:8080/stream \
     "id": 1,
     "method": "initialize",
     "params": {
-      "protocolVersion": "2024-11-05",
+      "protocolVersion": "2025-06-18",
       "capabilities": {},
       "clientInfo": {"name": "test", "version": "1.0.0"}
     }

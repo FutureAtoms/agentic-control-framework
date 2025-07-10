@@ -66,7 +66,7 @@ Comprehensive testing of all ACF functionality across CLI, local MCP, and remote
 **Direct MCP Server Communication**: All major tool categories tested
 
 #### ✅ Protocol Compliance
-- **Initialize**: ✅ Protocol version 2025-03-26 supported
+- **Initialize**: ✅ Protocol version 2025-06-18 supported
 - **Capabilities**: ✅ Proper capabilities declaration
 - **Server Info**: ✅ Title and version information correct
 
@@ -165,7 +165,7 @@ Comprehensive testing of all ACF functionality across CLI, local MCP, and remote
 ### ✅ Strengths
 1. **Complete Functionality**: All 83+ tools working correctly
 2. **Multi-Mode Support**: CLI, local MCP, and remote MCP all functional
-3. **Protocol Compliance**: Latest MCP 2025-03-26 standard supported
+3. **Protocol Compliance**: Latest MCP 2025-06-18 standard supported
 4. **Rich Feature Set**: Advanced task management with priorities, templates, analytics
 5. **File System Integration**: Comprehensive file operations with security
 6. **Browser Automation**: Full Playwright integration for web tasks

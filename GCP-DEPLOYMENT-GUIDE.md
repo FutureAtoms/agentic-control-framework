@@ -29,7 +29,7 @@ This guide walks you through deploying ACF to GCP Cloud Run with:
 ### 2. **Local Setup**
 - Google Cloud SDK (gcloud) installed
 - Docker installed
-- Node.js 18+ and npm
+- Node.js 22+ (LTS) and npm
 
 ### 3. **ACF Project**
 - Your Agentic Control Framework project
@@ -222,7 +222,7 @@ curl -X POST $CLOUD_RUN_URL/stream \
     "id": 1,
     "method": "initialize",
     "params": {
-      "protocolVersion": "2024-11-05",
+      "protocolVersion": "2025-06-18",
       "capabilities": {},
       "clientInfo": {"name": "test", "version": "1.0.0"}
     }
