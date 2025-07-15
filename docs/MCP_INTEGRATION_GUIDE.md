@@ -198,6 +198,43 @@ mcp-proxy --port 8080 --debug \
 - **Real-time Updates**: Live task status updates and file changes
 - **Error Handling**: Comprehensive error messages and debugging information
 
+### MCP Connection Configuration for Claude Desktop
+
+**⚠️ IMPORTANT: Use ONLY the Direct Executable Method - This is the ONLY method confirmed to work reliably**
+
+Configure Claude Desktop with this EXACT pattern:
+
+**Configuration File Location:**
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+**Configuration (replace with your actual paths):**
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
+      "env": {
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
+      }
+    }
+  }
+}
+```
+
+**⚠️ CRITICAL REQUIREMENTS:**
+- Use **FULL ABSOLUTE PATHS** - no relative paths or `~`
+- Set `ACF_PATH` to your ACF installation directory
+- Set `WORKSPACE_ROOT` to your project workspace
+- Ensure `bin/agentic-control-framework-mcp` is executable: `chmod +x bin/agentic-control-framework-mcp`
+- **❌ DO NOT USE** the `node` + `args` pattern - it fails in Claude Desktop
+
 ### MCP Connection Configuration for Cursor IDE
 
 Update your Cursor IDE's MCP settings with this configuration:

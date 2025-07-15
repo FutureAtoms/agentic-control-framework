@@ -127,14 +127,33 @@ claude mcp get acf-server
 }
 ```
 
-### Claude Desktop
+### Claude Desktop (Direct STDIO - RECOMMENDED)
 ```json
 // ~/.config/Claude/claude_desktop_config.json (Linux)
 // ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
 // %APPDATA%\Claude\claude_desktop_config.json (Windows)
 {
   "mcpServers": {
-    "acf-local": {
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
+      "env": {
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop (Via mcp-proxy - Alternative)
+```json
+{
+  "mcpServers": {
+    "acf-proxy": {
       "transport": "sse",
       "url": "http://localhost:8080/sse"
     }

@@ -159,26 +159,34 @@ sequenceDiagram
 }
 ```
 
-#### Claude Desktop Configuration
+#### Claude Desktop Configuration (Direct STDIO - RECOMMENDED)
+
+**⚠️ IMPORTANT: Use ONLY the Direct Executable Method - This is the ONLY method confirmed to work reliably**
 
 ```json
 {
   "mcpServers": {
-    "acf-local": {
-      "command": "node",
-      "args": [
-        "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
-        "--workspaceRoot",
-        "/path/to/your/project"
-      ],
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
       "env": {
-        "WORKSPACE_ROOT": "/path/to/your/project",
-        "ALLOWED_DIRS": "/path/to/your/project:/tmp"
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
       }
     }
   }
 }
 ```
+
+**⚠️ CRITICAL REQUIREMENTS:**
+- Use **FULL ABSOLUTE PATHS** - no relative paths or `~`
+- Set `ACF_PATH` to your ACF installation directory
+- Set `WORKSPACE_ROOT` to your project workspace
+- Ensure `bin/agentic-control-framework-mcp` is executable: `chmod +x bin/agentic-control-framework-mcp`
+- **❌ DO NOT USE** the `node` + `args` pattern - it fails in Claude Desktop
 
 ## 2. Cloud Deployment
 
