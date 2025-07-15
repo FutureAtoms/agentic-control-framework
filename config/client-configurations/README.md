@@ -64,15 +64,11 @@ Add to your Claude Code MCP settings:
   "mcpServers": {
     "agentic-control-framework": {
       "type": "stdio",
-      "command": "node",
-      "args": [
-        "/path/to/agentic-control-framework/bin/agentic-control-framework-mcp",
-        "--workspaceRoot",
-        "/path/to/your/project"
-      ],
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
       "env": {
-        "ACF_PATH": "/path/to/agentic-control-framework",
-        "WORKSPACE_ROOT": "/path/to/your/project",
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
         "READONLY_MODE": "false",
         "BROWSER_HEADLESS": "false",
         "DEFAULT_SHELL": "/bin/bash",
@@ -108,15 +104,44 @@ claude
 
 ### 2. **Claude Desktop** (Desktop App)
 
-**Location**: 
+**⚠️ IMPORTANT: Use ONLY the Direct Executable Method - This is the ONLY method confirmed to work reliably**
+
+**Location**:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-**Configuration**:
+**Configuration (Direct STDIO - RECOMMENDED)**:
 ```json
 {
   "mcpServers": {
-    "acf-local": {
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
+      "env": {
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
+      }
+    }
+  }
+}
+```
+
+**⚠️ CRITICAL REQUIREMENTS:**
+- Use **FULL ABSOLUTE PATHS** - no relative paths or `~`
+- Set `ACF_PATH` to your ACF installation directory
+- Set `WORKSPACE_ROOT` to your project workspace
+- Ensure `bin/agentic-control-framework-mcp` is executable: `chmod +x bin/agentic-control-framework-mcp`
+- **❌ DO NOT USE** the `node` + `args` pattern - it fails in Claude Desktop
+
+**Alternative: Via mcp-proxy (Remote/Cloud)**:
+```json
+{
+  "mcpServers": {
+    "acf-proxy": {
       "url": "http://localhost:8080/sse",
       "transport": "sse"
     }

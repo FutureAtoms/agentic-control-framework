@@ -1,8 +1,15 @@
 {
   "mcpServers": {
-    "acf-test": {
-      "url": "http://localhost:8080/sse",
-      "transport": "sse"
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
+      "env": {
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
+      }
     }
   }
 }

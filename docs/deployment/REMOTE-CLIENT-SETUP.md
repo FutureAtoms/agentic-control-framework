@@ -15,7 +15,9 @@ This guide covers setting up various MCP clients to connect to ACF via mcp-proxy
 
 ### Claude Desktop
 
-**Local Development:**
+**⚠️ NOTE**: For local development, the **Direct STDIO method** is recommended over mcp-proxy. See the main setup documentation for the working direct executable configuration.
+
+**Remote Development via mcp-proxy:**
 ```json
 {
   "mcpServers": {

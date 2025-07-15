@@ -127,11 +127,43 @@ claude
 2. Search "Preferences: Open User Settings (JSON)"
 3. Add the configuration from `client-configurations/cursor-settings.json`
 
-### 2. **Claude Desktop**
+### 2. **Claude Desktop** (Direct STDIO - Recommended)
 
-1. Open/create file: `~/Library/Application Support/Claude/claude_desktop_config.json`
-2. Add the configuration from `client-configurations/claude-desktop-config.json`
-3. Restart Claude Desktop
+**⚠️ IMPORTANT: Use the Direct Executable Method Below - This is the ONLY method confirmed to work reliably**
+
+1. **Create/Edit Configuration File:**
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+2. **Add This EXACT Configuration** (replace paths with your actual paths):
+```json
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "command": "/FULL/PATH/TO/agentic-control-framework/bin/agentic-control-framework-mcp",
+      "env": {
+        "ACF_PATH": "/FULL/PATH/TO/agentic-control-framework",
+        "WORKSPACE_ROOT": "/FULL/PATH/TO/YOUR/WORKSPACE",
+        "ALLOWED_DIRS": "/FULL/PATH/TO/YOUR/WORKSPACE:/tmp",
+        "READONLY_MODE": "false",
+        "BROWSER_HEADLESS": "false",
+        "DEFAULT_SHELL": "/bin/bash"
+      }
+    }
+  }
+}
+```
+
+3. **⚠️ CRITICAL REQUIREMENTS:**
+   - Use **FULL ABSOLUTE PATHS** - no relative paths or `~`
+   - Set `ACF_PATH` to your ACF installation directory
+   - Set `WORKSPACE_ROOT` to your project workspace
+   - Ensure `bin/agentic-control-framework-mcp` is executable: `chmod +x bin/agentic-control-framework-mcp`
+
+4. **Restart Claude Desktop**
+
+**❌ DO NOT USE** the `node` + `args` pattern - it fails in Claude Desktop
 
 ### 3. **VS Code (Cline/Continue)**
 
