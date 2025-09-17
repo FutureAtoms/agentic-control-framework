@@ -8,7 +8,6 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { execSync } = require('child_process');
 
 // Configuration
 const UPSTREAM_REPOS = {
@@ -23,7 +22,7 @@ const UPSTREAM_REPOS = {
 };
 
 // Current ACF tools (extracted from mcp_server.js)
-const ACF_TOOLS_PATH = path.join(__dirname, '../src/mcp_server.js');
+const ACF_TOOLS_PATH = path.join(__dirname, '../../src/mcp_server.js');
 
 /**
  * Fetch content from a URL
