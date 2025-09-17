@@ -10,7 +10,7 @@ let sessionCounter = 0;
 
 // Configuration management
 let config = {
-  defaultShell: process.env.DEFAULT_SHELL || '/bin/bash',
+  defaultShell: process.env.DEFAULT_SHELL || (process.platform === 'win32' ? 'powershell.exe' : '/bin/bash'),
   blockedCommands: (process.env.BLOCKED_COMMANDS || '').split(',').filter(Boolean),
   commandTimeout: parseInt(process.env.COMMAND_TIMEOUT || '30000'),
 };
@@ -112,7 +112,8 @@ async function executeCommand(command, options = {}) {
     // For simple commands, wait for completion
     if (waitForCompletion) {
       try {
-        const result = await execa(shell, ['-c', command], {
+        const { shellCmd, shellArgs } = getShellCommand(shell, command);
+        const result = await execa(shellCmd, shellArgs, {
           timeout,
           reject: false
         });
@@ -159,7 +160,8 @@ async function executeCommand(command, options = {}) {
     sessions.set(sessionId, session);
 
     // Execute the command
-    const subprocess = execa(shell, ['-c', command], {
+    const { shellCmd, shellArgs } = getShellCommand(shell, command);
+    const subprocess = execa(shellCmd, shellArgs, {
       timeout,
       buffer: false,
       reject: false,
@@ -280,9 +282,9 @@ async function forceTerminate(pid) {
       };
     }
 
-    // Kill the process tree
+    // Kill the process tree (cross-platform)
     await new Promise((resolve, reject) => {
-      treeKill(pid, 'SIGKILL', (err) => {
+      treeKill(pid, undefined, (err) => {
         if (err) reject(err);
         else resolve();
       });
@@ -401,18 +403,20 @@ async function killProcess(pid) {
       };
     }
 
-    // Kill the process
-    process.kill(pid, 'SIGTERM');
-
-    // Wait a moment and check if it's still running
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    try {
-      process.kill(pid, 0); // Check if process exists
-      // If we get here, process is still running, use SIGKILL
-      process.kill(pid, 'SIGKILL');
-    } catch (e) {
-      // Process is already dead, which is what we want
+    if (process.platform === 'win32') {
+      await new Promise((resolve, reject) => {
+        treeKill(pid, undefined, (err) => (err ? reject(err) : resolve()));
+      });
+    } else {
+      // POSIX signals
+      process.kill(pid, 'SIGTERM');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      try {
+        process.kill(pid, 0); // still running
+        process.kill(pid, 'SIGKILL');
+      } catch (_) {
+        // already exited
+      }
     }
 
     return {
@@ -462,3 +466,24 @@ module.exports = {
   listProcesses,
   killProcess
 };
+
+// Helper to build shell command per platform
+function getShellCommand(shell, command) {
+  const isWin = process.platform === 'win32';
+  const sh = (shell || '').toLowerCase();
+  if (isWin) {
+    if (sh.includes('powershell')) {
+      return { shellCmd: shell, shellArgs: ['-NoProfile', '-Command', command] };
+    }
+    if (sh.includes('cmd')) {
+      return { shellCmd: shell, shellArgs: ['/c', command] };
+    }
+    if (sh.includes('bash')) {
+      return { shellCmd: shell, shellArgs: ['-c', command] };
+    }
+    // Fallback to powershell
+    return { shellCmd: 'powershell.exe', shellArgs: ['-NoProfile', '-Command', command] };
+  }
+  // POSIX shells
+  return { shellCmd: shell || '/bin/bash', shellArgs: ['-c', command] };
+}

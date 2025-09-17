@@ -6,8 +6,9 @@ const logger = require('../logger');
 // Try to find ripgrep binary
 let ripgrepPath;
 try {
-  // First try @vscode/ripgrep package
-  const vscodeRgPath = path.join(__dirname, '../../node_modules/@vscode/ripgrep/bin/rg');
+  // First try @vscode/ripgrep package (rg on POSIX, rg.exe on Windows)
+  const rgBinaryName = process.platform === 'win32' ? 'rg.exe' : 'rg';
+  const vscodeRgPath = path.join(__dirname, '../../node_modules/@vscode/ripgrep/bin', rgBinaryName);
   if (fs.existsSync(vscodeRgPath)) {
     ripgrepPath = vscodeRgPath;
   } else {
@@ -193,8 +194,11 @@ async function searchCode(searchPath, pattern, options = {}) {
     logger.error(`Error in searchCode: ${error.message}`);
     
     // Check if it's a ripgrep not found error
-    if (error.message.includes('ripgrep not found')) {
-      // Try using native grep as fallback
+    if (error.message.includes('ripgrep not found') || error.message.includes('ENOENT')) {
+      // Try platform-specific fallback
+      if (process.platform === 'win32') {
+        return searchCodeWindowsFallback(searchPath, pattern, options);
+      }
       return searchCodeFallback(searchPath, pattern, options);
     }
     
@@ -293,6 +297,109 @@ async function searchCodeFallback(searchPath, pattern, options = {}) {
       message: `Search failed: ${error.message}`
     };
   }
+}
+
+/**
+ * Fallback search for Windows using findstr, or last-resort Node scanning
+ */
+async function searchCodeWindowsFallback(searchPath, pattern, options = {}) {
+  const resolvedPath = path.resolve(searchPath);
+  const maxResults = options.maxResults || 100;
+  const ignoreCase = options.ignoreCase !== false;
+
+  // Try findstr if available
+  try {
+    const args = ['/c', `for /r "${resolvedPath}" %f in (*) do @findstr ${ignoreCase ? '/i ' : ''}/n /c:"${pattern}" "%f"`];
+    const result = await new Promise((resolve, reject) => {
+      const proc = spawn('cmd', args, { cwd: process.cwd(), windowsVerbatimArguments: true, timeout: options.timeoutMs || 30000 });
+      let stdout = '', stderr = '';
+      proc.stdout.on('data', d => stdout += d.toString());
+      proc.stderr.on('data', d => stderr += d.toString());
+      proc.on('error', reject);
+      proc.on('close', code => resolve({ code, stdout, stderr }));
+    });
+
+    if (result.code === 0 || result.code === 1) {
+      const lines = result.stdout.split('\n').filter(Boolean);
+      const matches = [];
+      for (const line of lines) {
+        // Format: path:line:text OR sometimes: path(line): text — handle common case
+        const m = line.match(/^(.*?):(\d+):(.*)$/);
+        if (m) {
+          matches.push({
+            path: m[1],
+            relativePath: path.relative(resolvedPath, m[1]),
+            lineNumber: parseInt(m[2], 10),
+            line: m[3].trim(),
+            matchText: pattern
+          });
+          if (matches.length >= maxResults) break;
+        }
+      }
+
+      return {
+        success: true,
+        searchPath: resolvedPath,
+        pattern,
+        matchCount: matches.length,
+        matches,
+        truncated: lines.length > maxResults,
+        fallback: true,
+        usingFindstr: true,
+        message: matches.length ? 'Using findstr fallback' : 'No matches found'
+      };
+    }
+  } catch (_) { /* fall through to Node scan */ }
+
+  // Last-resort: Node scan (portable, slower)
+  const matches = [];
+  const rx = new RegExp(pattern, ignoreCase ? 'i' : '');
+
+  function walk(dir) {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        if (ent.name.startsWith('.') && !options.includeHidden) continue;
+        const full = path.join(dir, ent.name);
+        if (ent.isDirectory()) {
+          walk(full);
+          if (matches.length >= maxResults) return;
+        } else {
+          try {
+            const content = fs.readFileSync(full, 'utf8');
+            const lines = content.split(/\r?\n/);
+            for (let i = 0; i < lines.length; i++) {
+              if (rx.test(lines[i])) {
+                matches.push({
+                  path: full,
+                  relativePath: path.relative(resolvedPath, full),
+                  lineNumber: i + 1,
+                  line: lines[i].trim(),
+                  matchText: pattern
+                });
+                break; // one hit per file for speed
+              }
+            }
+          } catch (_) { /* skip unreadable */ }
+        }
+        if (matches.length >= maxResults) return;
+      }
+    } catch (_) { /* ignore */ }
+  }
+
+  walk(resolvedPath);
+
+  return {
+    success: true,
+    searchPath: resolvedPath,
+    pattern,
+    matchCount: matches.length,
+    matches,
+    truncated: false,
+    fallback: true,
+    usingFindstr: false,
+    message: matches.length ? 'Using Node scan fallback' : 'No matches found'
+  };
 }
 
 module.exports = {

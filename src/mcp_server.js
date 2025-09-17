@@ -76,9 +76,10 @@ if (!workspaceRoot || workspaceRoot === '/') {
 }
 
 // Parse allowed directories from environment variable
-// Format: dir1:dir2:dir3 (colon-separated paths)
-const envAllowedDirs = process.env.ALLOWED_DIRS ? 
-  process.env.ALLOWED_DIRS.split(':').filter(Boolean) : 
+// Use platform-specific delimiter (":" on POSIX, ";" on Windows)
+const pathMod = require('path');
+const envAllowedDirs = process.env.ALLOWED_DIRS ?
+  process.env.ALLOWED_DIRS.split(pathMod.delimiter).filter(Boolean) :
   [];
 
 // Create an array of allowed directories for filesystem operations

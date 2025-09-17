@@ -812,6 +812,26 @@ function addTask(workspaceRoot, options) { // Renamed argument
 
   // Helper to parse comma-separated string safely
   const parseCommaSeparated = (str) => str ? str.split(',').map(s => s.trim()).filter(Boolean) : [];
+  
+  // Helper to sanitize file paths for security
+  const sanitizePath = (filePath) => {
+    if (!filePath || typeof filePath !== 'string') return null;
+    
+    // Check for path traversal attempts
+    if (filePath.includes('..') || filePath.startsWith('/')) {
+      console.warn(`Path traversal attempt blocked: ${filePath}`);
+      return null;
+    }
+    
+    return filePath;
+  };
+  
+  // Sanitize related files
+  const sanitizeRelatedFiles = (files) => {
+    if (!files) return [];
+    const parsed = parseCommaSeparated(files);
+    return parsed.map(f => sanitizePath(f)).filter(Boolean);
+  };
 
   const newTask = {
     id: newTaskId,
@@ -825,7 +845,7 @@ function addTask(workspaceRoot, options) { // Renamed argument
     updatedAt: new Date().toISOString(),
     subtasks: [],
     lastSubtaskIndex: 0, // Initialize for this new task
-    relatedFiles: parseCommaSeparated(options.relatedFiles), // Add relatedFiles
+    relatedFiles: sanitizeRelatedFiles(options.relatedFiles), // Add relatedFiles with security
     activityLog: [] // Initialize activityLog
   };
 
@@ -1090,12 +1110,58 @@ function updateTask(workspaceRoot, id, options) {
     updated = true;
   }
   if (options.dependsOn !== undefined) {
-    task.dependsOn = options.dependsOn.split(',').map(depId => parseInt(depId.trim())).filter(depId => !isNaN(depId));
+    const newDeps = options.dependsOn.split(',').map(depId => parseInt(depId.trim())).filter(depId => !isNaN(depId));
+    
+    // Check for circular dependencies
+    const checkCircular = (taskId, deps, visited = new Set()) => {
+      if (visited.has(taskId)) return true; // Circular dependency detected
+      visited.add(taskId);
+      
+      for (const depId of deps) {
+        const depTask = tasksData.tasks.find(t => t.id === depId);
+        if (depTask) {
+          if (depTask.dependsOn && depTask.dependsOn.length > 0) {
+            if (depTask.dependsOn.includes(parseInt(id))) {
+              return true; // Direct circular dependency
+            }
+            if (checkCircular(depId, depTask.dependsOn, new Set(visited))) {
+              return true; // Indirect circular dependency
+            }
+          }
+        }
+      }
+      return false;
+    };
+    
+    if (checkCircular(parseInt(id), newDeps)) {
+      return { 
+        success: false, 
+        message: `Circular dependency detected. Cannot add dependency that would create a cycle.`,
+        error: 'CIRCULAR_DEPENDENCY'
+      };
+    }
+    
+    task.dependsOn = newDeps;
     addActivityLog(task, `Dependencies updated to: ${task.dependsOn.join(', ')}`);
     updated = true;
   }
   if (options.relatedFiles !== undefined) {
-    task.relatedFiles = parseCommaSeparated(options.relatedFiles);
+    // Need to define sanitizeRelatedFiles locally
+    const sanitizePath = (filePath) => {
+      if (!filePath || typeof filePath !== 'string') return null;
+      if (filePath.includes('..') || filePath.startsWith('/')) {
+        console.warn(`Path traversal attempt blocked: ${filePath}`);
+        return null;
+      }
+      return filePath;
+    };
+    const sanitizeRelatedFiles = (files) => {
+      if (!files) return [];
+      const parsed = parseCommaSeparated(files);
+      return parsed.map(f => sanitizePath(f)).filter(Boolean);
+    };
+    
+    task.relatedFiles = sanitizeRelatedFiles(options.relatedFiles);
     addActivityLog(task, 'Related files updated.');
     updated = true;
   }

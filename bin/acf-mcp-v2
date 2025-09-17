@@ -10,8 +10,8 @@ const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 
-// Get project root
-const projectRoot = process.env.ACF_PATH || path.resolve(__dirname, '..');
+// Get project root - resolve from the bin directory
+const projectRoot = path.resolve(__dirname, '..');
 
 // Get workspace root
 const getArg = (flag) => {
@@ -24,8 +24,8 @@ let workspaceRoot = getArg('--workspaceRoot') ||
                      process.env.WORKSPACE_ROOT || 
                      process.cwd();
 
-// MCP server v2 path
-const mcpServerPath = path.join(projectRoot, 'src', 'mcp_server_v2.js');
+// MCP server path - use the working mcp_server.js
+const mcpServerPath = path.join(projectRoot, 'src', 'mcp_server.js');
 
 // Check if server file exists
 if (!fs.existsSync(mcpServerPath)) {
@@ -33,19 +33,24 @@ if (!fs.existsSync(mcpServerPath)) {
   process.exit(1);
 }
 
-// Launch the server
+// Launch the server with proper stdio for MCP protocol
 const serverProcess = spawn('node', [
   mcpServerPath,
   '--workspaceRoot',
   workspaceRoot
 ], {
-  stdio: 'inherit',
+  stdio: ['pipe', 'pipe', 'pipe'],
   env: {
     ...process.env,
     WORKSPACE_ROOT: workspaceRoot,
     ACF_PATH: projectRoot
   }
 });
+
+// Connect stdio streams for MCP protocol communication
+process.stdin.pipe(serverProcess.stdin);
+serverProcess.stdout.pipe(process.stdout);
+serverProcess.stderr.pipe(process.stderr);
 
 // Handle process errors
 serverProcess.on('error', (err) => {
@@ -55,7 +60,7 @@ serverProcess.on('error', (err) => {
 
 // Handle server exit
 serverProcess.on('exit', (code) => {
-  if (code !== 0) {
+  if (code !== 0 && code !== null) {
     console.error(`MCP server exited with code ${code}`);
   }
   process.exit(code || 0);

@@ -26,6 +26,9 @@ RUN npm ci --production
 # Copy the entire ACF project
 COPY . .
 
+# Install Playwright browsers and Linux dependencies (best effort)
+RUN npx playwright install --with-deps || true
+
 # Create data directory for workspace
 RUN mkdir -p /data /tmp
 

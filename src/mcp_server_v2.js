@@ -11,7 +11,7 @@
  */
 
 const { Server } = require('@modelcontextprotocol/sdk/server');
-const { StdioServerTransport } = require('@modelcontextprotocol/sdk/dist/cjs/server/stdio.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
 const { z } = require('zod');
 const path = require('path');
 const fs = require('fs');
@@ -46,9 +46,10 @@ if (!workspaceRoot || workspaceRoot === '/') {
   logger.info(`Invalid workspace root. Using current directory: ${workspaceRoot}`);
 }
 
-// Parse allowed directories
-const envAllowedDirs = process.env.ALLOWED_DIRS ? 
-  process.env.ALLOWED_DIRS.split(':').filter(Boolean) : 
+// Parse allowed directories using OS-specific delimiter
+const pathMod = require('path');
+const envAllowedDirs = process.env.ALLOWED_DIRS ?
+  process.env.ALLOWED_DIRS.split(pathMod.delimiter).filter(Boolean) :
   [];
 const allowedDirectories = [...new Set([workspaceRoot, ...envAllowedDirs])];
 
