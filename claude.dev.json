@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "agentic-control-framework-local": {
+      "command": "node",
+      "args": [
+        "./bin/acf-mcp-v2",
+        "--workspaceRoot",
+        "${cwd}"
+      ],
+      "env": {
+        "WORKSPACE_ROOT": "${cwd}",
+        "ACF_PATH": "${cwd}",
+        "NODE_ENV": "development",
+        "DEBUG": "true"
+      }
+    }
+  }
+}

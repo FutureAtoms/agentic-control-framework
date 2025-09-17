@@ -1,11 +1,13 @@
 {
   "name": "agentic-control-framework",
-  "version": "0.1.1",
-  "description": "Production-ready agentic control framework with 79+ verified tools for autonomous agent development",
+  "version": "0.2.1",
+  "description": "MCP-compliant agentic control framework with 83+ tools for Claude Code and autonomous agent development",
   "main": "src/core.js",
   "bin": {
+    "agentic-control-framework": "./bin/agentic-control-framework-mcp",
     "acf": "./bin/acf",
     "acf-mcp": "./bin/agentic-control-framework-mcp",
+    "acf-mcp-v2": "./bin/acf-mcp-v2",
     "task-manager": "./bin/acf",
     "task-manager-mcp": "./bin/task-manager-mcp",
     "agentic-control-framework-mcp": "./bin/agentic-control-framework-mcp"
@@ -22,18 +24,27 @@
     "test:all": "npm test && npm run test:claude-code"
   },
   "keywords": [
-    "task",
-    "manager",
-    "cli",
     "mcp",
+    "model-context-protocol",
+    "claude",
+    "claude-code",
+    "ai-tools",
+    "task-manager",
+    "cli",
     "cursor",
     "agentic",
     "framework",
     "control",
-    "monetization",
-    "stripe",
-    "auth"
+    "automation",
+    "llm"
   ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "homepage": "https://github.com/FutureAtoms/agentic-control-framework#readme",
+  "bugs": {
+    "url": "https://github.com/FutureAtoms/agentic-control-framework/issues"
+  },
   "author": "Abhilash Chadhar (FutureAtoms)",
   "repository": {
     "type": "git",
@@ -41,6 +52,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "@vscode/ripgrep": "^1.15.9",
     "axios": "^1.7.2",
     "chalk": "^4.1.2",
@@ -57,7 +69,8 @@
     "playwright": "^1.52.0",
     "ps-list": "^8.1.1",
     "sharp": "^0.33.5",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "zod": "^3.23.0"
   },
   "optionalDependencies": {
     "@supabase/supabase-js": "^2.38.0",

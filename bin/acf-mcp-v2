@@ -1,0 +1,71 @@
+#!/usr/bin/env node
+
+/**
+ * ACF MCP Server v2 Launcher
+ * 
+ * This script launches the SDK-based MCP server for Claude Code integration
+ */
+
+const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
+
+// Get project root
+const projectRoot = process.env.ACF_PATH || path.resolve(__dirname, '..');
+
+// Get workspace root
+const getArg = (flag) => {
+  const index = process.argv.findIndex(arg => arg === flag);
+  return index !== -1 && index < process.argv.length - 1 ? process.argv[index + 1] : null;
+};
+
+let workspaceRoot = getArg('--workspaceRoot') || 
+                     getArg('-w') || 
+                     process.env.WORKSPACE_ROOT || 
+                     process.cwd();
+
+// MCP server v2 path
+const mcpServerPath = path.join(projectRoot, 'src', 'mcp_server_v2.js');
+
+// Check if server file exists
+if (!fs.existsSync(mcpServerPath)) {
+  console.error(`Error: MCP server not found at ${mcpServerPath}`);
+  process.exit(1);
+}
+
+// Launch the server
+const serverProcess = spawn('node', [
+  mcpServerPath,
+  '--workspaceRoot',
+  workspaceRoot
+], {
+  stdio: 'inherit',
+  env: {
+    ...process.env,
+    WORKSPACE_ROOT: workspaceRoot,
+    ACF_PATH: projectRoot
+  }
+});
+
+// Handle process errors
+serverProcess.on('error', (err) => {
+  console.error(`Failed to start MCP server: ${err.message}`);
+  process.exit(1);
+});
+
+// Handle server exit
+serverProcess.on('exit', (code) => {
+  if (code !== 0) {
+    console.error(`MCP server exited with code ${code}`);
+  }
+  process.exit(code || 0);
+});
+
+// Handle termination signals
+process.on('SIGINT', () => {
+  serverProcess.kill('SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  serverProcess.kill('SIGTERM');
+});

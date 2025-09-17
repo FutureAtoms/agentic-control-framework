@@ -1,0 +1,72 @@
+# Test files
+test/
+*.test.js
+*.spec.js
+
+# Development files
+.git/
+.gitignore
+.github/
+.vscode/
+.idea/
+
+# Documentation source files
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Configuration files
+.eslintrc*
+.prettierrc*
+.editorconfig
+.env*
+
+# Build artifacts
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local configuration
+claude.dev.json
+claude.json
+.claude.json
+.task-manager/
+.tmp/
+.acf/
+workspaces/
+
+# Docker files
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Cloud deployment files
+auth-proxy.js
+cloud/
+config/examples/
+
+# Test workspace
+test-workspace/
+
+# Large files
+*.gif
+*.png
+*.jpg
+*.jpeg
+
+# Backup files
+*.backup*
+*.bak
+
+# Scripts
+scripts/
+publish.sh
+
+# Installation guides
+INSTALL.md
+README_CLAUDE_CODE.md
+MCP_INTEGRATION.md

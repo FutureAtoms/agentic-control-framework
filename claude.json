@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "agentic-control-framework"
+      ],
+      "env": {
+        "WORKSPACE_ROOT": "${cwd}",
+        "ACF_PATH": "${cwd}/node_modules/agentic-control-framework"
+      }
+    }
+  }
+}
