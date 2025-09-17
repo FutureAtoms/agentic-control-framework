@@ -28,19 +28,19 @@
 
 ## Failed Tests
 
-- list command failed: Command failed: <ACF_PATH>/bin/acf list
+- list command failed: Command failed: /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/acf list
 [ERROR] Error listing tasks: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
-- add command failed: Command failed: <ACF_PATH>/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high
+- add command failed: Command failed: /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high
 [ERROR] Error adding task: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
-- add-subtask command failed: Command failed: <ACF_PATH>/bin/acf add-subtask 3 -t "CLI Subtask"
+- add-subtask command failed: Command failed: /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/acf add-subtask 3 -t "CLI Subtask"
 [ERROR] Error adding subtask: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
-- status command failed: Command failed: <ACF_PATH>/bin/acf status 3 inprogress -m "Starting CLI test"
+- status command failed: Command failed: /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/acf status 3 inprogress -m "Starting CLI test"
 [ERROR] Error updating status: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
-- next command failed: Command failed: <ACF_PATH>/bin/acf next
+- next command failed: Command failed: /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/acf next
 [ERROR] Error getting next task: Tasks file not found: /private/tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
 
 - Core module failed: Tasks file not found: /tmp/test_workspace_simple/.acf/tasks.json. Please run init command first.
@@ -60,4 +60,4 @@
 - Enables multi-client support and cloud deployment
 
 ---
-*Report generated on 2025-07-10T12:30:10.464Z by ACF Simple Test Suite*
+*Report generated on 2025-09-17T19:16:47.596Z by ACF Simple Test Suite*
