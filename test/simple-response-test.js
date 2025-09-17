@@ -6,10 +6,12 @@
 
 const core = require('../src/core');
 const fs = require('fs');
+const path = require('path');
 
 class SimpleResponseTest {
   constructor() {
-    this.workspaceRoot = '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework';
+    // Use repo root as workspace (contains .acf by default)
+    this.workspaceRoot = path.resolve(__dirname, '..');
   }
 
   measureResponseSize(operation, result) {

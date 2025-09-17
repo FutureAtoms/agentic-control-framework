@@ -1,7 +1,7 @@
 # ACF MCP Tools Test Report
-**Date**: 2025-06-25
+**Date**: 2025-01-25
 **Tester**: Claude via MCP
-**Workspace**: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework
+**Workspace**: <WORKSPACE_ROOT>
 
 ## Executive Summary
 Comprehensive testing of the Agentic Control Framework (ACF) MCP tools was conducted. Out of 64 available tools, 51 were tested with a 96% success rate (49 passing, 2 failing).

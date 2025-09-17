@@ -1,5 +1,5 @@
-[INFO] Starting server with workspace root: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework
-[INFO] Allowed directories for filesystem operations: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework
+[INFO] Starting server with workspace root: <WORKSPACE_ROOT>
+[INFO] Allowed directories for filesystem operations: <WORKSPACE_ROOT>
 [INFO] Server ready and listening for requests
 [DEBUG] Received request: {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
 [DEBUG] Parsed request - Method: tools/list, ID: 1

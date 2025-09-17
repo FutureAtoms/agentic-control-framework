@@ -48,7 +48,7 @@ config/
 ### **3. Updated Template Files**
 **Before:**
 ```json
-"allowedDirectories": "["/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework"]"
+"allowedDirectories": "["/absolute/path/to/agentic-control-framework"]"
 ```
 
 **After:**

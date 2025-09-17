@@ -18,7 +18,7 @@ class McpResponseTest {
     console.log('🚀 Starting MCP server...');
     
     this.mcpProcess = spawn('node', ['src/mcp_server.js'], {
-      cwd: '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework',
+      cwd: path.resolve(__dirname, '..'),
       stdio: ['pipe', 'pipe', 'pipe']
     });
 

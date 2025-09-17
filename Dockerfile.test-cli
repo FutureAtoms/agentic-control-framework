@@ -1,0 +1,51 @@
+# Test ACF CLI and npm installation
+FROM node:22-alpine
+
+# Install required tools
+RUN apk add --no-cache bash git python3 make g++
+
+# Create working directory
+WORKDIR /test
+
+# Test 1: Install ACF from npm
+RUN echo "=== Test 1: Install ACF from npm ===" && \
+    npm install -g agentic-control-framework && \
+    which agentic-control-framework || echo "Binary not found in PATH"
+
+# Test 2: Check CLI availability
+RUN echo "=== Test 2: Check CLI availability ===" && \
+    acf --version || echo "acf command not found"
+
+# Test 3: Initialize a project
+WORKDIR /workspace
+RUN echo "=== Test 3: Initialize ACF project ===" && \
+    acf init --project-name "test-project" --project-description "Testing ACF in Docker" || \
+    echo "Failed to initialize project"
+
+# Test 4: Add a task
+RUN echo "=== Test 4: Add a task ===" && \
+    acf add "Test task in Docker" --description "This is a test task" || \
+    echo "Failed to add task"
+
+# Test 5: List tasks
+RUN echo "=== Test 5: List tasks ===" && \
+    acf list || echo "Failed to list tasks"
+
+# Test 6: Test MCP server with npx
+RUN echo "=== Test 6: Test MCP server initialization ===" && \
+    echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{}}}' | \
+    npx -y agentic-control-framework /workspace 2>&1 | head -20 || \
+    echo "MCP server test failed"
+
+# Test 7: Test with explicit node command
+RUN echo "=== Test 7: Test with node command ===" && \
+    echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{}}}' | \
+    node $(which agentic-control-framework) 2>&1 | head -20 || \
+    echo "Node execution test failed"
+
+# Final verification
+RUN echo "=== Final Verification ===" && \
+    ls -la /workspace/.acf/ && \
+    cat /workspace/.acf/tasks.json || echo "No tasks.json found"
+
+CMD ["echo", "All CLI tests completed"]

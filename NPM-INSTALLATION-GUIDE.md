@@ -4,17 +4,17 @@
 
 ### 1. Install from Local Directory
 ```bash
-# Install locally in your project
-npm install /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework
+# Install locally in your project (from a local clone)
+npm install <absolute/path/to/agentic-control-framework>
 
 # Or install globally
-npm install -g /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework
+npm install -g <absolute/path/to/agentic-control-framework>
 ```
 
 ### 2. Using npm link (Development)
 ```bash
 # In the ACF directory
-cd /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework
+cd <absolute/path/to/agentic-control-framework>
 npm link
 
 # In your project directory
@@ -84,7 +84,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 **Problem**: Multiple ACF installations causing path confusion
 **Solution**: Always set `ACF_PATH` environment variable to point to the correct installation:
 ```bash
-export ACF_PATH="/Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework"
+export ACF_PATH="<absolute/path/to/agentic-control-framework>"
 ```
 
 ### Issue 3: Permission Errors
@@ -109,11 +109,11 @@ claude mcp add agentic-control-framework
 ## Package Information
 
 - **Name**: agentic-control-framework
-- **Version**: 0.2.1
+- **Version**: 0.1.1
 - **Author**: Abhilash Chadhar (FutureAtoms)
 - **License**: ISC
 - **Node**: Requires Node.js v18 or higher
-- **Tools**: 80+ specialized tools for autonomous agent development
+- **Tools**: 79+ specialized tools for autonomous agent development
 
 ## Support
 

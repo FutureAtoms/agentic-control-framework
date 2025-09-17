@@ -28,51 +28,51 @@
 
 ## Failed Tests
 
-- list command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf list
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
+- list command failed: Command failed: <ACF_PATH>/test/unit/bin/acf list
+/bin/sh: <ACF_PATH>/test/unit/bin/acf: No such file or directory
 
-- add command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
+- add command failed: Command failed: <ACF_PATH>/test/unit/bin/acf add -t "CLI Test Task" -d "Testing CLI functionality" -p high
+/bin/sh: <ACF_PATH>/test/unit/bin/acf: No such file or directory
 
-- add-subtask command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf add-subtask 3 -t "CLI Subtask"
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
+- add-subtask command failed: Command failed: <ACF_PATH>/test/unit/bin/acf add-subtask 3 -t "CLI Subtask"
+/bin/sh: <ACF_PATH>/test/unit/bin/acf: No such file or directory
 
-- status command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf status 3 inprogress -m "Starting CLI test"
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
+- status command failed: Command failed: <ACF_PATH>/test/unit/bin/acf status 3 inprogress -m "Starting CLI test"
+/bin/sh: <ACF_PATH>/test/unit/bin/acf: No such file or directory
 
-- next command failed: Command failed: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf next
-/bin/sh: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/bin/acf: No such file or directory
+- next command failed: Command failed: <ACF_PATH>/test/unit/bin/acf next
+/bin/sh: <ACF_PATH>/test/unit/bin/acf: No such file or directory
 
-- Core module failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/core'
+- Core module failed: Cannot find module '<ACF_PATH>/test/unit/src/core'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Filesystem tools failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/filesystem_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Filesystem tools failed: Cannot find module '<ACF_PATH>/test/unit/src/filesystem_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Terminal tools failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/tools/terminal_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Terminal tools failed: Cannot find module '<ACF_PATH>/test/unit/src/tools/terminal_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Search tools failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/tools/search_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Search tools failed: Cannot find module '<ACF_PATH>/test/unit/src/tools/search_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Edit tools failed to load: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/tools/edit_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Edit tools failed to load: Cannot find module '<ACF_PATH>/test/unit/src/tools/edit_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Browser tools failed to load: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/tools/browser_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Browser tools failed to load: Cannot find module '<ACF_PATH>/test/unit/src/tools/browser_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- AppleScript tools failed to load: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/tools/applescript_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- AppleScript tools failed to load: Cannot find module '<ACF_PATH>/test/unit/src/tools/applescript_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- File operations failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/filesystem_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- File operations failed: Cannot find module '<ACF_PATH>/test/unit/src/filesystem_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Directory operations failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/filesystem_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Directory operations failed: Cannot find module '<ACF_PATH>/test/unit/src/filesystem_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
-- Search operations failed: Cannot find module '/Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/src/filesystem_tools'
+- <ACF_PATH>/test/unit/test-simple-tools.js
+- Search operations failed: Cannot find module '<ACF_PATH>/test/unit/src/filesystem_tools'
 Require stack:
-- /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework/test/unit/test-simple-tools.js
+- <ACF_PATH>/test/unit/test-simple-tools.js
 
 ## Configuration Recommendations
 
@@ -89,4 +89,4 @@ Require stack:
 - Enables multi-client support and cloud deployment
 
 ---
-*Report generated on 2025-06-02T12:01:33.995Z by ACF Simple Test Suite*
+*Report generated on 2025-01-02T12:01:33.995Z by ACF Simple Test Suite*

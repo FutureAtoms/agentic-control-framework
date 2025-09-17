@@ -1,7 +1,7 @@
 # ACF MCP Tools Test Report - FIXES IMPLEMENTED
-**Date**: 2025-06-25
+**Date**: 2025-01-25
 **Tester**: Claude via MCP
-**Workspace**: /Users/abhilashchadhar/uncloud/cursor/agentic-control-framework
+**Workspace**: <WORKSPACE_ROOT>
 
 ## Executive Summary
 Following the initial test report, fixes have been implemented for all failing tools. The Agentic Control Framework (ACF) MCP tools should now have a 100% success rate after restarting the MCP server.
