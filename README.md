@@ -1,7 +1,7 @@
 
 # 🤖 Agentic Control Framework (ACF)
 
-**A comprehensive toolkit for autonomous agent development with 83+ specialized tools**
+**A comprehensive toolkit for autonomous agent development with 79+ specialized tools**
 
 **Author:** Abhilash Chadhar (FutureAtoms)
 **Repository:** [agentic-control-framework](https://github.com/FutureAtoms/agentic-control-framework)
@@ -12,7 +12,7 @@
 
 The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 79+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
 
-**✅ Comprehensive Testing Completed (July 2025)**
+**✅ Comprehensive Testing Completed (January 2025)**
 - **79 Tools Verified**: All tool categories tested individually via MCP protocol
 - **4 IDE Integrations**: Cursor, Claude Desktop, Claude Code, VS Code tested
 - **100% MCP Compliance**: Full JSON-RPC 2.0 and MCP 2024-11-05 protocol compliance
@@ -78,8 +78,7 @@ graph TB
     MS --> TT
     MS --> BT
     MS --> ST
-    MS --> AT
-    MS --> CFT
+    MS --> SYS
 
     CT --> DB
     FT --> FS
@@ -89,14 +88,14 @@ graph TB
 ```
 
 **Key Features:**
-- 🔧 **83+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
+- 🔧 **79+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
 - 🎯 **3 Usage Modes**: CLI, Local MCP, Cloud MCP for maximum flexibility
 - 🔗 **Universal Compatibility**: Works with Claude Code, Cursor, Claude Desktop, VS Code, and any MCP-compatible client
 - ☁️ **Cloud-Ready**: Deploy to GCP, Railway, Fly.io with auto-scaling
-- 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (83/83 tools verified)
+- 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (79/79 tools verified)
 - ⚡ **High Performance**: Average response time 200-1000ms, excellent reliability
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
-- 📋 **MCP 2025-06-18 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
+- 📋 **MCP 2024-11-05 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
 
 ## 🔧 All Available Tools
 
@@ -104,7 +103,7 @@ graph TB
 
 ```mermaid
 mindmap
-  root((ACF Tools<br/>83 Total))
+  root((ACF Tools<br/>79 Total))
     Core ACF
       Task Management
         listTasks
@@ -171,7 +170,7 @@ mindmap
         set_config_value
 ```
 
-### Core ACF Tools (33 tools) ✅
+### Core ACF Tools (25 tools) ✅
 ```
 Task Management:
 - listTasks: List all tasks with filtering
@@ -200,7 +199,7 @@ Priority Management (Numerical 1-1000 System):
 - deprioritizeTask: Set task to low priority range (1-399)
 ```
 
-### Filesystem Tools (13 tools) ⚠️
+### Filesystem Tools (13 tools) ✅
 ```
 File Operations:
 - read_file: Read file contents with type detection
@@ -330,7 +329,7 @@ ACF provides comprehensive documentation organized by category:
 
 ### 🧪 Testing & Quality
 - **[Cloud MCP Testing](docs/testing/CLOUD-MCP-COMPREHENSIVE-TEST-REPORT.md)** - Latest comprehensive testing
-- **[Tool Verification](docs/testing/TOOL_CATEGORY_VERIFICATION_REPORT.md)** - All 83 tools verified
+- **[Tool Verification](docs/testing/TOOL_CATEGORY_VERIFICATION_REPORT.md)** - All 79 tools verified
 - **[Security Testing](docs/testing/AUTHENTICATION-SECURITY-TEST-RESULTS.md)** - Security validation
 - **[Test Framework](test/README.md)** - Testing infrastructure
 
@@ -351,7 +350,7 @@ ACF provides comprehensive documentation organized by category:
 | Component | Status | Details |
 |-----------|--------|---------|
 | **CLI Mode** | ✅ 100% Working | All task management and core tools functional |
-| **Local MCP** | ✅ 100% Working | All 83+ tools verified via MCP protocol |
+| **Local MCP** | ✅ 100% Working | All 79+ tools verified via MCP protocol |
 | **Cloud MCP** | ✅ 100% Working | mcp-proxy integration, HTTP/SSE transport verified |
 | **IDE Integrations** | ✅ 100% Working | Cursor, Claude Desktop, Claude Code, VS Code tested |
 | **Core ACF Tools** | ✅ 25/25 Working | Task management, priority system, file generation |
@@ -395,7 +394,7 @@ ACF provides comprehensive documentation organized by category:
 
 ## 🧪 Testing & Verification
 
-**Comprehensive Testing Completed (July 2025)**
+**Comprehensive Testing Completed (January 2025)**
 
 ACF has undergone extensive testing to ensure production readiness:
 
@@ -946,7 +945,7 @@ Once configured, you can use natural language with your AI assistant:
 | **Search/Edit** | search_code, edit_block | ✅ Working |
 | **AppleScript** | applescript_execute (macOS only) | ✅ Working |
 
-## 3. ☁️ Cloud MCP Mode (33% Working)
+## 3. ☁️ Cloud MCP Mode (100% Working)
 
 **Perfect for**: Remote access, web clients, multi-client support
 
