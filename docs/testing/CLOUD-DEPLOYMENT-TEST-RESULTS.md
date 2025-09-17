@@ -87,7 +87,7 @@ Comprehensive testing of ACF cloud deployment capabilities using quick-deploy.sh
 ### 1. Zero-Code Deployment Bridge
 - ✅ Existing ACF server works without modifications
 - ✅ mcp-proxy converts STDIO to HTTP/SSE automatically
-- ✅ All 83+ tools available immediately
+- ✅ All 80+ tools available immediately
 
 ### 2. Multi-Platform Support
 - ✅ Google Cloud Run (enterprise-grade)

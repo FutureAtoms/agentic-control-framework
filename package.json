@@ -1,7 +1,7 @@
 {
   "name": "agentic-control-framework",
   "version": "0.2.1",
-  "description": "MCP-compliant agentic control framework with 83+ tools for Claude Code and autonomous agent development",
+  "description": "MCP-compliant agentic control framework with 80+ tools for Claude Code and autonomous agent development",
   "main": "src/core.js",
   "bin": {
     "agentic-control-framework": "./bin/agentic-control-framework-mcp",
@@ -69,11 +69,11 @@
     "node-fetch": "^2.7.0",
     "playwright": "^1.52.0",
     "ps-list": "^8.1.1",
-    "sharp": "^0.33.5",
     "tree-kill": "^1.2.2",
     "zod": "^3.23.0"
   },
   "optionalDependencies": {
+    "sharp": "^0.33.5",
     "@supabase/supabase-js": "^2.38.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",

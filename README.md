@@ -1,22 +1,22 @@
 
 # 🤖 Agentic Control Framework (ACF)
 
-**A comprehensive toolkit for autonomous agent development with 79+ specialized tools**
+**A comprehensive toolkit for autonomous agent development with 80+ specialized tools**
 
 **Author:** Abhilash Chadhar (FutureAtoms)
 **Repository:** [agentic-control-framework](https://github.com/FutureAtoms/agentic-control-framework)
 
-![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-100%25%20Pass%20Rate-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202024--11--05-Compliant-blue) ![Test Status](https://img.shields.io/badge/79%20Tools-Verified-green) ![Test Status](https://img.shields.io/badge/IDE%20Integrations-4%20Tested-blue) [![smithery badge](https://smithery.ai/badge/@FutureAtoms/agentic-control-framework)](https://smithery.ai/server/@FutureAtoms/agentic-control-framework)
+![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-Healthy-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202025--03--26-Compliant-blue) ![Test Status](https://img.shields.io/badge/80%2B%20Tools-Available-green) ![Test Status](https://img.shields.io/badge/IDE%20Integrations-4%20Tested-blue) [![smithery badge](https://smithery.ai/badge/@FutureAtoms/agentic-control-framework)](https://smithery.ai/server/@FutureAtoms/agentic-control-framework)
 
 ## 🌟 Overview
 
-The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 79+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
+The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 80+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
 
-**✅ Comprehensive Testing Completed (January 2025)**
-- **79 Tools Verified**: All tool categories tested individually via MCP protocol
-- **4 IDE Integrations**: Cursor, Claude Desktop, Claude Code, VS Code tested
-- **100% MCP Compliance**: Full JSON-RPC 2.0 and MCP 2024-11-05 protocol compliance
-- **Performance Verified**: Average 4ms response time, 100% success rate
+**✅ Comprehensive Testing (2025)**
+- Broad tool verification across categories via MCP protocol
+- 4 IDE integrations: Cursor, Claude Desktop, Claude Code, VS Code
+- JSON-RPC 2.0 compliant; MCP 2025-03-26 (default) and 2024-11-05 supported
+- Performance verified under typical local workloads
 
 ## 🏗️ System Architecture
 
@@ -31,7 +31,7 @@ graph TB
     end
 
     subgraph "Protocol Layer"
-        MCP[MCP Protocol 2024-11-05]
+        MCP[MCP Protocol 2025-03-26]
         HTTP[HTTP/SSE Transport]
         STDIO[STDIO Transport]
     end
@@ -88,14 +88,14 @@ graph TB
 ```
 
 **Key Features:**
-- 🔧 **79+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
+- 🔧 **80+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
 - 🎯 **3 Usage Modes**: CLI, Local MCP, Cloud MCP for maximum flexibility
 - 🔗 **Universal Compatibility**: Works with Claude Code, Cursor, Claude Desktop, VS Code, and any MCP-compatible client
 - ☁️ **Cloud-Ready**: Deploy to GCP, Railway, Fly.io with auto-scaling
-- 🚀 **Production-Tested**: 100% test coverage with comprehensive testing suite (79/79 tools verified)
+- 🚀 **Production-Ready**: Comprehensive test suite coverage across core tools
 - ⚡ **High Performance**: Average response time 200-1000ms, excellent reliability
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
-- 📋 **MCP 2024-11-05 Compliant**: Latest protocol with tool titles, annotations, and proper capabilities
+- 📋 **MCP 2025-03-26 Compliant**: Default protocol with tool titles, annotations, and proper capabilities
 
 ## 🔧 All Available Tools
 
@@ -350,7 +350,7 @@ ACF provides comprehensive documentation organized by category:
 | Component | Status | Details |
 |-----------|--------|---------|
 | **CLI Mode** | ✅ 100% Working | All task management and core tools functional |
-| **Local MCP** | ✅ 100% Working | All 79+ tools verified via MCP protocol |
+| **Local MCP** | ✅ 100% Working | All core tools verified via MCP protocol |
 | **Cloud MCP** | ✅ 100% Working | mcp-proxy integration, HTTP/SSE transport verified |
 | **IDE Integrations** | ✅ 100% Working | Cursor, Claude Desktop, Claude Code, VS Code tested |
 | **Core ACF Tools** | ✅ 25/25 Working | Task management, priority system, file generation |
@@ -359,7 +359,7 @@ ACF provides comprehensive documentation organized by category:
 | **Terminal Tools** | ✅ 6/6 Working | Command execution, process management |
 | **Search/Edit Tools** | ✅ 3/3 Working | Code search with ripgrep, surgical editing |
 | **System Tools** | ✅ 7/7 Working | AppleScript, configuration management |
-| **MCP Protocol** | ✅ 100% Compliant | JSON-RPC 2.0, MCP 2024-11-05 specification |
+| **MCP Protocol** | ✅ Supported | JSON-RPC 2.0; MCP 2025-03-26 (default) and 2024-11-05 |
 
 *All tests passing! See [ACF-TESTING-SUMMARY.md](./ACF-TESTING-SUMMARY.md) for detailed test results*
 
@@ -399,7 +399,7 @@ ACF provides comprehensive documentation organized by category:
 ACF has undergone extensive testing to ensure production readiness:
 
 ### Tool Verification ✅
-- **79 Tools Tested**: Every tool individually verified via MCP protocol
+- Extensive tool testing: Core tools verified via MCP protocol
 - **100% Success Rate**: All tools working correctly across all categories
 - **Performance Validated**: Average 4ms response time, no slow responses
 
@@ -410,7 +410,7 @@ ACF has undergone extensive testing to ensure production readiness:
 - **VS Code**: Cline and Continue extension configurations verified
 
 ### Protocol Compliance ✅
-- **MCP 2024-11-05**: 100% specification compliance
+- **MCP 2025-03-26**: Default protocol version; backward compatible with 2024-11-05
 - **JSON-RPC 2.0**: Full protocol implementation
 - **Error Handling**: Standard error codes and graceful degradation
 
@@ -552,7 +552,7 @@ graph LR
 
     PROXY --> ACF
 
-    ACF --> TOOLS[83+ Tools]
+    ACF --> TOOLS[80+ Tools]
 
     style CLI1 fill:#e1f5fe
     style MCP1 fill:#f3e5f5
@@ -1166,5 +1166,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 | **Cloud MCP** | Remote access | 15 minutes | ✅ Production Ready | Full Integration Verified |
 
 For detailed test results and improvement roadmap, see [ACF-TESTING-SUMMARY.md](./ACF-TESTING-SUMMARY.md). 
-
-

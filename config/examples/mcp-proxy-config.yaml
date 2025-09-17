@@ -12,7 +12,7 @@ servers:
       ACF_PATH: "/app"
       DEBUG: "false"
       NODE_ENV: "production"
-    description: "Agentic Control Framework - 64+ Tools for AI Agents"
+    description: "Agentic Control Framework - 80+ Tools for AI Agents"
     restart: true
     restartDelay: 1000
     

@@ -75,9 +75,9 @@ graph TB
 ```
 
 #### Updated Statistics
-- **Tool Count**: Updated from 64+ to 83 tools
+- **Tool Count**: Updated to reflect 80+ tools
 - **Test Coverage**: Updated to reflect 100% verification
-- **MCP Compliance**: Added MCP 2025-06-18 compliance badge
+- **MCP Compliance**: Updated to MCP 2025-03-26 compliance badge
 - **Claude Code**: Added Claude Code compatibility badge
 
 #### Added Tool Overview Mindmap
@@ -145,7 +145,7 @@ graph TB
 - Updated with latest verification reports
 
 #### Tool Verification Reports
-- **TOOL_CATEGORY_VERIFICATION_REPORT.md**: Complete verification of all 83 tools
+- **TOOL_CATEGORY_VERIFICATION_REPORT.md**: Comprehensive verification across core tools
 - **COMPREHENSIVE_FUNCTIONALITY_TEST_REPORT.md**: End-to-end testing results
 
 ## 🎯 Key Improvements
@@ -158,7 +158,7 @@ graph TB
 - **Deployment patterns** illustration
 
 ### Comprehensive Coverage
-- **All 83 tools** documented and verified
+- **All core tools** documented and verified
 - **Multiple deployment scenarios** covered
 - **Complete architecture** documentation
 - **Performance characteristics** documented
@@ -184,7 +184,7 @@ graph TB
 - **Total Documents**: 15+ comprehensive guides
 - **Mermaid Diagrams**: 15+ visual diagrams
 - **Code Examples**: 50+ practical examples
-- **Tool Coverage**: 83/83 tools documented (100%)
+- **Tool Coverage**: Comprehensive coverage across categories
 - **Deployment Scenarios**: 8+ platforms covered
 
 ### Quality Metrics

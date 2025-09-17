@@ -2,7 +2,7 @@
 
 ## ✅ Current Status
 
-The ACF MCP server has been successfully configured and added to Claude Code. The server is now ready for use with all 83+ tools available.
+The ACF MCP server integrates with Claude Code and exposes 80+ tools.
 
 ## Installation Instructions
 
@@ -11,8 +11,11 @@ The ACF MCP server has been successfully configured and added to Claude Code. Th
 The server has already been added to Claude Code with the following configuration:
 
 ```bash
-# Already configured:
-claude mcp add acf-local node /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/agentic-control-framework-mcp
+# Example (run from agentic-control-framework/)
+claude mcp add acf-local \
+  -e ACF_PATH="$(pwd)" \
+  -e WORKSPACE_ROOT="${cwd}" \
+  -- node bin/agentic-control-framework-mcp --workspaceRoot "${cwd}"
 ```
 
 ### To Use the Server
@@ -36,18 +39,18 @@ Once connected, you can use commands like:
 
 ## Configuration Details
 
-The server is configured in your local Claude Code settings at:
+The server can be configured via:
 - Config file: `~/.claude.json`
 - Server name: `acf-local`
-- Command: `node /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/agentic-control-framework-mcp`
+- Command: `node <ACF_PATH>/bin/agentic-control-framework-mcp`
 
 ## Testing the Connection
 
 To verify the MCP server is working:
 
 ```bash
-# Test the server directly
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/src/mcp_server.js
+# Test the server directly (from agentic-control-framework/)
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node src/mcp_server.js
 ```
 
 You should see a JSON response with server information.
@@ -76,7 +79,7 @@ The server supports these environment variables:
 
 3. **Manually test the server:**
    ```bash
-   node /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/agentic-control-framework-mcp
+   node bin/agentic-control-framework-mcp --workspaceRoot "${PWD}"
    ```
 
 4. **Reinstall if needed:**
@@ -85,7 +88,7 @@ The server supports these environment variables:
    claude mcp remove acf-local
    
    # Re-add
-   claude mcp add acf-local node /Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework/bin/agentic-control-framework-mcp
+   claude mcp add acf-local -- node <ACF_PATH>/bin/agentic-control-framework-mcp --workspaceRoot "${cwd}"
    ```
 
 ## NPM Publishing (Future)
@@ -130,6 +133,5 @@ When ready to publish to npm:
 
 ---
 
-**Current Installation Path:** `/Users/abhilashchadhar/uncloud/acf-sep/agentic-control-framework`
 **Server Status:** ✅ Configured and ready
-**Tools Available:** 83+
+**Tools Available:** 80+

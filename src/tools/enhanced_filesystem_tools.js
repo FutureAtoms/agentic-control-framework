@@ -1,8 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const sharp = require('sharp');
 const logger = require('../logger');
+
+// Try to load sharp, but don't fail if it's not available
+let sharp = null;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  logger.warn('Sharp module not available - screenshot features will be disabled');
+}
 
 /**
  * Enhanced readFile that supports both local files and URLs

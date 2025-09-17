@@ -20,7 +20,7 @@ agentic-control-framework/
 ├── 📁 src/                                    # Core source code
 │   ├── 🔧 core.js                           # Core task management logic
 │   ├── 🔧 cli.js                            # CLI command definitions
-│   ├── 🔧 mcp_server.js                     # MCP server with 83+ tools
+│   ├── 🔧 mcp_server.js                     # MCP server with 80+ tools
 │   ├── 🔧 auth-proxy.js                     # Authentication proxy for cloud
 │   ├── 🔧 filesystem_tools.js               # Filesystem operations
 │   ├── 🔧 prd_parser.js                     # AI-powered PRD parsing

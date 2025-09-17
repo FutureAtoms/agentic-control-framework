@@ -37,7 +37,7 @@ The fastest path to commercial deployment using mcp-proxy to convert your existi
 
 ### Core Features
 - **Zero Code Changes**: Use your existing ACF server as-is
-- **Full Functionality**: All 64+ tools work immediately
+- **Full Functionality**: All 80+ tools work immediately
 - **HTTP/SSE Bridge**: Convert STDIO to web-compatible protocols
 - **Production Ready**: Battle-tested mcp-proxy foundation
 
@@ -152,7 +152,7 @@ export SUPABASE_ANON_KEY="eyJ..."
 | Tier | Price | Requests/Month | Tools | Support |
 |------|-------|----------------|-------|---------|
 | **Free** | $0 | 100 | 15 basic tools | Community |
-| **Pro** | $29 | 10,000 | All 64+ tools | Priority |
+| **Pro** | $29 | 10,000 | All 80+ tools | Priority |
 | **Enterprise** | $199 | 100,000 | All + Custom | 24/7 |
 
 ### 4. Landing Page
@@ -247,7 +247,7 @@ MCP_PROXY_URL=http://mcp-proxy:8080
 
 ### Custom Configuration
 
-Modify `mcp-proxy-config.yaml` for custom settings:
+Modify `mcp-proxy-config.yaml` for custom settings (copy from `config/examples/mcp-proxy-config.yaml` to project root before building):
 
 ```yaml
 # Performance tuning

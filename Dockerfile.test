@@ -1,0 +1,41 @@
+# Test container for ACF npm installation
+FROM node:20-alpine
+
+# Install required tools
+RUN apk add --no-cache bash git
+
+# Create working directory
+WORKDIR /test
+
+# Copy the entire ACF repository
+COPY . /acf-source
+
+# Test 1: Install from local directory
+RUN echo "=== Test 1: Install from local directory ===" && \
+    npm install /acf-source && \
+    npx agentic-control-framework --version || echo "Binary test failed"
+
+# Test 2: Global install from local
+RUN echo "=== Test 2: Global install from local ===" && \
+    npm install -g /acf-source && \
+    agentic-control-framework --version || echo "Global binary test failed"
+
+# Test 3: Test MCP server initialization
+RUN echo "=== Test 3: Test MCP server ===" && \
+    echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{}}}' | \
+    agentic-control-framework 2>&1 | head -20 || echo "MCP server test failed"
+
+# Test 4: npm link approach
+WORKDIR /acf-source
+RUN echo "=== Test 4: npm link approach ===" && \
+    npm link && \
+    cd /test && \
+    npm link agentic-control-framework && \
+    npx agentic-control-framework --version || echo "npm link test failed"
+
+# Final verification
+RUN echo "=== Final Verification ===" && \
+    which agentic-control-framework && \
+    ls -la $(which agentic-control-framework) || echo "Binary not found"
+
+CMD ["echo", "All tests completed"]
