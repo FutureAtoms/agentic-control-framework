@@ -308,34 +308,37 @@ agentic-control-framework/
 
 ## 📚 Documentation
 
-ACF provides comprehensive documentation organized by category:
+Well-organized documentation for all skill levels:
 
 ### 🚀 Getting Started
-- **[Setup Instructions](docs/setup/SETUP-INSTRUCTIONS.md)** - Complete installation guide
-- **[Working Example](docs/setup/WORKING-EXAMPLE.md)** - Live demonstrations
-- **[Complete Tutorial](docs/COMPLETE_TUTORIAL.md)** - Comprehensive development guide
+- **[Installation Guide](docs/getting-started/installation.md)** - Complete setup instructions
+- **[Quick Start](docs/getting-started/quick-start.md)** - Get running in 5 minutes
+- **[Requirements](docs/getting-started/requirements.md)** - System prerequisites
 
-### 🔧 Client Integration
-- **[Claude Code Setup](docs/CLAUDE_CODE_SETUP_GUIDE.md)** - Claude Code integration (Recommended)
-- **[Cursor Setup](docs/setup/CURSOR-SETUP-GUIDE.md)** - Cursor IDE integration
-- **[Client Configurations](config/client-configurations/README.md)** - All MCP client configs
-- **[MCP Integration Guide](docs/MCP_INTEGRATION_GUIDE.md)** - Complete MCP protocol integration
+### 🔧 IDE Integration
+- **[Claude Code](docs/setup/claude-code.md)** - Claude Code setup (Recommended)
+- **[Claude Desktop](docs/setup/claude-desktop.md)** - Claude Desktop configuration
+- **[Cursor IDE](docs/setup/cursor.md)** - Cursor IDE integration
+- **[VS Code](docs/setup/vscode.md)** - Visual Studio Code setup
+- **[Troubleshooting](docs/setup/troubleshooting.md)** - Common issues and solutions
 
 ### ☁️ Cloud Deployment
-- **[GCP Deployment](docs/deployment/GCP-DEPLOYMENT-GUIDE.md)** - Google Cloud Platform
-- **[Platform Setup](docs/deployment/PLATFORM-SETUP-GUIDE.md)** - Multi-platform deployment
-- **[Remote Client Setup](docs/deployment/REMOTE-CLIENT-SETUP.md)** - Remote configuration
-- **[Quick Deploy Script](scripts/deployment/quick-deploy.sh)** - One-command deployment
+- **[Deployment Guide](docs/deployment/deployment-guide.md)** - Complete deployment overview
+- **[Google Cloud Run](docs/deployment/gcp-deployment-guide.md)** - GCP deployment
+- **[Docker](docs/deployment/docker.md)** - Container deployment
+- **[Remote Setup](docs/deployment/remote-client-setup.md)** - Remote client configuration
 
 ### 🧪 Testing & Quality
-- **[Cloud MCP Testing](docs/testing/CLOUD-MCP-COMPREHENSIVE-TEST-REPORT.md)** - Latest comprehensive testing
-- **[Tool Verification](docs/testing/TOOL_CATEGORY_VERIFICATION_REPORT.md)** - All 79 tools verified
-- **[Security Testing](docs/testing/AUTHENTICATION-SECURITY-TEST-RESULTS.md)** - Security validation
+- **[Cloud MCP Testing](docs/testing/cloud-mcp-comprehensive-test-report.md)** - Latest comprehensive testing
+- **[Tool Verification](docs/testing/tool-category-verification-report.md)** - All 79 tools verified
+- **[Security Testing](docs/testing/authentication-security-test-results.md)** - Security validation
 - **[Test Framework](test/README.md)** - Testing infrastructure
 
 ### 🏗️ Technical Reference
-- **[System Architecture](docs/ARCHITECTURE.md)** - Complete architecture with diagrams
-- **[Tool Reference](docs/TOOL_REFERENCE.md)** - Complete tool documentation
+- **[System Architecture](docs/architecture/overview.md)** - Complete architecture with diagrams
+- **[Tool Reference](docs/architecture/tool-reference.md)** - Complete tool documentation
+- **[Priority System](docs/architecture/priority-system.md)** - Advanced task prioritization
+- **[MCP Integration](docs/architecture/mcp-integration.md)** - Protocol implementation details
 - **[Project Structure](docs/PROJECT-STRUCTURE.md)** - Repository organization
 - **[Quick Reference](docs/reference/QUICK-REFERENCE.md)** - Essential commands
 
