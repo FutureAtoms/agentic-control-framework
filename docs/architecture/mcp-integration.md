@@ -201,7 +201,7 @@ DEBUG=true
 
 ### Run MCP Server Tests
 ```bash
-npm test -- test/mcp/mcp-server-v2.test.js
+npm test -- test/mcp/mcp-server.test.js
 ```
 
 ### Run All Tests
@@ -224,11 +224,11 @@ npm test
 ### Server Structure
 ```
 src/
-├── mcp_server_v2.js    # Main MCP server using SDK
-├── mcp_server.js        # Legacy JSON-RPC server (backward compatible)
-├── core.js              # Core task management functionality
-├── filesystem_tools.js  # File system operations
-└── tools/               # Additional tool implementations
+├── mcp/
+│   └── server.js          # Unified MCP server (JSON-RPC over stdio)
+├── core.js                # Core task management functionality
+├── filesystem_tools.js    # File system operations
+└── tools/                 # Additional tool implementations
     ├── terminal_tools.js
     ├── search_tools.js
     ├── edit_tools.js

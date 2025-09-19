@@ -17,7 +17,7 @@ class McpResponseTest {
   async startMcpServer() {
     console.log('🚀 Starting MCP server...');
     
-    this.mcpProcess = spawn('node', ['src/mcp_server.js'], {
+    this.mcpProcess = spawn('node', ['src/mcp/server.js'], {
       cwd: path.resolve(__dirname, '..'),
       stdio: ['pipe', 'pipe', 'pipe']
     });

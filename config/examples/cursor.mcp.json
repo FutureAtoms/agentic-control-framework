@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "agentic-control-framework": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./bin/agentic-control-framework-mcp", "--workspaceRoot", "${workspaceFolder}"],
+      "env": {
+        "WORKSPACE_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}
+

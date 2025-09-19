@@ -328,8 +328,8 @@ program
         if (options.title) updateOptions.title = options.title;
         if (options.description) updateOptions.description = options.description;
         if (options.priority) updateOptions.priority = options.priority;
-        if (options.dependsOn) updateOptions.dependsOn = options.dependsOn.split(',').map(id => id.trim());
-        if (options.relatedFiles) updateOptions.relatedFiles = options.relatedFiles.split(',').map(path => path.trim());
+        if (options.dependsOn) updateOptions.dependsOn = options.dependsOn; // let core parse string/array
+        if (options.relatedFiles) updateOptions.relatedFiles = options.relatedFiles; // let core parse string/array
         if (options.tests) updateOptions.tests = options.tests.split(',').map(test => test.trim());
         if (options.message) updateOptions.message = options.message;
         

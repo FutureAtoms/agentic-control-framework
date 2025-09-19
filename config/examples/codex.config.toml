@@ -1,0 +1,5 @@
+[mcp_servers.agentic-control-framework]
+command = "node"
+args = ["./bin/agentic-control-framework-mcp", "--workspaceRoot", "${cwd}"]
+env = { "WORKSPACE_ROOT" = "${cwd}" }
+

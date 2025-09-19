@@ -1,0 +1,203 @@
+# ACF-SWE Integration Configuration
+
+# ACF MCP Server Settings
+acf_mcp:
+  host: "localhost"
+  port: 3000
+  protocol: "ws"
+  reconnect_attempts: 5
+  timeout: 30
+
+# SWE-bench Settings
+swebench:
+  # Dataset configuration
+  datasets:
+    default: "princeton-nlp/SWE-bench_Lite"
+    available:
+      - "princeton-nlp/SWE-bench"
+      - "princeton-nlp/SWE-bench_Lite"
+      - "princeton-nlp/SWE-bench_Verified"
+  
+  # Docker configuration
+  docker:
+    use_cache: true
+    cleanup_after: true
+    memory_limit: "4g"
+    cpu_limit: 2
+    timeout_seconds: 600
+  
+  # Evaluation settings
+  evaluation:
+    max_workers: 4
+    max_retries: 3
+    retry_delay: 5
+    save_predictions: true
+    output_dir: "./results"
+
+# Agent Configuration
+agent:
+  # Strategy selection
+  strategy: "advanced"  # basic, advanced, or custom
+  
+  # Tool preferences
+  tools:
+    code_search:
+      enabled: true
+      max_results: 100
+      context_lines: 3
+    
+    edit_block:
+      enabled: true
+      validate_changes: true
+      create_backup: false
+    
+    task_manager:
+      enabled: true
+      auto_decompose: true
+      max_subtasks: 10
+    
+    terminal:
+      enabled: true
+      timeout_ms: 30000
+      capture_output: true
+  
+  # Behavior settings
+  behavior:
+    verbose: true
+    interactive: false
+    confirm_changes: false
+    test_after_change: true
+    incremental_testing: true
+    
+# Task Management
+task_management:
+  enabled: true
+  priority_algorithm: "advanced"
+  
+  # Task decomposition
+  decomposition:
+    enabled: true
+    max_depth: 3
+    min_complexity: 5
+  
+  # Priority settings
+  priority:
+    bug_fix: 900
+    test_failure: 850
+    refactor: 500
+    documentation: 300
+  
+  # Workflow
+  workflow:
+    - understand_problem
+    - locate_code
+    - plan_solution
+    - implement_fix
+    - validate_tests
+    - cleanup
+
+# Performance Optimization
+optimization:
+  # Parallel execution
+  parallel:
+    enabled: true
+    max_workers: 8
+    batch_size: 5
+  
+  # Caching
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+    max_size_mb: 1000
+  
+  # Resource limits
+  resources:
+    max_memory_mb: 8192
+    max_cpu_percent: 80
+    max_open_files: 1000
+
+# Logging & Monitoring
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  
+  # File logging
+  file:
+    enabled: true
+    path: "./logs"
+    rotation: "daily"
+    retention: 7
+  
+  # Console logging
+  console:
+    enabled: true
+    colorize: true
+    format: "detailed"  # simple, detailed, json
+  
+  # Metrics
+  metrics:
+    enabled: true
+    export_path: "./metrics"
+    formats:
+      - "json"
+      - "csv"
+      - "prometheus"
+
+# Error Handling
+error_handling:
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+    max_delay: 60
+  
+  # Fallback strategies
+  fallback:
+    enabled: true
+    strategies:
+      - "simplify_approach"
+      - "manual_intervention"
+      - "skip_instance"
+  
+  # Recovery
+  recovery:
+    checkpoint_enabled: true
+    checkpoint_interval: 300
+    resume_from_checkpoint: true
+
+# Experimental Features
+experimental:
+  # Chain-of-thought reasoning
+  cot_reasoning:
+    enabled: false
+    max_steps: 10
+  
+  # Multi-agent collaboration
+  multi_agent:
+    enabled: false
+    num_agents: 3
+    coordination: "consensus"
+  
+  # Self-reflection
+  self_reflection:
+    enabled: false
+    frequency: "after_failure"
+    max_iterations: 2
+
+# Custom Extensions
+extensions:
+  # Plugin system
+  plugins:
+    enabled: false
+    directory: "./plugins"
+  
+  # Custom tools
+  custom_tools:
+    enabled: false
+    directory: "./custom_tools"
+  
+  # Hooks
+  hooks:
+    pre_evaluation: null
+    post_evaluation: null
+    on_error: null
+    on_success: null

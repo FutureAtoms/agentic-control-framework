@@ -46,3 +46,47 @@ config.json
 mcp-connection.json
 settings.json
 workspaces/
+
+# IDE Configuration Files
+claude.json
+claude.dev.json
+*.dev.json
+cline_*.json
+cursor_*.json
+
+# Workspace directories
+workspaces/
+workspace-*/
+
+# ACF local state
+.acf/
+
+# Test Dockerfiles at root
+Dockerfile.test*
+
+# Development artifacts
+*.local
+*.backup
+*.bak
+*.tmp
+*.temp
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Additional IDE files
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.code-workspace

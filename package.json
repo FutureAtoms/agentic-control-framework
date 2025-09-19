@@ -7,7 +7,6 @@
     "agentic-control-framework": "./bin/agentic-control-framework-mcp",
     "acf": "./bin/acf",
     "acf-mcp": "./bin/agentic-control-framework-mcp",
-    "acf-mcp-v2": "./bin/acf-mcp-v2",
     "task-manager": "./bin/acf",
     "task-manager-mcp": "./bin/task-manager-mcp",
     "agentic-control-framework-mcp": "./bin/agentic-control-framework-mcp"
@@ -15,11 +14,13 @@
   "scripts": {
     "start:mcp": "node ./bin/agentic-control-framework-mcp",
     "start:legacy-mcp": "node ./bin/task-manager-mcp",
-    "start": "node ./src/mcp_server.js --workspaceRoot $(pwd)",
+    "start": "node ./src/mcp/server.js --workspaceRoot $(pwd)",
     "start:auth": "node src/auth-proxy.js",
     "start:local": "docker-compose up --build",
     "postinstall": "node ./scripts/postinstall.js",
     "test": "mocha 'test/mcp/**/*.js'",
+    "test:cli": "mocha 'test/cli/**/*.js'",
+    "coverage:cli": "nyc -r text -r lcov -r html npm run test:cli",
     "test:claude-code": "./test/claude-code/run-claude-code-tests.sh",
     "test:claude-code-unit": "mocha 'test/claude-code/**/*.test.js'",
     "test:priority": "node test/unit/test-priority-system.js",
@@ -86,6 +87,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.10",
-    "mocha": "^10.7.0"
+    "mocha": "^10.7.0",
+    "nyc": "^15.1.0"
   }
 }

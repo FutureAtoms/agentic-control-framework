@@ -88,8 +88,8 @@ if (process.env.DEBUG === 'true') {
   console.error('[DEBUG] Workspace path file:', workspacePathFile);
 }
 
-// MCP server path
-const mcpServerPath = path.join(projectRoot, 'src', 'mcp_server.js');
+// MCP server path (unified v2)
+const mcpServerPath = path.join(projectRoot, 'src', 'mcp', 'server.js');
 
 // Launch the server with the initial workspace root
 const serverProcess = spawn('node', [

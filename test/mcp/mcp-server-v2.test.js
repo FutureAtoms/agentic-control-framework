@@ -2,12 +2,13 @@ const { expect } = require('chai');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const treeKill = require('tree-kill');
 
-describe('ACF MCP Server v2 Tests', function() {
+describe('ACF MCP Server Tests', function() {
   this.timeout(10000);
   
   let serverProcess;
-  const serverPath = path.join(__dirname, '../../bin/acf-mcp-v2');
+  const serverPath = path.join(__dirname, '../../bin/agentic-control-framework-mcp');
   const testWorkspace = path.join(__dirname, '../test-workspace');
   
   // Helper to send JSON-RPC request
@@ -78,14 +79,30 @@ describe('ACF MCP Server v2 Tests', function() {
     setTimeout(done, 1000);
   });
   
-  after(function() {
-    if (serverProcess) {
-      serverProcess.kill();
+  after(function(done) {
+    if (serverProcess && serverProcess.pid) {
+      try {
+        treeKill(serverProcess.pid, 'SIGKILL', () => {
+          // continue cleanup after kill
+          if (fs.existsSync(testWorkspace)) {
+            try { fs.rmSync(testWorkspace, { recursive: true, force: true }); } catch (_) {}
+          }
+          done();
+        });
+      } catch (_) {
+        try { serverProcess.kill('SIGKILL'); } catch (_) {}
+        if (fs.existsSync(testWorkspace)) {
+          try { fs.rmSync(testWorkspace, { recursive: true, force: true }); } catch (_) {}
+        }
+        done();
+      }
+      return;
     }
     // Clean up test workspace
     if (fs.existsSync(testWorkspace)) {
-      fs.rmSync(testWorkspace, { recursive: true, force: true });
+      try { fs.rmSync(testWorkspace, { recursive: true, force: true }); } catch (_) {}
     }
+    done();
   });
   
   describe('Server Initialization', function() {

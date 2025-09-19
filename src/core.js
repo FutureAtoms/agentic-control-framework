@@ -1110,7 +1110,10 @@ function updateTask(workspaceRoot, id, options) {
     updated = true;
   }
   if (options.dependsOn !== undefined) {
-    const newDeps = options.dependsOn.split(',').map(depId => parseInt(depId.trim())).filter(depId => !isNaN(depId));
+    // Accept array or comma-separated string
+    const newDeps = Array.isArray(options.dependsOn)
+      ? options.dependsOn.map(depId => parseInt(String(depId).trim())).filter(depId => !isNaN(depId))
+      : String(options.dependsOn).split(',').map(depId => parseInt(depId.trim())).filter(depId => !isNaN(depId));
     
     // Check for circular dependencies
     const checkCircular = (taskId, deps, visited = new Set()) => {
@@ -1157,8 +1160,8 @@ function updateTask(workspaceRoot, id, options) {
     };
     const sanitizeRelatedFiles = (files) => {
       if (!files) return [];
-      const parsed = parseCommaSeparated(files);
-      return parsed.map(f => sanitizePath(f)).filter(Boolean);
+      const list = Array.isArray(files) ? files : parseCommaSeparated(files);
+      return list.map(f => sanitizePath(f)).filter(Boolean);
     };
     
     task.relatedFiles = sanitizeRelatedFiles(options.relatedFiles);
@@ -1272,7 +1275,8 @@ function generateTaskFiles(workspaceRoot, options = {}) { // Renamed argument, a
   
   try {
     tasksData.tasks.forEach(task => {
-      const taskFileName = `task-${task.id}-${task.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
+      const safeTitle = (task && task.title) ? task.title : `task-${task.id}`;
+      const taskFileName = `task-${task.id}-${safeTitle.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.md`;
       // Use resolvePath to ensure the path is resolved correctly against the workspace root
       const filePath = resolvePath(workspaceRoot, path.join(taskFilesDir, taskFileName));
       
@@ -2161,19 +2165,17 @@ function addTaskWithTemplate(workspaceRoot, title, description, templateName, ta
       return priorityResult;
     }
 
-    // Create task with calculated priority
+    // Build options for addTask
     const taskOptions = {
-      ...options,
+      title,
+      description,
       priority: priorityResult.priority,
-      templateUsed: templateName,
-      templateInfo: {
-        basePriority: priorityResult.basePriority,
-        appliedModifiers: priorityResult.appliedModifiers,
-        template: priorityResult.template
-      }
+      // normalize optional fields
+      dependsOn: Array.isArray(options.dependsOn) ? options.dependsOn.join(',') : (options.dependsOn || ''),
+      relatedFiles: Array.isArray(options.relatedFiles) ? options.relatedFiles.join(',') : (options.relatedFiles || ''),
     };
 
-    const result = addTask(workspaceRoot, title, description, taskOptions);
+    const result = addTask(workspaceRoot, taskOptions);
 
     if (result.success) {
       result.priorityCalculation = priorityResult;
