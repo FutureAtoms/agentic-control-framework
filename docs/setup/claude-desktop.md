@@ -359,3 +359,4 @@ Now that you've connected ACF to Claude Desktop, you can:
 - **Logs**: Check MCP logs for detailed error messages
 - **NPM Package**: [npmjs.com/package/agentic-control-framework](https://npmjs.com/package/agentic-control-framework)
 - **Documentation**: See repository README for full tool documentation
+> Note: This guide is deprecated. See docs/INTEGRATIONS.md and the root claude.json for the current setup.

@@ -156,3 +156,4 @@ For production deployment, replace the URL:
 Deploy using: `./quick-deploy.sh gcp --with-auth`
 
 Your ACF tools are now available directly in Cursor! 🎯 
+> Note: This guide is deprecated. See docs/INTEGRATIONS.md and config/examples/cursor.mcp.json for the current setup.

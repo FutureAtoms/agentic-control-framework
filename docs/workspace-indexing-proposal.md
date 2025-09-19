@@ -24,7 +24,7 @@ Add intelligent workspace indexing to ACF that automatically analyzes projects a
 
 ### 1. Add Smart Indexer Tool
 ```javascript
-// New tool in mcp_server.js
+// New tool in src/mcp/server.js
 {
   name: 'index_workspace',
   description: 'Get comprehensive workspace analysis including structure, technologies, and recommendations'
@@ -76,7 +76,7 @@ When `setWorkspace` is called, automatically index the project and return key in
 
 1. Review and approve proposal
 2. Implement workspace_indexer.js
-3. Add minimal integration to mcp_server.js
+3. Add minimal integration to src/mcp/server.js
 4. Test with various project types
 5. Document usage patterns
 

@@ -69,7 +69,7 @@ Core functionality and business logic:
   - Dependency management
   - Status tracking
   
-- **`mcp_server.js`**: MCP server implementation
+- **`src/mcp/server.js`**: MCP server implementation
   - JSON-RPC protocol handler
   - Tool registration and execution
   - Integration point for all tools
@@ -239,7 +239,7 @@ User → CLI (cli.js) → Core Logic (core.js) → File System (tasks.json)
 ### 2. MCP Server Communication
 
 ```
-Cursor IDE ←→ MCP Server (mcp_server.js) ←→ Tools (src/tools/*.js)
+Cursor IDE ←→ MCP Server (src/mcp/server.js) ←→ Tools (src/tools/*.js)
                     ↓
               Core Functions (core.js)
 ```
@@ -300,7 +300,7 @@ module.exports = {
   myNewFunction
 };
 
-// 2. Register in mcp_server.js
+// 2. Register in src/mcp/server.js
 case 'my_new_tool':
   responseData = await myNewTool.myNewFunction(argsParam);
   break;

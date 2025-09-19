@@ -100,7 +100,7 @@ npm install
 
 ### Core Files ✅
 - `/bin/agentic-control-framework-mcp` - MCP wrapper
-- `/src/mcp_server.js` - MCP server implementation
+- `/src/mcp/server.js` - MCP server implementation
 - `/src/tools/browser_tools.js` - Browser automation
 - `/src/tools/terminal_tools.js` - Terminal management
 - `/src/tools/search_tools.js` - Code search

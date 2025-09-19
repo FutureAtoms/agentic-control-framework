@@ -39,7 +39,7 @@ Alternatively, add a JSON entry to `~/.claude.json` pointing to `bin/agentic-con
 Standalone test:
 
 ```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node src/mcp_server.js
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node src/mcp/server.js
 ```
 
 ## Troubleshooting

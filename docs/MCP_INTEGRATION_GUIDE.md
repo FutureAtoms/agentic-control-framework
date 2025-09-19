@@ -30,7 +30,7 @@ The Agentic Control Framework includes enhanced MCP server functionality with in
 ./bin/acf-mcp
 
 # Or directly running the MCP server with custom options
-node src/mcp_server.js --workspaceRoot /path/to/your/workspace
+node src/mcp/server.js --workspaceRoot /path/to/your/workspace
 ```
 
 ### Environment Variables for MCP Server
@@ -264,7 +264,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const mcpServer = spawn('node', [
-  path.join(__dirname, 'src/mcp_server.js'),
+  path.join(__dirname, 'src/mcp/server.js'),
   '--workspaceRoot', process.cwd()
 ], {
   env: {
@@ -592,7 +592,7 @@ env:
    - Verify the command path in client settings
    - Check environment variables
    - Review stderr output for errors
-   - Test with: `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node src/mcp_server.js`
+   - Test with: `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node src/mcp/server.js`
 
 4. **Tool not working**
    - Check if required dependencies are installed

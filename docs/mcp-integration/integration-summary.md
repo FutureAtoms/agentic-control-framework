@@ -76,7 +76,7 @@ src/
 │   ├── edit_tools.js          # Surgical text editing
 │   ├── enhanced_filesystem_tools.js  # URL-enabled file reading
 │   └── browser_tools.js       # Complete Playwright integration
-└── mcp_server.js              # Updated with all new tool definitions
+└── mcp/server.js              # Unified MCP server
 ```
 
 ### Key Features Added

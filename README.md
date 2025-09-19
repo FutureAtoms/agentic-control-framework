@@ -1,91 +1,20 @@
 
-# 🤖 Agentic Control Framework (ACF)
+# Agentic Control Framework (ACF)
 
-**A comprehensive toolkit for autonomous agent development with 80+ specialized tools**
+Lightweight task manager + MCP server for agent workflows. This README reflects the current code and tested integrations.
 
-**Author:** Abhilash Chadhar (FutureAtoms)
-**Repository:** [agentic-control-framework](https://github.com/FutureAtoms/agentic-control-framework)
+- CLI entry: `bin/acf`
+- MCP server: `bin/agentic-control-framework-mcp` → `src/mcp/server.js`
+- Example client configs: `config/examples/`
+- Tests: `npm run test:cli`, `npm test`
 
-![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-Healthy-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202025--03--26-Compliant-blue) ![Test Status](https://img.shields.io/badge/80%2B%20Tools-Available-green) ![Test Status](https://img.shields.io/badge/IDE%20Integrations-4%20Tested-blue) [![smithery badge](https://smithery.ai/badge/@FutureAtoms/agentic-control-framework)](https://smithery.ai/server/@FutureAtoms/agentic-control-framework)
+## What’s included
 
-## 🌟 Overview
+What’s in the box
 
-The Agentic Control Framework (ACF) is a production-ready platform that transforms your existing projects into powerful autonomous agents. With 80+ specialized tools spanning task management, filesystem operations, browser automation, terminal control, and more, ACF provides everything needed to build sophisticated AI agents.
-
-**✅ Comprehensive Testing (2025)**
-- Broad tool verification across categories via MCP protocol
-- 4 IDE integrations: Cursor, Claude Desktop, Claude Code, VS Code
-- JSON-RPC 2.0 compliant; MCP 2025-03-26 (default) and 2024-11-05 supported
-- Performance verified under typical local workloads
-
-## 🏗️ System Architecture
-
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        CC[Claude Code]
-        CD[Claude Desktop]
-        CU[Cursor IDE]
-        VS[VS Code]
-        CLI[CLI Interface]
-    end
-
-    subgraph "Protocol Layer"
-        MCP[MCP Protocol 2025-03-26]
-        HTTP[HTTP/SSE Transport]
-        STDIO[STDIO Transport]
-    end
-
-    subgraph "ACF Core"
-        MS[MCP Server]
-        TM[Task Manager]
-        PE[Priority Engine]
-        FW[File Watcher]
-    end
-
-    subgraph "Tool Categories"
-        CT[Core ACF Tools<br/>25 tools ✅]
-        FT[Filesystem Tools<br/>14 tools ✅]
-        TT[Terminal Tools<br/>5 tools ✅]
-        BT[Browser Tools<br/>25 tools ✅]
-        ST[Search/Edit Tools<br/>3 tools ✅]
-        SYS[System Tools<br/>7 tools ✅]
-    end
-
-    subgraph "Storage & External"
-        FS[File System]
-        DB[Task Database]
-        BR[Browser Engine]
-        OS[Operating System]
-    end
-
-    CC --> MCP
-    CD --> MCP
-    CU --> MCP
-    VS --> MCP
-    CLI --> TM
-
-    MCP --> MS
-    HTTP --> MS
-    STDIO --> MS
-
-    MS --> TM
-    MS --> PE
-    MS --> FW
-
-    TM --> CT
-    MS --> FT
-    MS --> TT
-    MS --> BT
-    MS --> ST
-    MS --> SYS
-
-    CT --> DB
-    FT --> FS
-    TT --> OS
-    BT --> BR
-    FW --> FS
-```
+- Task manager with priorities, dependencies, subtasks, templates
+- CLI with rich commands
+- MCP server (JSON‑RPC over stdio) tested with Claude Desktop/Code, Cursor, Codex
 
 **Key Features:**
 - 🔧 **80+ Specialized Tools**: Task management, filesystem, terminal, browser automation, AppleScript integration
@@ -97,7 +26,7 @@ graph TB
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
 - 📋 **MCP 2025-03-26 Compliant**: Default protocol with tool titles, annotations, and proper capabilities
 
-## 🔧 All Available Tools
+## MCP tools (implemented)
 
 ### Tool Categories Overview
 
@@ -170,54 +99,24 @@ mindmap
         set_config_value
 ```
 
-### Core ACF Tools (25 tools) ✅
-```
-Task Management:
-- listTasks: List all tasks with filtering
-- addTask: Create new tasks with priority/dependencies
-- addSubtask: Add subtasks to existing tasks
-- updateStatus: Change task status (todo/inprogress/done/blocked/error)
-- updateTask: Modify task details
-- removeTask: Delete tasks or subtasks
-- getNextTask: Get next actionable task based on priority/dependencies
-- getContext: Get detailed task information
-- generateTaskFiles: Create individual markdown files for tasks
-- generateTaskTable: Create readable task status table
-- parsePrd: Parse Product Requirements Documents
-- expandTask: AI-powered task breakdown
-- reviseTasks: AI-powered task revision
-- setWorkspace: Configure workspace directory
-- initProject: Initialize new ACF project
+Core task tools
+- initProject, addTask, addSubtask, listTasks, updateTask, updateStatus, removeTask, getNextTask
+- generateTaskFiles, recalculatePriorities, getPriorityStatistics, getDependencyAnalysis
+- getPriorityTemplates, calculatePriorityFromTemplate, suggestPriorityTemplate, addTaskWithTemplate
 
-Priority Management (Numerical 1-1000 System):
-- recalculatePriorities: Intelligent priority recalculation with dependency analysis
-- getPriorityStatistics: Comprehensive priority distribution and statistics
-- getDependencyAnalysis: Critical path analysis and blocking task detection
-- bumpTaskPriority: Increase task priority by specified amount
-- deferTaskPriority: Decrease task priority by specified amount
-- prioritizeTask: Set task to high priority range (700-899)
-- deprioritizeTask: Set task to low priority range (1-399)
-```
+Utilities
+- read_file, write_file
+- execute_command (stub for tests)
 
-### Filesystem Tools (13 tools) ✅
-```
-File Operations:
-- read_file: Read file contents with type detection
-- read_multiple_files: Read multiple files at once
-- write_file: Write/create files
-- copy_file: Copy files and directories
-- move_file: Move/rename files
-- delete_file: Delete files/directories
-- get_file_info: File metadata and statistics
+Note: Additional names may appear in tools/list for client compatibility, but only the methods above are handled by `tools/call` in `src/mcp/server.js`.
 
-Directory Operations:
-- list_directory: Detailed directory listing
-- create_directory: Create directories
-- tree: Hierarchical directory structure
-- search_files: Find files by pattern
-- list_allowed_directories: Show accessible paths
-- get_filesystem_status: Show security status
-```
+## CLI commands (high level)
+
+- init, add, list, add-subtask, status, next, update, remove, context
+- update-subtask, bump, defer, prioritize, deprioritize
+- recalculate-priorities, priority-stats, dependency-analysis
+- start-file-watcher, stop-file-watcher, file-watcher-status, force-sync
+- list-templates, suggest-template, calculate-priority, add-with-template
 
 ### Terminal Tools (6 tools) ✅
 ```
@@ -285,7 +184,7 @@ Server Management:
 ```
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/futureatoms-agentic-control-framework-badge.png)](https://mseep.ai/app/futureatoms-agentic-control-framework)
 
-## 📁 Project Structure
+## Project structure
 
 The repository is organized following standard practices with clean separation of concerns:
 
@@ -304,23 +203,18 @@ agentic-control-framework/
 └── 📁 data/          # Data directory
 ```
 
-**📋 For complete repository structure details, see [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md)**
+See also: docs/PROJECT-STRUCTURE.md
 
-## 📚 Documentation
+## Integrations
 
-Well-organized documentation for all skill levels:
+Use the ready-to-copy templates in `config/examples/`.
 
-### 🚀 Getting Started
-- **[Installation Guide](docs/getting-started/installation.md)** - Complete setup instructions
-- **[Quick Start](docs/getting-started/quick-start.md)** - Get running in 5 minutes
-- **[Requirements](docs/getting-started/requirements.md)** - System prerequisites
+- Claude Desktop: `claude.json`
+- Claude Code (VS Code): `config/examples/claude_code.json`
+- Cursor: `config/examples/cursor.mcp.json`
+- Codex: `config/examples/codex.config.toml`
 
-### 🔧 IDE Integration
-- **[Claude Code](docs/setup/claude-code.md)** - Claude Code setup (Recommended)
-- **[Claude Desktop](docs/setup/claude-desktop.md)** - Claude Desktop configuration
-- **[Cursor IDE](docs/setup/cursor.md)** - Cursor IDE integration
-- **[VS Code](docs/setup/vscode.md)** - Visual Studio Code setup
-- **[Troubleshooting](docs/setup/troubleshooting.md)** - Common issues and solutions
+More details: docs/INTEGRATIONS.md
 
 ### ☁️ Cloud Deployment
 - **[Deployment Guide](docs/deployment/deployment-guide.md)** - Complete deployment overview
@@ -479,15 +373,9 @@ Choose your preferred mode:
 ./bin/acf list
 ```
 
-#### Option 2: Local MCP Mode (IDE Integration)
+#### MCP server (for IDEs)
 ```bash
-# Start MCP server for IDE integration
-npm run start:mcp
-# OR
 node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
-
-# Server will be available for IDE connections
-# See SETUP-INSTRUCTIONS.md for IDE configuration
 ```
 
 #### Option 3: Cloud MCP Mode (Remote Access)

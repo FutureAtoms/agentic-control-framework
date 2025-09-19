@@ -29,7 +29,7 @@ agentic-control-framework/
 ├── src/                         # 💻 Source code
 │   ├── auth-proxy.js           # Authentication proxy (moved from root)
 │   ├── core.js                 # Core functionality
-│   ├── mcp_server.js           # MCP server
+│   ├── src/mcp/server.js       # MCP server
 │   └── tools/                  # Tool implementations
 │
 ├── bin/                         # 🔧 Executable scripts

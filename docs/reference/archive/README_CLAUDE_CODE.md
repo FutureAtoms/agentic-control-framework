@@ -50,7 +50,7 @@ To verify the MCP server is working:
 
 ```bash
 # Test the server directly (from agentic-control-framework/)
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node src/mcp_server.js
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node src/mcp/server.js
 ```
 
 You should see a JSON response with server information.

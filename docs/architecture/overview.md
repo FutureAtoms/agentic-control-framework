@@ -102,7 +102,7 @@ graph TB
 
 ## Core Components
 
-### 1. MCP Server (`src/mcp_server.js`)
+### 1. MCP Server (`src/mcp/server.js`)
 
 The central hub that implements the MCP protocol and coordinates all tool operations.
 

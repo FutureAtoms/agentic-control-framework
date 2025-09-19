@@ -557,3 +557,4 @@ claude
 2. Try the example workflows above
 3. Explore the 83+ tools available
 4. Join our community for tips and best practices
+> Note: This guide is deprecated. See docs/INTEGRATIONS.md and config/examples/claude_code.json for the current setup.
