@@ -1,0 +1,22 @@
+FROM node:20-bullseye
+
+SHELL ["/bin/bash", "-lc"]
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+# Skip heavy Playwright downloads by default; override locally if needed
+ENV ACF_SKIP_POSTINSTALL=0 \
+    ACF_SKIP_PLAYWRIGHT=1 \
+    CI=1
+
+RUN npm ci
+
+COPY . .
+
+RUN chmod +x bin/* || true
+
+# Default: run CLI tests. Override CMD to run MCP or coverage.
+CMD ["npm", "run", "test:cli"]
+
