@@ -290,22 +290,25 @@ class PrioritySystemTestRunner {
             });
             this.assert(analysisOutput.includes('Dependency Analysis'), 'Dependency analysis should show analysis');
             
-            // Test bump command
-            const tasks = this.core.readTasks(this.testWorkspace);
-            if (tasks.tasks.length > 0) {
-                const firstTaskId = tasks.tasks[0].id;
-                const originalPriority = tasks.tasks[0].priority;
-                
-                execSync(`${taskManagerPath} bump ${firstTaskId} -a 50`, {
+            // Test bump command on a fresh, dedicated task to avoid uniqueness side-effects
+            const created = this.core.addTask(this.testWorkspace, {
+                title: 'CLI Bump Test',
+                description: 'Isolated CLI bump test',
+                priority: '600'
+            });
+            const firstTaskId = created.taskId;
+            const originalPriority = 600;
+
+            execSync(`${taskManagerPath} bump ${firstTaskId} -a 50`, {
                     cwd: this.testWorkspace,
                     timeout: 10000
                 });
                 
                 const updatedTasks = this.core.readTasks(this.testWorkspace);
-                const updatedTask = updatedTasks.tasks.find(t => t.id === firstTaskId);
-                
-                this.assert(updatedTask.priority > originalPriority, 'Bump command should increase priority');
-            }
+            const updatedTask = updatedTasks.tasks.find(t => t.id === firstTaskId);
+            const minExpected = Math.min(1000, originalPriority + 1);
+            this.assert(updatedTask.priority >= minExpected && updatedTask.priority <= 1000, 'Bump command should increase priority without exceeding cap');
+            
             
         } catch (error) {
             throw new Error(`CLI command failed: ${error.message}`);

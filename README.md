@@ -1,7 +1,7 @@
 
 # Agentic Control Framework (ACF)
 
-Lightweight task manager + MCP server for agent workflows. This README reflects the current code and tested integrations.
+Production‑grade MCP server and task‑graph engine with 80+ tools for context engineering—retrieval, code editing, browser automation, terminal orchestration, and persistent memory—designed for Claude Code, Cursor, Codex, and VS Code. This README reflects the current code and tested integrations.
 
 - CLI entry: `bin/acf`
 - MCP server: `bin/agentic-control-framework-mcp` → `src/mcp/server.js`
