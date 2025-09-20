@@ -26,6 +26,73 @@ What’s in the box
 - 🛡️ **Security-First**: Filesystem guardrails, permission systems, and secure defaults
 - 📋 **MCP 2025-03-26 Compliant**: Default protocol with tool titles, annotations, and proper capabilities
 
+## How ACF Solves Context Engineering
+
+ACF turns the messy, multi-file, multi-step reality of software work into precise, addressable “context units” that LLMs can request, refine, and act on. It does this by combining a task graph, rich context surfaces, retrieval/edit tools, and guardrails — all accessible via CLI and MCP.
+
+- Task Graph as Source of Truth
+  - Each task/subtask has an ID, status, numeric priority (1–1000), dependencies, related files, activity log, timestamps.
+  - Priority engine supports time decay and effort weighting to keep “what’s next” dynamically correct.
+
+- Rich, On‑Demand Context Surfaces
+  - `getContext` returns the exact task/subtask context block (including related files metadata and activity log).
+  - `generateTaskFiles` materializes one Markdown file per task (tasks/), and `tasks-table.md` gives a project overview.
+  - CLI `context <id>` prints a human summary for humans and LLMs.
+
+- Retrieval and Editing Tools (for context building and application)
+  - Retrieval: `search_code`, `tree`, `list_directory`, `get_file_info`, `read_file`/`read_multiple_files`, `read_url`.
+  - Editing: `edit_block` applies surgical replacements using explicit old/new blocks (minimizes accidental drift).
+  - Execution: terminal tools (`execute_command`, `list_processes`, sessions) to verify context assumptions (tests, builds).
+
+- Synchronization & Freshness
+  - File watcher syncs `tasks.json` and per‑task files; debounced change detection; `tasks-table.md` kept fresh.
+  - Guards: `allowedDirectories` and `readonlyMode` restrict the accessible filesystem scope.
+
+- Planning from Product Docs (optional)
+  - `parsePrd`, `expandTask`, `reviseTasks` convert PRDs or change requests into structured tasks via Gemini, then fold back into the task graph for traceable execution.
+
+Together, this provides a repeatable “context loop”: plan → retrieve → edit/verify → update state, with every step addressable by tools so MCP clients (Claude Code, Cursor, Codex, VS Code) can drive it reliably.
+
+### End‑to‑End Context Recipes
+
+- Bootstrap from PRD
+  - `tools/call: parsePrd { filePath }` → tasks created with priorities and dependencies → `generateTaskFiles` for review.
+
+- Focus a Model on the Next Action
+  - `tools/call: getNextTask` → get the next actionable task considering dependencies/priority.
+  - `tools/call: getContext { id }` → fetch the task block; then `read_file`/`search_code` for surrounding code.
+
+- Safe, Surgical Code Change
+  - Retrieve: `search_code` to identify exact block; verify with `read_file`.
+  - Apply: `edit_block { file_path, old_string, new_string, normalize_whitespace }`.
+  - Verify: `execute_command { command: "npm test" }` or suite‑specific commands.
+
+- Keep Context Fresh
+  - `start_file_watcher` → modify files or tasks → `file_watcher_status` for stats → `stop_file_watcher` when done.
+
+### Persistent Memory (Activity Logs in tasks.json)
+
+ACF keeps a durable, queryable memory of what the agent (or human) did, when, and why. This persistent memory lives in `.acf/tasks.json` and per‑task files:
+
+- What is stored
+  - For every task and subtask: `createdAt`, `updatedAt`, and `activityLog[]` entries with timestamped messages.
+  - Each change to a task (status, title, description, priority, dependencies, related files) appends a log entry and bumps `updatedAt`.
+  - AI flows (`parsePrd`, `expandTask`, `reviseTasks`) also write clear activity messages.
+
+- How LLMs write memory
+  - CLI: include `--message "..."` when changing state to append a human/LLM note to the activity log.
+    - Examples:
+      - `acf status 12 inprogress --message "Started implementing parser"`
+      - `acf update 12 --priority 750 --message "Raised priority due to deadline"`
+  - MCP: pass `message` in tools/call arguments for `updateStatus` or `updateTask`.
+    - `tools/call { name: "updateStatus", arguments: { id: "12", newStatus: "done", message: "Tests green; merging" } }`
+    - `tools/call { name: "updateTask", arguments: { id: "12", priority: 820, message: "Escalated after stakeholder review" } }`
+
+- How to consume memory
+  - `acf context <id>` (CLI) prints a rich, human‑readable context including the recent `activityLog`.
+  - `tools/call: getContext { id }` (MCP) returns the same structured block, ideal for LLM prompts.
+  - `generateTaskFiles` produces markdown snapshots; `tasks-table.md` shows a live overview synced from `.acf/tasks.json` via the file watcher.
+
 ## MCP tools (implemented)
 
 ### Tool Categories Overview
