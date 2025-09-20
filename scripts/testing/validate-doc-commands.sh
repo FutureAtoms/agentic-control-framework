@@ -10,7 +10,12 @@ chmod +x bin/* || true
 echo "[validate] CLI help"
 ./bin/acf --help | head -n 20
 
-echo "[validate] Quick CLI list (repo has .acf/tasks.json)"
+echo "[validate] Ensure workspace initialized"
+if [ ! -f ".acf/tasks.json" ]; then
+  ./bin/acf init --project-name "CI Validation" --project-description "Workspace for docs validation" >/dev/null 2>&1 || true
+fi
+
+echo "[validate] Quick CLI list"
 ./bin/acf list --table || true
 
 echo "[validate] MCP stdio initialize (unified server)"
