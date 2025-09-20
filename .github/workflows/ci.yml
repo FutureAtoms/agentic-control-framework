@@ -24,9 +24,6 @@ jobs:
   test-linux:
     name: Linux • Node 20 • CLI+MCP
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: agentic-control-framework
     env:
       NODE_ENV: test
       # Keep CI lean: skip heavy browser downloads
@@ -65,9 +62,6 @@ jobs:
     name: macOS • Heavy (Playwright+AppleScript)
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_heavy == true }}
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: agentic-control-framework
     env:
       NODE_ENV: test
       # Allow Playwright setup for browser tools
