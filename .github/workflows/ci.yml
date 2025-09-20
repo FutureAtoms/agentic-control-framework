@@ -41,22 +41,22 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
 
       - name: Install
-        run: cd agentic-control-framework && npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Make executables runnable
-        run: cd agentic-control-framework && chmod +x bin/* || true
+        run: chmod +x bin/* || true
 
       - name: CLI tests
-        run: cd agentic-control-framework && npm run -s test:cli
+        run: npm run -s test:cli
 
       - name: MCP tests (core)
-        run: cd agentic-control-framework && npm test
+        run: npm test
 
       - name: Priority tests
-        run: cd agentic-control-framework && npm run -s test:priority
+        run: npm run -s test:priority
 
       - name: Validate docs commands
-        run: cd agentic-control-framework && scripts/testing/validate-doc-commands.sh
+        run: scripts/testing/validate-doc-commands.sh
 
   heavy-macos:
     name: macOS • Heavy (Playwright+AppleScript)
@@ -82,15 +82,14 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
 
       - name: Install
-        run: cd agentic-control-framework && npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund
 
       - name: Install Playwright browsers
         run: |
-          cd agentic-control-framework
           npx playwright install || true
 
       - name: Make executables runnable
-        run: cd agentic-control-framework && chmod +x bin/* || true
+        run: chmod +x bin/* || true
 
       - name: MCP tests (heavy)
-        run: cd agentic-control-framework && npm test
+        run: npm test
