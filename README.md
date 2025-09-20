@@ -1,6 +1,8 @@
 
 # Agentic Control Framework (ACF)
 
+[![CI](https://github.com/FutureAtoms/agentic-control-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/FutureAtoms/agentic-control-framework/actions/workflows/ci.yml)
+
 AI‑native orchestration layer (CLI + MCP) with 80+ tools for context engineering—retrieval, code editing, browser automation, terminal orchestration, and persistent memory—designed for Claude Code, Cursor, Codex, and VS Code. This README reflects the current code and tested integrations.
 
 - CLI entry: `bin/acf`
@@ -93,6 +95,51 @@ ACF keeps a durable, queryable memory of what the agent (or human) did, when, an
   - `tools/call: getContext { id }` (MCP) returns the same structured block, ideal for LLM prompts.
   - `generateTaskFiles` produces markdown snapshots; `tasks-table.md` shows a live overview synced from `.acf/tasks.json` via the file watcher.
 
+## Quick Start
+
+- Requirements
+  - Node.js 18+
+  - macOS for AppleScript tools (optional). Playwright browsers if using browser tools: `npx playwright install`.
+
+- Install
+  - `cd agentic-control-framework && npm ci`
+
+- CLI (local)
+  - `./bin/acf init --project-name "Demo" --project-description "Getting started"`
+  - `./bin/acf add -t "First task" -p high`
+  - `./bin/acf list --format human`
+
+- MCP Server (stdio)
+  - `node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)`
+  - Use example client configs in `config/examples/` for Claude Code, Cursor, and Codex.
+
+## Documentation
+
+- Overview
+  - Primary docs index: `docs/README.md`
+  - Project structure: `docs/PROJECT-STRUCTURE.md`
+  - Architecture overview: `docs/architecture/overview.md`
+  - MCP integration details: `docs/architecture/mcp-integration.md`
+
+- Integrations (MCP Clients)
+  - Connection guides: `docs/INTEGRATIONS.md`
+  - Example configs:
+    - Claude Code (VS Code): `config/examples/claude_code.json`
+    - Cursor (project/global): `config/examples/cursor.mcp.json`
+    - Codex CLI (TOML): `config/examples/codex.config.toml`
+  - Claude helper (dev notes): `CLAUDE.md`
+
+- Reference
+  - CLI complete examples: `docs/reference/cli_examples.md`
+  - MCP request/response examples (auto‑generated): `docs/reference/mcp_examples.md`
+
+- Testing & Validation
+  - Test summary and notes: `docs/TESTING_SUMMARY.md`
+  - Doc command validator: `scripts/testing/validate-doc-commands.sh`
+
+- Proposals & Ideas
+  - Workspace indexing proposal: `docs/workspace-indexing-proposal.md`
+
 ## MCP tools (implemented)
 
 ### Tool Categories Overview
@@ -175,7 +222,29 @@ Utilities
 - read_file, write_file
 - execute_command (stub for tests)
 
-Note: Additional names may appear in tools/list for client compatibility, but only the methods above are handled by `tools/call` in `src/mcp/server.js`.
+Note: Tools are advertised via `tools/list` from `src/mcp/server.js`, and each listed tool has a handler in the server.
+
+## Configuration
+
+- Core environment variables
+  - `WORKSPACE_ROOT`: default workspace path used by CLI/MCP
+  - `ALLOWED_DIRS`: additional allowed directories (path-delimited)
+  - `READONLY_MODE`: set to `true` to disable write operations
+  - `ACF_PATH`: project root override for bins
+
+- Optional/feature flags
+  - `GEMINI_API_KEY`: enable AI-backed tools (`parsePrd`, `expandTask`, `reviseTasks`)
+  - `ACF_SKIP_POSTINSTALL=1`: skip all postinstall steps
+  - `ACF_SKIP_PLAYWRIGHT=1`: skip heavy Playwright browser downloads
+  - `ACF_INSTALL_SHARP=1` or `ACF_INSTALL_ALL=1`: install optional `sharp`
+  - `ACF_ENABLE_BROWSER_TOOLS=1`: enable Playwright browser tests (macOS default)
+  - `ACF_ENABLE_APPLESCRIPT=1`: enable AppleScript tests (macOS only)
+
+## Security & Guardrails
+
+- Filesystem access is constrained by `allowedDirectories` and `readonlyMode`.
+- URL reads (`read_url`) are explicit; edits use `edit_block` with old/new content to minimize unintended changes.
+- Terminal execution supports blocked commands and timeouts; sessions can be listed/terminated.
 
 ## CLI commands (high level)
 
