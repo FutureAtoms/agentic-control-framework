@@ -21,8 +21,8 @@ const UPSTREAM_REPOS = {
   }
 };
 
-// Current ACF tools (extracted from mcp_server.js)
-const ACF_TOOLS_PATH = path.join(__dirname, '../../src/mcp_server.js');
+// Current ACF tools (extracted from unified server)
+const ACF_TOOLS_PATH = path.join(__dirname, '../../src/mcp/server.js');
 
 /**
  * Fetch content from a URL

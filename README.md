@@ -218,6 +218,23 @@ More details: docs/INTEGRATIONS.md
 
 ### ☁️ Cloud Deployment
 - **[Deployment Guide](docs/deployment/deployment-guide.md)** - Complete deployment overview
+
+## Testing
+
+- MCP tests: `npm test`
+- CLI tests: `npm run test:cli`
+- Coverage: `npm run coverage:all`
+
+Environment flags
+- `ACF_SKIP_POSTINSTALL=1` to skip all postinstall steps
+- `ACF_SKIP_PLAYWRIGHT=1` to skip Playwright browser downloads on install
+- `ACF_INSTALL_SHARP=1` (or `ACF_INSTALL_ALL=1`) to install optional `sharp`
+- `ACF_ENABLE_BROWSER_TOOLS=1` to enable Playwright browser tests (macOS only by default)
+- `ACF_ENABLE_APPLESCRIPT=1` to enable AppleScript tests (macOS only)
+
+Platform gating (CI-safe by default)
+- Browser and AppleScript MCP tests are skipped by default and on Windows/Linux.
+- To run them locally on macOS, set the corresponding `ACF_ENABLE_*` env vars.
 - **[Google Cloud Run](docs/deployment/gcp-deployment-guide.md)** - GCP deployment
 - **[Docker](docs/deployment/docker.md)** - Container deployment
 - **[Remote Setup](docs/deployment/remote-client-setup.md)** - Remote client configuration

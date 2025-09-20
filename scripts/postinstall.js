@@ -33,16 +33,21 @@ function main() {
     }
   }
 
-  // 2) Install Playwright browsers
-  try {
-    console.log('[postinstall] Installing Playwright browsers...');
-    run(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'install']);
-    if (process.platform === 'linux') {
-      console.log('[postinstall] Installing Playwright Linux deps...');
-      run(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'install-deps']);
+  const wantPlaywright = process.env.ACF_SKIP_PLAYWRIGHT !== '1';
+  if (wantPlaywright || process.env.ACF_INSTALL_ALL === '1') {
+    try {
+      console.log('[postinstall] Installing Playwright browsers...');
+      run(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'install']);
+      if (process.platform === 'linux') {
+        console.log('[postinstall] Installing Playwright Linux deps...');
+        run(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['playwright', 'install-deps']);
+      }
+    } catch (e) {
+      console.warn('[postinstall] Playwright install step failed:', e.message);
+      console.warn('[postinstall] You can manually run: npx playwright install');
     }
-  } catch (e) {
-    console.warn('[postinstall] Playwright install step failed:', e.message);
+  } else {
+    console.log('[postinstall] Skipping Playwright install (ACF_SKIP_PLAYWRIGHT=1)');
   }
 
   // 3) Ripgrep presence check (best effort)
@@ -63,8 +68,37 @@ function main() {
     }
   } catch (_) {}
 
+  // 4) Ensure sharp (optional) when requested
+  try {
+    const wantSharp = process.env.ACF_INSTALL_SHARP === '1' || process.env.ACF_INSTALL_ALL === '1';
+    if (wantSharp) {
+      try {
+        require.resolve('sharp');
+        console.log('[postinstall] sharp already present');
+      } catch (_) {
+        console.log('[postinstall] Installing sharp (optional dependency)...');
+        const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+        const ok = run(npmCmd, ['i', 'sharp@^0.33.5', '--no-save'], { cwd: projectRoot });
+        if (!ok) console.warn('[postinstall] Failed to install sharp automatically. You can install it manually: npm i sharp');
+      }
+    } else {
+      console.log('[postinstall] Skipping sharp install. Set ACF_INSTALL_SHARP=1 to force.');
+    }
+  } catch (e) {
+    console.warn('[postinstall] sharp install step failed:', e.message);
+  }
+
+  // 5) AppleScript availability (macOS only)
+  if (process.platform === 'darwin') {
+    try {
+      const which = spawnSync('which', ['osascript'], { stdio: 'ignore' });
+      if (which.status !== 0) {
+        console.warn('[postinstall] osascript not found in PATH; AppleScript tools may be unavailable.');
+      }
+    } catch (_) {}
+  }
+
   console.log('[postinstall] Completed');
 }
 
 main();
-

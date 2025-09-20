@@ -139,7 +139,7 @@ show_next_steps() {
     echo "   - $TOOLS_DIR/"
     echo ""
     echo "4. Update the tool definitions in:"
-    echo "   - $PROJECT_ROOT/src/mcp_server.js"
+    echo "   - $PROJECT_ROOT/src/mcp/server.js"
     echo ""
     echo "5. Test the new tools:"
     echo "   - npm test"

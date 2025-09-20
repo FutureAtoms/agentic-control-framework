@@ -372,7 +372,7 @@ describe('Claude Code Compatibility Tests', function() {
   // Helper function to send MCP requests
   async function sendMCPRequest(request) {
     return new Promise((resolve, reject) => {
-      const serverPath = path.join(__dirname, '../../src/mcp_server.js');
+      const serverPath = path.join(__dirname, '../../src/mcp/server.js');
       const server = spawn('node', [serverPath, '--workspaceRoot', tempDir], {
         stdio: ['pipe', 'pipe', 'pipe']
       });

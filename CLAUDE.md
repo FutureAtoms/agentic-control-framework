@@ -151,7 +151,7 @@ Key environment variables:
 
 2. **Core Logic**:
    - `src/core.js`: Task management operations
-   - `src/mcp_server.js`: MCP protocol implementation
+   - `src/mcp/server.js`: MCP protocol implementation
    - `src/priority_engine.js`: Priority algorithms
 
 3. **Configuration**:

@@ -13,11 +13,10 @@ echo "[validate] CLI help"
 echo "[validate] Quick CLI list (repo has .acf/tasks.json)"
 ./bin/acf list --table || true
 
-echo "[validate] MCP stdio initialize (v1 server)"
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"validator","version":"1.0.0"}}}' | node src/mcp_server.js | head -n 1 || true
+echo "[validate] MCP stdio initialize (unified server)"
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"validator","version":"1.0.0"}}}' | node src/mcp/server.js | head -n 1 || true
 
-echo "[validate] MCP stdio tools/list (v1 server)"
-echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | node src/mcp_server.js | head -n 1 || true
+echo "[validate] MCP stdio tools/list (unified server)"
+echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | node src/mcp/server.js | head -n 1 || true
 
 echo "[validate] DONE"
-
