@@ -1,41 +1,102 @@
-name: ACF CI
+name: CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_heavy:
+        description: 'Run heavy macOS tests (Playwright + AppleScript)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  test-linux:
+    name: Linux • Node 20 • CLI+MCP
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [ '22.x' ]
-
+    defaults:
+      run:
+        working-directory: agentic-control-framework
+    env:
+      NODE_ENV: test
+      # Keep CI lean: skip heavy browser downloads
+      ACF_SKIP_POSTINSTALL: '0'
+      ACF_SKIP_PLAYWRIGHT: '1'
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4.4.0
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
           cache: 'npm'
-      
-      - name: Clean npm cache and install dependencies
-        run: |
-          npm cache clean --force
-          npm install
+          cache-dependency-path: agentic-control-framework/package-lock.json
 
-      - name: Reinstall sharp for Linux
-        run: npm install --platform=linux --arch=x64 sharp
+      - name: Install
+        run: npm ci
 
-      - name: Run MCP and E2E Tests
+      - name: Make executables runnable
+        run: chmod +x bin/* || true
+
+      - name: CLI tests
+        run: npm run -s test:cli
+
+      - name: MCP tests (core)
         run: npm test
 
-      - name: Make CLI test script executable
-        run: chmod +x test/cli/test-commands.sh
+      - name: Priority tests
+        run: npm run -s test:priority
 
-      - name: Run CLI Tests
-        run: bash test/cli/test-commands.sh 
+      - name: Validate docs commands
+        run: scripts/testing/validate-doc-commands.sh
+
+  heavy-macos:
+    name: macOS • Heavy (Playwright+AppleScript)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_heavy == true }}
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: agentic-control-framework
+    env:
+      NODE_ENV: test
+      # Allow Playwright setup for browser tools
+      ACF_SKIP_POSTINSTALL: '0'
+      ACF_SKIP_PLAYWRIGHT: '0'
+      # Enable gated test suites
+      ACF_ENABLE_BROWSER_TOOLS: '1'
+      ACF_ENABLE_APPLESCRIPT: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: agentic-control-framework/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          npx playwright install || true
+
+      - name: Make executables runnable
+        run: chmod +x bin/* || true
+
+      - name: MCP tests (heavy)
+        run: npm test
+
