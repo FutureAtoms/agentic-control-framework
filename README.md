@@ -1,6 +1,11 @@
 
 # Agentic Control Framework (ACF)
 
+**Author:** Abhilash Chadhar (FutureAtoms)
+**Repository:** [agentic-control-framework](https://github.com/FutureAtoms/agentic-control-framework)
+
+![Test Status](https://img.shields.io/badge/CLI%20Mode-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Local%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Cloud%20MCP-100%25%20Working-brightgreen) ![Test Status](https://img.shields.io/badge/Test%20Suite-100%25%20Pass%20Rate-brightgreen) ![Test Status](https://img.shields.io/badge/Production-Ready-brightgreen) ![Test Status](https://img.shields.io/badge/Claude%20Code-Compatible-blue) ![Test Status](https://img.shields.io/badge/MCP%202024--11--05-Compliant-blue) ![Test Status](https://img.shields.io/badge/79%20Tools-Verified-green) ![Test Status](https://img.shields.io/badge/IDE%20Integrations-4%20Tested-blue) [![smithery badge](https://smithery.ai/badge/@FutureAtoms/agentic-control-framework)](https://smithery.ai/server/@FutureAtoms/agentic-control-framework)
+
 [![CI](https://github.com/FutureAtoms/agentic-control-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/FutureAtoms/agentic-control-framework/actions/workflows/ci.yml)
 
 AI‑native orchestration layer (CLI + MCP) with 80+ tools for context engineering—retrieval, code editing, browser automation, terminal orchestration, and persistent memory—designed for Claude Code, Cursor, Codex, and VS Code. This README reflects the current code and tested integrations.

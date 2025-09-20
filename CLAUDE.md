@@ -4,157 +4,140 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Agentic Control Framework (ACF) is an MCP-compliant framework providing 80+ tools for autonomous agent development. It operates in three modes: CLI, Local MCP (IDE integration), and Cloud MCP (remote access).
+Agentic Control Framework (ACF) is an AI-native orchestration layer with 80+ tools for context engineering. It provides task management, filesystem operations, browser automation, terminal orchestration, and persistent memory through both CLI and MCP (Model Context Protocol) server interfaces.
 
-## Common Development Commands
+## Build and Development Commands
 
-### Build & Development
+### Installation and Setup
 ```bash
-# Install dependencies
-npm install
-
-# Run MCP server (for IDE integration)
-npm run start:mcp
-# Or directly:
-node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
-
-# Run CLI mode
-./bin/acf <command>
-
-# Run with mcp-proxy for remote access
-mcp-proxy --port 8080 node ./bin/agentic-control-framework-mcp --workspaceRoot $(pwd)
+npm install                    # Install dependencies
+npx playwright install         # Install browsers for Playwright (if using browser tools)
+chmod +x bin/*                # Make CLI executables
 ```
 
-### Testing
+### Running the Application
 ```bash
-# Run all tests
-npm run test:all
-
-# Run specific test suites
-npm test                    # MCP tests (mocha test/mcp/**/*.js)
-npm run test:cli           # CLI tests (mocha test/cli/**/*.js)
-npm run test:priority      # Priority system tests
-npm run test:claude-code   # Claude Code integration tests
-
-# Run test coverage
-npm run coverage:cli       # CLI test coverage with nyc
-
-# Run individual test files
-mocha test/mcp/test-tools.js
-node test/unit/test-priority-system.js
+./bin/acf                     # Run CLI directly
+./bin/acf list                # List all tasks
+./bin/acf next                # Get next actionable task
+npm run start:mcp             # Start MCP server locally
 ```
 
-### Linting & Code Quality
-Note: This project doesn't have explicit lint or typecheck scripts configured. When modifying code, ensure consistency with existing code style and patterns.
+### Testing Commands
+```bash
+npm test                      # Run default MCP tests (test/mcp/**/*.js)
+npm run test:cli              # Run CLI tests (test/cli/**/*.js)
+npm run test:claude-code-unit # Run Claude Code unit tests
+npm run test:priority         # Run priority system tests
+npm run test:all              # Run all test suites
+npm run coverage:all          # Generate coverage reports
+```
+
+### Linting and Type Checking
+No enforced linter or type checker is configured. Mirror existing code patterns when contributing.
 
 ## High-Level Architecture
 
 ### Core Components
 
-1. **MCP Server** (`src/mcp/server.js`)
-   - Implements JSON-RPC 2.0 protocol
-   - Handles tool registration and execution
-   - Manages stdio/HTTP/SSE transports
-   - Protocol versions: 2025-03-26 (default) and 2024-11-05
+1. **Task Management System** (`src/core.js`)
+   - Central task graph with IDs, statuses, priorities (1-1000), dependencies
+   - Persistent storage in `.acf/tasks.json`
+   - Activity logging for every task state change
+   - Priority engine with time decay and effort weighting
 
-2. **Task Manager Core** (`src/core.js`)
-   - Task CRUD operations with numerical priorities (1-1000)
-   - Dependency management and validation
-   - Subtask handling
-   - Task file generation and synchronization
+2. **CLI Interface** (`bin/acf` → `src/cli.js`)
+   - Commander-based CLI for task operations
+   - Rich context generation for tasks
+   - Integration with Gemini API for PRD parsing and task expansion
 
-3. **Priority Engine** (`src/priority_engine.js`)
-   - Numerical priority system (1-1000 replacing string priorities)
-   - Dependency-based priority boosts
-   - Critical path analysis
-   - Distribution optimization algorithms
-   - Priority templates system
+3. **MCP Server** (`bin/agentic-control-framework-mcp` → `src/mcp/server.js`)
+   - JSON-RPC over stdio protocol
+   - 80+ tools exposed via MCP protocol
+   - Compatible with Claude Desktop, Claude Code, Cursor, Codex
 
-4. **Tool Categories** (`src/tools/`)
-   - `browser_tools.js`: 25 Playwright-based browser automation tools
-   - `terminal_tools.js`: Command execution, process management
+4. **Tool Modules** (`src/tools/`)
+   - `browser_tools.js`: Playwright-based browser automation
+   - `terminal_tools.js`: Command execution with session management
+   - `edit_tools.js`: Surgical text replacements with `edit_block`
    - `search_tools.js`: Ripgrep-based code search
-   - `edit_tools.js`: Surgical text replacements
    - `applescript_tools.js`: macOS system integration
    - `enhanced_filesystem_tools.js`: Extended file operations
 
-5. **File Watcher** (`src/file_watcher.js`)
-   - Automatic task.json synchronization
-   - Task file generation triggers
-   - Debounced change detection
+5. **Context Engineering**
+   - File watcher for automatic synchronization (`src/file_watcher.js`)
+   - Task context generation with related files and activity logs
+   - Markdown generation for task documentation (`tasks/` directory)
+   - Priority templates for common task patterns (`src/priority_templates.js`)
 
 ### Data Flow
 
-1. **CLI Mode**: Direct function calls → Core → tasks.json
-2. **MCP Mode**: JSON-RPC → MCP Server → Tool handlers → Core → Response
-3. **Cloud Mode**: HTTP/SSE → mcp-proxy → MCP Server → Tools → Response
+1. **Task Creation**: CLI/MCP → `core.js` → `.acf/tasks.json`
+2. **Context Retrieval**: Task ID → `getContext()` → Full task context with history
+3. **File Operations**: Guard checks (`allowedDirectories`) → Operation → Result
+4. **MCP Communication**: Client → stdio → `server.js` → Tool execution → Response
 
-### Key Design Patterns
+## Code Conventions
 
-- **Tool Registration**: Dynamic tool discovery and registration in MCP server
-- **Error Handling**: Standardized JSON-RPC error codes (-32600 to -32000)
-- **Security**: Filesystem guardrails via `allowedDirectories` and `readonlyMode`
-- **Async Operations**: Promise-based tool execution with timeout handling
-- **State Management**: File-based persistence (tasks.json) with atomic writes
+- **Language**: Node.js CommonJS (no ES modules)
+- **Indentation**: 2 spaces
+- **File naming**: snake_case (e.g., `mcp_server.js`, `browser_tools.js`)
+- **Function naming**: lowerCamelCase internally
+- **Tool IDs**: snake_case for MCP tool names
+- **CLI flags**: kebab-case
+- **Test files**: `*-test.js` (general), `*.test.js` (Claude Code specific)
 
-## Project-Specific Conventions
+## Key Configuration
 
-### Tool Implementation Pattern
-```javascript
-// Tools follow this structure:
-async function toolName(params) {
-  // Validation
-  if (!params.required) throw new Error('Missing required parameter');
-  
-  // Core logic
-  const result = await performOperation();
-  
-  // Return standardized response
-  return { success: true, data: result };
-}
+### Environment Variables
+- `WORKSPACE_ROOT`: Base directory for operations
+- `ALLOWED_DIRS`: Comma-separated allowed directories
+- `READONLY_MODE`: Enable read-only filesystem mode
+- `ACF_PATH`: Path to ACF installation
+- `GEMINI_API_KEY`: For PRD parsing and task expansion
+
+### Configuration Files
+- `.acf/tasks.json`: Task storage
+- `.acf/config.json`: Runtime configuration
+- `config/examples/`: Client integration examples
+- `.env`: Environment variables (create from `.env.example`)
+
+## Task Management Workflow
+
+### Task Status Flow
+`todo` → `inprogress` → `testing` → `done` (with `blocked` and `error` as alternatives)
+
+### Priority System
+- Range: 1-1000 (higher = more priority)
+- Templates available for common patterns
+- Automatic recalculation with dependency boosts
+- Time decay and effort weighting options
+
+### Activity Logging
+Every task change appends to `activityLog[]` with timestamps. Use `--message` flag in CLI or `message` parameter in MCP to add context:
+```bash
+acf status 12 done --message "Tests passing, merging to main"
 ```
 
-### Priority Ranges
-- Critical (900-1000): Security fixes, blockers
-- High (700-899): Important features, urgent tasks  
-- Medium (400-699): Standard development work
-- Low (1-399): Documentation, cleanup
+## Testing Approach
 
-### Testing Approach
-- Unit tests use Mocha/Chai
-- Integration tests verify MCP protocol compliance
-- Each tool category has dedicated test files
-- Mock workspaces created in temp directories for isolation
+- **Unit tests**: Isolated function testing in `test/unit/`
+- **Integration tests**: Multi-component testing in `test/integration/`
+- **MCP tests**: Protocol compliance in `test/mcp/`
+- **CLI tests**: Command validation in `test/cli/`
+- Use Mocha + Chai for all test suites
 
-### Error Handling
-- Use standard JSON-RPC error codes
-- Always include descriptive error messages
-- Log errors via `src/logger.js` for debugging
-- Graceful degradation for optional features
+## MCP Integration Points
 
-## Environment Configuration
+The MCP server exposes tools in categories:
+- Task management: `create_task`, `update_task`, `getContext`
+- File operations: `read_file`, `write_file`, `edit_block`, `search_code`
+- Terminal: `execute_command`, `list_processes`
+- Browser: `browser_navigate`, `browser_click`, `browser_snapshot`
+- System: `applescript_execute` (macOS only)
 
-Key environment variables:
-- `WORKSPACE_ROOT`: Project workspace directory
-- `ALLOWED_DIRS`: Colon-separated list of accessible directories
-- `READONLY_MODE`: Enable read-only filesystem mode
-- `BROWSER_HEADLESS`: Control browser automation visibility
-- `DEFAULT_SHELL`: Shell for terminal commands
-- `ACF_PATH`: ACF installation directory
-
-## Critical Files to Understand
-
-1. **Entry Points**:
-   - `bin/agentic-control-framework-mcp`: MCP server executable
-   - `bin/acf`: CLI entry point
-   - `src/cli.js`: CLI command definitions
-
-2. **Core Logic**:
-   - `src/core.js`: Task management operations
-   - `src/mcp/server.js`: MCP protocol implementation
-   - `src/priority_engine.js`: Priority algorithms
-
-3. **Configuration**:
-   - `config/examples/`: Configuration templates
-   - `package.json`: Dependencies and scripts
-   - `tasks.json`: Task persistence (generated)
+Clients connect via stdio with configuration in:
+- Claude Desktop: `~/claude.json`
+- Claude Code: Project `.vscode/settings.json`
+- Cursor: `.cursor/mcp.json`
+- Codex: `~/.codex/config.toml`
